@@ -1,8 +1,6 @@
 import pytest
 
-
-from src.main import add
-
+from src.system import add
 
 pytestmark = pytest.mark.django_db
 
