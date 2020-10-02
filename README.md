@@ -14,3 +14,10 @@ pip install -r requirements/REQUIRMEMENTS.txt
 # Activate pre-commit, it'll check your files for mistakes before you commit
 pre-commit install
 ```
+
+## Usage 
+```sh
+cd System/bellboy
+python bellboy
+```
+Status: only prints some logs
