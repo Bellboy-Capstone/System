@@ -1,7 +1,7 @@
 # the bellboy app 
 import os
 import logging
-#import sensors
+import sensors
 import argparse
 
 log_filename = "bellboy_log.txt"
@@ -9,7 +9,7 @@ log_filename = "bellboy_log.txt"
 # cmd line argument handling
 
 parser = argparse.ArgumentParser()
-parser.add_argument('loglevel', metavar='log_level', default="INFO",
+parser.add_argument('loglevel', metavar='log_level', default="INFO", required=False,
                    choices=['DEBUG', 'INFO', 'WARNING', "ERROR"],
                    help='specify level of logging (default: %(default)s)')
 args = parser.parse_args()
