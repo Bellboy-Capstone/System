@@ -1,18 +1,25 @@
-# the bellboy app 
-import os
-import logging
-import sensors
+# the bellboy app
 import argparse
+import logging
+import os
+
+# import sensors
 
 log_filename = "bellboy_log.txt"
 
 # cmd line argument handling
 
 parser = argparse.ArgumentParser()
-parser.add_argument('loglevel', metavar='log_level', default="INFO", required=False,
-                   choices=['DEBUG', 'INFO', 'WARNING', "ERROR"],
-                   help='specify level of logging (default: %(default)s)')
+parser.add_argument(
+    "loglevel",
+    metavar="log_level",
+    default="INFO",
+    required=False,
+    choices=["DEBUG", "INFO", "WARNING", "ERROR"],
+    help="specify level of logging (default: %(default)s)",
+)
 args = parser.parse_args()
+
 
 # configures logging.
 # first method called during main, so logging configured here will be used for all modules.
@@ -28,18 +35,26 @@ def configure_logging(log_level):
     ch.setLevel(log_level)
 
     # create formatter and add it to the handlers
-    formatter = logging.Formatter("%(asctime)s :: %(name)s :: %(levelname)s :: %(message)s")
+    formatter = logging.Formatter(
+        "%(asctime)s :: %(name)s :: %(levelname)s :: %(message)s"
+    )
     fh.setFormatter(formatter)
     ch.setFormatter(formatter)
 
     # add the handlers to the logger
     logger.addHandler(fh)
     logger.addHandler(ch)
-    logger.info("Logging configured to console and {} at {} level".format(os.path.abspath(log_filename), logging.getLevelName(logger.getEffectiveLevel())))
+    logger.info(
+        "Logging configured to console and {} at {} level".format(
+            os.path.abspath(log_filename),
+            logging.getLevelName(logger.getEffectiveLevel()),
+        )
+    )
 
 
 def main():
     configure_logging(logging.getLevelName(args.loglevel))
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()
