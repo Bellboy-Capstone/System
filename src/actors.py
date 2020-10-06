@@ -7,10 +7,15 @@ from thespian.actors import Actor, ActorSystem
 # https://github.com/malefs/security-smell-detector-python-gist/blob/e90764deb06ae4d3c45e702db7ad00351520348f/gist-hash/b51a9cabd41edae990fd6e844f10ef8e/snippet.py
 # https://thespianpy.com/doc/in_depth#outline-container-org9bb4305
 
+logging.basicConfig(level=logging.DEBUG)
+log = logging.getLogger(__name__)
+
 
 class BellBoy(Actor):
+    log = logging.getLogger("BellBoy")
+
     def receiveMessage(self, message, sender):
-        logging.info("BellBoy got message %s", message)
+        self.log.info("Received message %s", message)
         if type(message) is str and "start" in message:
             self.startBellboyServices()
         if type(message) is str and "heartbeat" in message:
@@ -22,7 +27,8 @@ class BellBoy(Actor):
 
     def startBellboyServices(self):
         """Starts all other BellBoy system actors."""
-        logging.info("Starting belloboy services...")
+        self.log.info("Starting belloboy services...")
+        # Create child actors. Ha.
         self.gui = self.createActor(StatusWebGUI)
         self.sensor = self.createActor(Sensor)
         self.send(self.gui, "start")
@@ -30,13 +36,17 @@ class BellBoy(Actor):
 
 
 class StatusWebGUI(Actor):
+    log = logging.getLogger("StatusWebGUI")
+
     def receiveMessage(self, message, sender):
-        logging.info("StatusWebGUI got message %s", message)
+        self.log.info("Received message %s", message)
 
 
 class Sensor(Actor):
+    log = logging.getLogger("Sensor")
+
     def receiveMessage(self, message, sender):
-        logging.info("Sensor got message %s", message)
+        self.log.info("Received message %s", message)
 
 
 if __name__ == "__main__":
