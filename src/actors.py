@@ -13,16 +13,17 @@ class BellBoy(Actor):
             self.startBellboyServices()
         if type(message) is str and "heartbeat" in message:
             print("Got heartbeat message...")
+            self.send(self.gui, "heartbeat")
+            self.send(self.sensor, "heartbeat")
         else:
             self.wakeupAfter(timedelta(seconds=1), "wakeup")
 
     def startBellboyServices(self):
         """Starts all other BellBoy system actors."""
-        gui = self.createActor(StatusWebGUI)
-        self.send(gui, "start")
-
-        sensor = self.createActor(Sensor)
-        self.send(sensor, "start")
+        self.gui = self.createActor(StatusWebGUI)
+        self.sensor = self.createActor(Sensor)
+        self.send(self.gui, "start")
+        self.send(self.sensor, "start")
 
 
 class StatusWebGUI(Actor):
@@ -42,6 +43,7 @@ if __name__ == "__main__":
     system.tell(bellboy, "start")
     try:
         while True:
-            sleep(2)
+            sleep(5)
+            system.tell(bellboy, "heartbeat")
     finally:
         system.shutdown()
