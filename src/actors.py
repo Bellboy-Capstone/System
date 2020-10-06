@@ -79,7 +79,7 @@ class Sensor(ActorTypeDispatcher):
         self.wakeupAfter(timedelta(seconds=0.1))
         distance = self.measure()
         self.distances.append(distance)
-        self.log.info("Raw distance is: %f", distance)
+        # self.log.info("Raw distance is: %f", distance)
         self.analyzeDistance()
 
         # Prune extra elements
