@@ -15,7 +15,7 @@ pip install -r requirements/REQUIRMEMENTS.txt
 pre-commit install
 ```
 
-## Usage 
+## Usage
 ```sh
 cd System/bellboy
 python bellboy
