@@ -18,6 +18,11 @@ pre-commit install
 ## Usage
 ```sh
 cd System/bellboy
-python bellboy
+python bellboy [-h]
 ```
-Status: only prints some logs
+Status: only prints some logs.
+Change log verbosity on cmd line like this
+```sh
+python bellboy loglevel
+```
+loglevel can be INFO, DEBUG, WARNING or ERROR
