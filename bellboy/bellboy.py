@@ -6,10 +6,6 @@ import os
 import sensors
 from sensors import UltrasonicSensor
 
-# import sensors
-
-log_filename = "bellboy_log.txt"
-
 # cmd line argument handling
 
 parser = argparse.ArgumentParser()
@@ -22,7 +18,7 @@ args = parser.parse_args()
 # configures logging.
 # first method called during main, so logging configured here will be used for all modules.
 def configure_logging(log_level):
-
+    log_filename = "bellboy_log.txt"
     root_logger = logging.getLogger()
     root_logger.setLevel(log_level)
 
@@ -38,12 +34,12 @@ def configure_logging(log_level):
     ch.setFormatter(formatter)
 
     # add the handlers to the logger
-    logger.addHandler(fh)
-    logger.addHandler(ch)
-    logger.info(
+    root_logger.addHandler(fh)
+    root_logger.addHandler(ch)
+    root_logger.info(
         "Logging configured to console and {} at {} level".format(
             os.path.abspath(log_filename),
-            logging.getLevelName(logger.getEffectiveLevel()),
+            logging.getLevelName(root_logger.getEffectiveLevel()),
         )
     )
 

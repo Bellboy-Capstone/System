@@ -2,19 +2,15 @@
 # Sensors include Camera, Ultrasonicm Mic....
 import logging
 import time
+from threading import Thread
 
 import picamera
 import RPi.GPIO as GPIO
-
-from bellboy.UltrasonicRanging import pulseIn
 
 logger = logging.getLogger(__name__)
 
 
 class AbstractSensor():
-
-
-class AbstractSensor(ABC):
 
     # constructor.
     # creates private variables for:
