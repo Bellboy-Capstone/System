@@ -79,4 +79,5 @@ if __name__ == "__main__":
             sleep(5)
             system.tell(bellboy, "heartbeat")
     finally:
+        # This call sends an ActorExitRequest to all live actors.
         system.shutdown()
