@@ -16,7 +16,6 @@ echoPin = 18
 MAX_DISTANCE = 220
 timeOut = MAX_DISTANCE * 60
 
-GPIO.cleanup()
 GPIO.setmode(GPIO.BOARD)  # use PHYSICAL GPIO Numbering
 GPIO.setup(trigPin, GPIO.OUT)  # set trigPin to OUTPUT mode
 GPIO.setup(echoPin, GPIO.IN)  # set echoPin to INPUT mode
@@ -27,9 +26,12 @@ GPIO.setup(echoPin, GPIO.IN)  # set echoPin to INPUT mode
 
 
 class BellBoy(ActorTypeDispatcher):
+    """Lead actor. Starts other actors and co-ordinates system actions."""
+
     log = logging.getLogger("BellBoy")
 
     def receiveMsg_str(self, message, sender):
+        """Handles string messages sent to the BellBoy actor"""
         self.log.info("Received message %s from sender %s", message, sender)
         if type(message) is str and "start" in message:
             self.startBellboyServices()
@@ -44,7 +46,7 @@ class BellBoy(ActorTypeDispatcher):
 
     def startBellboyServices(self):
         """Starts all other BellBoy system actors."""
-        self.log.info("Starting belloboy services...")
+        self.log.info("Starting bellboy services.")
         # Create child actors. Ha.
         self.gui = self.createActor(StatusWebGUI)
         self.sensor = self.createActor(Sensor)
@@ -54,20 +56,28 @@ class BellBoy(ActorTypeDispatcher):
 
 
 class StatusWebGUI(Actor):
-    """Simple actors that inherit from Actor only need to implement recieveMessage."""
+    """
+    Will eventually deploy a simple Flask site as a simple frontend for the device.
+
+    Simple actors that inherit from Actor only need to implement recieveMessage.
+    """
 
     log = logging.getLogger("StatusWebGUI")
 
     def receiveMessage(self, message, sender):
+        """Handles all messages sent to the StatusWebGUI actor"""
         self.log.info("Received message %s from sender %s", message, sender)
 
 
 class Sensor(ActorTypeDispatcher):
+    """Reads the Ultrasonic sensor and calculates a rolling average of the distance"""
+
     log = logging.getLogger("Sensor")
     distances = []
     parent = None
 
     def receiveMsg_str(self, message, sender):
+        """Handles strings sent to the Sensor actor"""
         self.log.info("Received message %s from sender %s", message, sender)
         if "start" in message:
             self.parent = sender
@@ -76,6 +86,7 @@ class Sensor(ActorTypeDispatcher):
             self.log.info("Past 10 readings: %s", self.distances)
 
     def receiveMsg_WakeupMessage(self, message, sender):
+        """Handles WakeupMessages sent to the Sensor actor"""
         self.wakeupAfter(timedelta(seconds=0.1))
         distance = self.measure()
         self.distances.append(distance)
@@ -87,11 +98,15 @@ class Sensor(ActorTypeDispatcher):
             del self.distances[0]
 
     def analyzeDistance(self):
+        """Returns the average distance of the last 10 ultrasonic sensor polls"""
         average = sum(self.distances) / len(self.distances)
         self.log.info("Average distance: %i cm", average)
         return average
 
     def measure(self):
+        """Takes a single measurement from the Ultrasonic sensor"""
+        # measurement_start_time = time.time()
+
         # Pulse HIGH for 10us
         GPIO.output(trigPin, GPIO.HIGH)
         time.sleep(0.00001)
@@ -113,9 +128,12 @@ class Sensor(ActorTypeDispatcher):
                 self.log.error("Ultrasonic reading timed out.")
                 return 0
 
-        pulseTime = (time.time() - t0) * 1000000
         # Sound travels at 340m/s, distance is half that time.
+        pulseTime = (time.time() - t0) * 1000000
         distance = pulseTime * 340.0 / 2.0 / 10000.0
+
+        # measurement_time = time.time() - measurement_start_time
+        # self.log.info("Measurement took %f s", measurement_time)
         return distance
 
 
@@ -127,6 +145,7 @@ if __name__ == "__main__":
     system.tell(bellboy, "start")
     try:
         while True:
+            # Every five seconds, get the BellBoy actor to report on its children
             sleep(5)
             system.tell(bellboy, "heartbeat")
     finally:
