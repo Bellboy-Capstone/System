@@ -3,6 +3,9 @@ import argparse
 import logging
 import os
 
+import sensors
+from sensors import UltrasonicSensor
+
 # import sensors
 
 log_filename = "bellboy_log.txt"
@@ -10,14 +13,9 @@ log_filename = "bellboy_log.txt"
 # cmd line argument handling
 
 parser = argparse.ArgumentParser()
-parser.add_argument(
-    "loglevel",
-    metavar="log_level",
-    default="INFO",
-    required=False,
-    choices=["DEBUG", "INFO", "WARNING", "ERROR"],
-    help="specify level of logging (default: %(default)s)",
-)
+parser.add_argument('loglevel', metavar='log_level', default="INFO", nargs="?",
+                    choices=['DEBUG', 'INFO', 'WARNING', "ERROR"],
+                    help='specify level of logging (default: %(default)s)')
 args = parser.parse_args()
 
 
@@ -25,8 +23,8 @@ args = parser.parse_args()
 # first method called during main, so logging configured here will be used for all modules.
 def configure_logging(log_level):
 
-    logger = logging.getLogger("bellboy_main")
-    logger.setLevel(log_level)
+    root_logger = logging.getLogger()
+    root_logger.setLevel(log_level)
 
     # create file logging handler & console logging handler
     fh = logging.FileHandler(log_filename)
@@ -35,9 +33,7 @@ def configure_logging(log_level):
     ch.setLevel(log_level)
 
     # create formatter and add it to the handlers
-    formatter = logging.Formatter(
-        "%(asctime)s :: %(name)s :: %(levelname)s :: %(message)s"
-    )
+    formatter = logging.Formatter("%(asctime)s :: %(levelname)s :: %(name)s :: %(funcName)s() :: %(message)s")
     fh.setFormatter(formatter)
     ch.setFormatter(formatter)
 
@@ -54,7 +50,21 @@ def configure_logging(log_level):
 
 def main():
     configure_logging(logging.getLevelName(args.loglevel))
+    poll_period_us = 60*1000  # 60 ms
+    sensors.init_sensor_module()
+
+    ult_sensor = UltrasonicSensor(poll_period_us)
+    try:
+        ult_sensor.init_sensor()
+        ult_sensor.begin()
+        ult_sensor.join()
+
+    except KeyboardInterrupt:
+        pass
+
+    finally:
+        sensors.teardown_sensor_module()
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
