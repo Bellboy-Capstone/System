@@ -12,17 +12,20 @@ from sensors import UltrasonicSensor
 class BellBoy(ActorTypeDispatcher):
     """Lead actor. Starts other actors and co-ordinates system actions."""
 
-    log = logging.getLogger(__name__)
+    log = logging.getLogger("BellBoy")
     event_count = 0
 
     # ---- MESSAGE HANDLING --- #
-    # for now all messages are strings. TO DO change that
+    # TO DO class messages instead of strings/dicts
     def receiveMsg_str(self, message, sender):
         """Handles string messages sent to the BellBoy actor"""
         self.log.info("Received message %s from sender %s", message, sender)
 
         if message == "start":
             self.startBellboyServices()
+
+        if message == "end":
+            self.endBellboyServices()
 
         elif "heartbeat" in message:
             print("Got heartbeat message...")
@@ -31,42 +34,58 @@ class BellBoy(ActorTypeDispatcher):
 
         elif message == "sensorModuleRdy":
             # sensor module ready, so request for sensors here
-            log.debug("Requesting ultrasonic sensor")
+            self.log.debug("Requesting ultrasonic sensor")
             self.send(self.sensor_handler, "UltrasonicSensorReq")
 
-        elif "sensorReady" in message:
+    def receiveMsg_dict(self, message, sender):
+        if message["type"] == "sensorReady":
             # sensor response message in form sensorReady-sensorAddress
             # store address of the assigned sensor
             # once weve been assigned an ultrasonic sensor,
             # begin polling data from it, and tell it what event youre waiting on
-            self.sensor = message.split("-")[1]
-            log.debug("sending begin polling request to sensor")
+            self.sensor = message["sensorAddr"]
+            self.log.debug("sending begin polling request to sensor")
             self.send(self.sensor, "poll")
 
-        elif "sensorEventOccured" in message:
-            # once a sensorEvent happens, the message will describe the event.
-            event_count += 1
-            log.debug(str.format("event #{}: {}", event_count, message))
+        if message["type"] == "sensorEventOccured":
+            self.event_count += 1
+            self.log.info(str.format("event #{}: {}", self.event_count, message["payload"]))
 
-            if event_count == 5:
+            if self.event_count == 5:
+                self.log.info("received 5 events, pausing sensor thread")
                 self.send(self.sensor, "pause")
-
+                #self.send(self.sensor_handler, "teardown")
 
     def receiveMsg_WakeupMessage(self, message, sender):
         self.log.info("Staying awake.")
         self.wakeupAfter(timedelta(seconds=10))
 
-
-    # -- START SYSTEM --- #
+    # -- START / END SYSTEM -- #
     def startBellboyServices(self):
         """Starts all other BellBoy system actors."""
         self.log.info("Starting bellboy services.")
 
         # Create child actors. Ha.
-        # stores the address of the actor, not the actual object.
         self.gui = self.createActor(StatusWebGUI)
         self.sensor_handler = self.createActor(sensors.SensorModule)
         self.send(self.sensor_handler, "init")
+
+    def endBellboyServices(self):
+        self.log.info("Terminating bellboy services.")
+        self.send(self.sensor_handler, "teardown")
+
+
+class StatusWebGUI(Actor):
+    """
+    Will eventually deploy a simple Flask site as a simple frontend for the device.
+    Simple actors that inherit from Actor only need to implement recieveMessage.
+    """
+
+    log = logging.getLogger("StatusWebGUI")
+
+    def receiveMessage(self, message, sender):
+        """Handles all messages sent to the StatusWebGUI actor"""
+        self.log.info("Received message %s from sender %s", message, sender)
 
 
 def configure_logging(log_level):
@@ -122,7 +141,13 @@ def main():
 
     # create lead actor
     bellboy = system.createActor(BellBoy)
-    system.tell(bellboy, "start")
+    try:
+        system.tell(bellboy, "start")
+        system.listen(timeout=1*60)  # automatically ends after a minute
+    except KeyboardInterrupt:
+        pass
+    finally:
+        system.tell(bellboy, "end")
 
 
 if __name__ == "__main__":
