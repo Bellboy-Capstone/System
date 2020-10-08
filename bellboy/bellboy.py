@@ -2,11 +2,10 @@
 import argparse
 import logging
 import os
-
-from thespian.actors import Actor, ActorSystem, ActorTypeDispatcher
+from datetime import timedelta
 
 import sensors
-from sensors import UltrasonicSensor
+from thespian.actors import Actor, ActorSystem, ActorTypeDispatcher
 
 
 class BellBoy(ActorTypeDispatcher):
@@ -150,6 +149,7 @@ def main():
         pass
     finally:
         system.tell(bellboy, "end")
+        system.shutdown()
 
 
 if __name__ == "__main__":

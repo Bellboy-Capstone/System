@@ -1,11 +1,13 @@
+# flake8: noqa
 ########################################################################
 # Filename    : PCF8574.py
 # Description : PCF8574 as Raspberry GPIO
 # Author      : freenove
 # modification: 2018/08/03
 ########################################################################
-import smbus
 import time
+
+import smbus
 
 
 class PCF8574_I2C(object):

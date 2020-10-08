@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
+# flake8: noqa
 ########################################################################
 # Filename    : UltrasonicRanging.py
 # Description : Get distance via UltrasonicRanging sensor
 # auther      : www.freenove.com
 # modification: 2019/12/28
 ########################################################################
-import RPi.GPIO as GPIO
 import time
+
+import RPi.GPIO as GPIO
+
 
 trigPin = 16
 echoPin = 18

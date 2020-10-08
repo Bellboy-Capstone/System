@@ -130,5 +130,5 @@ dmypy.json
 .idea/
 
 # yusra's ignore list
-*/bellboy_log.txt
+*log.txt
 bellboy/functest.py
