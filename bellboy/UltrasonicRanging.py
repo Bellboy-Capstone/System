@@ -9,6 +9,7 @@ import time
 
 import RPi.GPIO as GPIO
 
+
 trigPin = 16
 echoPin = 18
 MAX_DISTANCE = 220  # define the maximum measuring distance, unit: cm

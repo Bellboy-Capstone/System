@@ -3,10 +3,9 @@ import argparse
 import logging
 import os
 
-from thespian.actors import Actor, ActorSystem, ActorTypeDispatcher
-
 import sensors
 from sensors import UltrasonicSensor
+from thespian.actors import Actor, ActorSystem, ActorTypeDispatcher
 
 
 class BellBoy(ActorTypeDispatcher):

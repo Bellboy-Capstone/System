@@ -2,10 +2,10 @@ import logging
 import time
 from threading import Thread
 
-from UltrasonicRanging import pulseIn
-
 import RPi.GPIO as GPIO
 from thespian.actors import Actor, ActorSystem, ActorTypeDispatcher
+from UltrasonicRanging import pulseIn
+
 
 logger = logging.getLogger(__name__)
 
