@@ -5,6 +5,18 @@
 
 Embedded Raspberry Pi Program
 
+## Usage
+```sh
+cd System/bellboy
+python bellboy [-h]
+```
+Status: only prints some logs.
+Change log verbosity on cmd line like this
+```sh
+python bellboy loglevel
+```
+loglevel can be INFO, DEBUG, WARNING or ERROR
+
 ## Development
 
 ```sh

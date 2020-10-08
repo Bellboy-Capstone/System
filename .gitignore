@@ -131,3 +131,7 @@ dmypy.json
 
 # vim
 *.swp
+
+# yusra's ignore list
+*/bellboy_log.txt
+bellboy/functest.py
