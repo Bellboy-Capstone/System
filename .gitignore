@@ -129,6 +129,9 @@ dmypy.json
 .pyre/
 .idea/
 
+# vim
+*.swp
+
 # yusra's ignore list
 *log.txt
 bellboy/functest.py

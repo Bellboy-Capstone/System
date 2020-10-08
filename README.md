@@ -5,16 +5,6 @@
 
 Embedded Raspberry Pi Program
 
-## Development
-
-```sh
-# Install dependencies (if on Win10 use admin powershell)
-pip install -r requirements/REQUIRMEMENTS.txt
-
-# Activate pre-commit, it'll check your files for mistakes before you commit
-pre-commit install
-```
-
 ## Usage
 ```sh
 cd System/bellboy
@@ -26,3 +16,18 @@ Change log verbosity on cmd line like this
 python bellboy loglevel
 ```
 loglevel can be INFO, DEBUG, WARNING or ERROR
+
+## Development
+
+```sh
+# Install dependencies (if on Win10 use admin powershell)
+pip install -r requirements/REQUIRMEMENTS.txt
+
+# Activate pre-commit, it'll check your files for mistakes before you commit
+pre-commit install
+```
+
+## Resources
+
+1. [Actor tutorial w/Thespian](https://bytes.yingw787.com/posts/2019/02/02/concurrency_with_python_actor_models/)
+1. [Thespian docs](https://thespianpy.com/doc/)
