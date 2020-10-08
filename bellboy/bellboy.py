@@ -49,12 +49,14 @@ class BellBoy(ActorTypeDispatcher):
 
         if message["type"] == "sensorEventOccured":
             self.event_count += 1
-            self.log.info(str.format("event #{}: {}", self.event_count, message["payload"]))
+            self.log.info(
+                str.format("event #{}: {}", self.event_count, message["payload"])
+            )
 
             if self.event_count == 5:
                 self.log.info("received 5 events, pausing sensor thread")
                 self.send(self.sensor, "pause")
-                #self.send(self.sensor_handler, "teardown")
+                # self.send(self.sensor_handler, "teardown")
 
     def receiveMsg_WakeupMessage(self, message, sender):
         self.log.info("Staying awake.")
@@ -143,7 +145,7 @@ def main():
     bellboy = system.createActor(BellBoy)
     try:
         system.tell(bellboy, "start")
-        system.listen(timeout=1*60)  # automatically ends after a minute
+        system.listen(timeout=1 * 60)  # automatically ends after a minute
     except KeyboardInterrupt:
         pass
     finally:

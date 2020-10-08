@@ -15,9 +15,11 @@ US_PER_SEC = 1000000
 
 class SensorModule(Actor):
     """SensorModule actor handles sensors which connect to RPI.
-       Sensors can only be created through a request to this module
+    Sensors can only be created through a request to this module
     """
+
     logger = logging.getLogger("SensorModule")
+
     def __init__(self):
         self._ready = False
         self.sensors = []
@@ -92,6 +94,7 @@ class SensorModule(Actor):
     def receiveMsg_unknown(self, message, sender):
         self.logger.warning("received unknown message: " + message)
 
+
 # -- EXAMPLE EVENT FUNCTIONS ---#
 # these functions analyze an array of data and
 # returns the Event which occured as a message, if it happened
@@ -106,7 +109,12 @@ def average_distance_lt20(distance_array):
         sum += distance
 
     if sum / 5 < 20:
-        return {"type": "sensorEventOccured", "payload": str.format("sensorEventOccurred: average distance was less than 20: {}", sum / 5)}
+        return {
+            "type": "sensorEventOccured",
+            "payload": str.format(
+                "sensorEventOccurred: average distance was less than 20: {}", sum / 5
+            ),
+        }
     return None
 
 
@@ -117,7 +125,10 @@ def buttonXHovered(distance_array):
         if distance > 15 or distance < 10:
             return None
 
-    return {"type": "sensorEventOccured", "payload": str.format("sensorEventOccurred: button at 12.5 cm was hovered")}
+    return {
+        "type": "sensorEventOccured",
+        "payload": str.format("sensorEventOccurred: button at 12.5 cm was hovered"),
+    }
 
 
 # sensor blueprint
@@ -202,7 +213,7 @@ class UltrasonicSensor(AbstractSensor):
             GPIO.output(self._trigPin, GPIO.LOW)
 
             # calculate distance from reflected ping
-            pingTime = pulseIn(self._echoPin, GPIO.HIGH, self._time_out/0.000001)
+            pingTime = pulseIn(self._echoPin, GPIO.HIGH, self._time_out / 0.000001)
             distance = pingTime * 340.0 / 2.0 / 10000.0
             self._buffer.append(distance)
             self.logger.debug(
@@ -237,4 +248,6 @@ class UltrasonicSensor(AbstractSensor):
         if message["type"] == "init":
             self.init_sensor()
             self.subscriber = message["subscriber"]
-            self.send(self.subscriber, {"type": "sensorReady", "sensorAddr": self.myAddress})
+            self.send(
+                self.subscriber, {"type": "sensorReady", "sensorAddr": self.myAddress}
+            )
