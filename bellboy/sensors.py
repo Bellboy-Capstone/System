@@ -3,9 +3,7 @@ import time
 from threading import Thread
 
 import RPi.GPIO as GPIO
-from thespian.actors import Actor, ActorSystem, ActorTypeDispatcher
-from UltrasonicRanging import pulseIn
-
+from thespian.actors import Actor, ActorTypeDispatcher
 
 logger = logging.getLogger(__name__)
 
@@ -13,7 +11,7 @@ logger = logging.getLogger(__name__)
 US_PER_SEC = 1000000
 
 
-class SensorModule(Actor):
+class SensorModule(ActorTypeDispatcher):
     """SensorModule actor handles sensors which connect to RPI.
     Sensors can only be created through a request to this module
     """
@@ -43,7 +41,7 @@ class SensorModule(Actor):
         self._ready = False
 
     # -- MSG HANDLING -- #
-    def receiveMessage(self, message, sender):
+    def receiveMsg_str(self, message, sender):
         self.logger.debug(str.format("Received message {} from {}", message, sender))
 
         switcher = {
@@ -84,7 +82,7 @@ class SensorModule(Actor):
         creates the sensor and send init msg, indicating the actor who requested it/ will be subscribed to it
         """
         if not self._ready:
-            log.warning("sensor module not ready!")
+            self.logger.warning("sensor module not ready!")
             return
         self.logger.debug(str.format("creating UltrasonicSensor for {}", sender))
         sensor = self.createActor(UltrasonicSensor)
@@ -120,7 +118,6 @@ def average_distance_lt20(distance_array):
 
 def buttonXHovered(distance_array):
     # lets say button is within distances 10 - 15.
-    sum = 0
     for distance in distance_array[-5:]:
         if distance > 15 or distance < 10:
             return None
@@ -213,7 +210,7 @@ class UltrasonicSensor(AbstractSensor):
             GPIO.output(self._trigPin, GPIO.LOW)
 
             # calculate distance from reflected ping
-            pingTime = pulseIn(self._echoPin, GPIO.HIGH, self._time_out / 0.000001)
+            pingTime = pulseIn(self._echoPin, GPIO.HIGH, self._time_out/0.000001)
             distance = pingTime * 340.0 / 2.0 / 10000.0
             self._buffer.append(distance)
             self.logger.debug(

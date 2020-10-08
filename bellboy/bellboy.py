@@ -2,6 +2,7 @@
 import argparse
 import logging
 import os
+from datetime import timedelta
 
 import sensors
 from sensors import UltrasonicSensor
@@ -149,6 +150,7 @@ def main():
         pass
     finally:
         system.tell(bellboy, "end")
+        system.shutdown()
 
 
 if __name__ == "__main__":
