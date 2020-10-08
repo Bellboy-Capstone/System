@@ -5,6 +5,8 @@ from threading import Thread
 import RPi.GPIO as GPIO
 from thespian.actors import ActorTypeDispatcher
 
+from UltrasonicRanging import pulseIn
+
 
 logger = logging.getLogger(__name__)
 
