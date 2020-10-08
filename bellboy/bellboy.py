@@ -5,7 +5,6 @@ import os
 from datetime import timedelta
 
 import sensors
-from sensors import UltrasonicSensor
 from thespian.actors import Actor, ActorSystem, ActorTypeDispatcher
 
 

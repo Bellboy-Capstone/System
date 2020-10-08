@@ -3,7 +3,8 @@ import time
 from threading import Thread
 
 import RPi.GPIO as GPIO
-from thespian.actors import Actor, ActorTypeDispatcher
+from thespian.actors import ActorTypeDispatcher
+
 
 logger = logging.getLogger(__name__)
 
@@ -210,7 +211,7 @@ class UltrasonicSensor(AbstractSensor):
             GPIO.output(self._trigPin, GPIO.LOW)
 
             # calculate distance from reflected ping
-            pingTime = pulseIn(self._echoPin, GPIO.HIGH, self._time_out/0.000001)
+            pingTime = pulseIn(self._echoPin, GPIO.HIGH, self._time_out / 0.000001)
             distance = pingTime * 340.0 / 2.0 / 10000.0
             self._buffer.append(distance)
             self.logger.debug(
