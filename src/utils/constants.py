@@ -1,8 +1,9 @@
-from enum import auto, Enum
+from enum import Enum, auto
 
 
 class ChoicesEnum(Enum):
-    """Augments a regular enum with methods to return lists of enum choices/names"""
+    """Augments a regular enum with methods to return lists of enum
+    choices/names."""
 
     @classmethod
     def get_names(cls):
@@ -21,9 +22,11 @@ class ChoicesEnum(Enum):
         return choices
 
 
-class EventMessages(ChoicesEnum):
+class Requests(ChoicesEnum):
     START = auto()
+    STARTING = auto()
     STOP = auto()
+    STOPPING = auto()
 
 
 class RunLevels(ChoicesEnum):
@@ -37,4 +40,3 @@ class LogLevels(ChoicesEnum):
     INFO = auto()
     WARNING = auto()
     ERROR = auto()
-

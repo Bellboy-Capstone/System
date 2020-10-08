@@ -1,8 +1,11 @@
-import argparse
 import logging
-import os
+from time import sleep
 
+from thespian.actors import ActorSystem
+
+from src.actors.lead import LeadActor
 from src.utils.cli import CLI
+from src.utils.constants import Requests
 
 
 def main():
@@ -14,15 +17,17 @@ def main():
     system = ActorSystem("multiprocQueueBase")
 
     # create lead actor
-    bellboy = system.createActor(BellBoy)
+    lead = system.createActor(LeadActor)
     try:
-        system.tell(bellboy, "start")
-        system.listen(timeout=1 * 60)  # automatically ends after a minute
+        response = system.ask(lead, Requests.START)
+        if response != Requests.STARTING:
+            raise Exception("Lead actor did not start correctly.")
+        while True:
+            sleep(5)
     except KeyboardInterrupt:
-
-        pass
+        logging.error("The bellboy system was interrupted by the keyboard.")
     finally:
-        system.tell(bellboy, "end")
+        system.tell(lead, Requests.STOP)
         system.shutdown()
 
 

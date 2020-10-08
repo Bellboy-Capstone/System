@@ -1,6 +1,6 @@
 import logging
+import os
 from argparse import ArgumentParser
-from enum import Enum
 
 
 class CLI:
@@ -9,7 +9,6 @@ class CLI:
     args = None
     log_file = ""
     run_level = ""
-
 
     def parse_args(self):
         parser = ArgumentParser()
