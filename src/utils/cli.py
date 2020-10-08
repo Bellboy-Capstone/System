@@ -10,24 +10,6 @@ class CLI:
     log_file = ""
     run_level = ""
 
-    class RunLevels(Enum):
-        LOCAL = 1
-        LOCAL_STANDALONE = 2
-        PRODUCTION = 3
-
-        def get_choices(self):
-            for choice in self:
-                print(choice)
-
-    class LogLevels(Enum):
-        DEBUG = 1
-        INFO = 2
-        WARNING = 3
-        ERROR = 4
-
-        def get_choices(self):
-            for choice in self:
-                print(choice)
 
     def parse_args(self):
         parser = ArgumentParser()
