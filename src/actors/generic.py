@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 
 from thespian.actors import ActorAddress, ActorTypeDispatcher
 
+from src.utils.address_book import AddressBook
 from src.utils.constants import ActorNames, Requests
 
 
@@ -21,8 +22,11 @@ class GenericActor(ActorTypeDispatcher, ABC):
     loop_period_seconds: float = 10
     loop_enabled: bool = False
 
+    # For contacting other actors
+    address_book = None
+
     def __init__(self, *args, **kwargs):
-        if not self.actor:
+        if not self.actor or self.actor not in ActorNames:
             raise Exception("Please provide an actor:ActorNames value for this actor!")
 
         # We can init a new log as long as children of this class provide 'name', but
@@ -33,7 +37,6 @@ class GenericActor(ActorTypeDispatcher, ABC):
         # Init the ActorTypeDispatcher
         super(ActorTypeDispatcher, self).__init__(*args, **kwargs)
         self.log.info(f"Initialized actor '{self.actor.name}'.")
-        print(type(self.log))
 
     def receiveMsg_str(self, message: str, sender: ActorAddress):
         """Parses incoming messages containing strings."""
@@ -44,18 +47,45 @@ class GenericActor(ActorTypeDispatcher, ABC):
         self.log.debug("Received int %s from sender %s", message, sender)
 
     def receiveMsg_dict(self, message: dict, sender: ActorAddress):
-        """Parses incoming messages containing dictionaries."""
+        """
+        Parses incoming messages containing dictionaries.
+
+        Make sure you SUPER this method if you are overriding it.
+        """
         self.log.debug("Received dict %s from sender %s", message, sender)
 
+        # If the dictionary has actor-name keys, assume it is an address book.
+        if message.keys()[0] in ActorNames:
+            self.address_book = message
+
+    def receiveMsg_AddressBook(self, message: AddressBook, sender: ActorAddress):
+        """
+        DO NOT OVERRIDE;
+
+        Parses incoming messages containing dictionaries.
+        """
+        # Currently this fails, the arriving object is empty. Needs some work.
+        self.log.debug("Received address book from sender %s", message, sender)
+        self.log.debug("Received Book has keys: %s", message.all().keys())
+        self.address_book = message
+
     def receiveMsg_WakeupMessage(self, message: dict, sender: ActorAddress):
-        """Continuously runs the code in the looping method."""
+        """
+        DO NOT OVERRIDE;
+
+        Continuously runs the code in the looping method.
+        """
         if self.loop_enabled:
             self.wakeupAfter(self.loop_period_seconds)
         self.log.debug("Received %s from sender %s", message, sender)
         self.loop()
 
     def receiveMsg_Requests(self, message: Requests, sender: ActorAddress):
-        """Parses incoming messages containing Request enumerations."""
+        """
+        DO NOT OVERRIDE;
+
+        Parses incoming messages containing Request enumerations.
+        """
         self.log.debug("Received enum %s from sender %s", message.name, sender)
 
         if message is Requests.START:

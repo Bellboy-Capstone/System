@@ -4,8 +4,9 @@ from time import sleep
 
 from thespian.actors import ActorAddress, ActorSystem
 
+from src.utils.address_book import AddressBook
 from src.utils.cli import CLI
-from src.utils.constants import Requests
+from src.utils.constants import ActorNames, Requests
 
 
 def main():
@@ -24,14 +25,30 @@ def main():
     cli = CLI()
     cli.setup(sys.argv)
 
-    # Import the lead actor. This must be done here to allow the log configuration to correctly propagate over
-    # the multi-threaded Thespian configurations with Queue or UDP bases.
+    # Import actors here to instantiate logging system correctly.
+    from src.actors.lcd import LiquidCrystalActor
     from src.actors.lead import LeadActor
+    from src.actors.ultrasonic import UltrasonicActor
 
     # Initialize the Actor system:
     system: ActorSystem = ActorSystem(systemBase="multiprocQueueBase")
+    address_book = AddressBook()
+
     lead: ActorAddress = system.createActor(LeadActor)
-    log.info("Created lead actor")
+    address_book.add(ActorNames.LEAD, lead)
+
+    # All the other actors can be added with one-liners:
+    address_book.add(ActorNames.LIQUID_CRYSTAL, system.createActor(LiquidCrystalActor))
+    address_book.add(ActorNames.ULTRASONIC, system.createActor(UltrasonicActor))
+
+    # Send the complete address book to each thread:
+    # Currently the AddressBook arrives EMPTY! So we just send the stored dictionary instead.
+    log.debug("Address Book has keys: %s", address_book.all().keys())
+    all_addresses = address_book.all()
+    for actor in address_book.all().values():
+        system.tell(actor, all_addresses)  # Tell each actor everyone's address!
+
+    # Now we can get all the actors to start.
     try:
         # Ask the lead actor to start his work
         response = system.ask(lead, Requests.START)
