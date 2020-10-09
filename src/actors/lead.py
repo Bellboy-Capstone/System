@@ -11,9 +11,9 @@ class LeadActor(GenericActor):
     log = logging.getLogger(ActorNames.LEAD.name)
 
     def start(self, message: Requests, sender: ActorAddress):
-        self.log.debug("Address Book has keys: %s", self.address_book.all().keys())
-        # self.send(self.address_book.get(ActorNames.LIQUID_CRYSTAL), Requests.START)
-        # self.send(self.address_book.get(ActorNames.ULTRASONIC), Requests.START)
+        self.log.debug("Address Book has keys: %s", self.address_book.keys())
+        self.send(self.address_book.get(ActorNames.LIQUID_CRYSTAL), Requests.START)
+        self.send(self.address_book.get(ActorNames.ULTRASONIC), Requests.START)
 
     def stop(self, message: Requests, sender: ActorAddress):
         self.log.info("Stopping all child actors...")

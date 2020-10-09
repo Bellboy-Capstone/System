@@ -55,7 +55,7 @@ class GenericActor(ActorTypeDispatcher, ABC):
         self.log.debug("Received dict %s from sender %s", message, sender)
 
         # If the dictionary has actor-name keys, assume it is an address book.
-        if message.keys()[0] in ActorNames:
+        if list(message.keys())[0] in ActorNames:
             self.address_book = message
 
     def receiveMsg_AddressBook(self, message: AddressBook, sender: ActorAddress):
@@ -99,6 +99,8 @@ class GenericActor(ActorTypeDispatcher, ABC):
             self.stop(message, sender)
         elif message is Requests.ARE_YOU_ALIVE:
             self.send(sender, Requests.YES)
+        elif message in Requests:
+            self.log.debug("No known action for this message.")
         else:
             msg = "Unrecognized Request Enum value sent."
             self.log.error(msg)
