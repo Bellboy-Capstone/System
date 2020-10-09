@@ -11,7 +11,3 @@ class TestLeadActor:
         # Actor should reply that it is starting when asked.
         response = actor_system.ask(lead, Requests.START)
         assert response == Requests.STARTING
-
-        # Actor should reply that it is stopping when asked.
-        response = actor_system.ask(lead, Requests.STOP)
-        assert response == Requests.STOPPING
