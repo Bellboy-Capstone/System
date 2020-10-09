@@ -11,7 +11,7 @@ class LeadActor(GenericActor):
     log = logging.getLogger(ActorNames.LEAD.name)
 
     def start(self, message: Requests, sender: ActorAddress):
-        self.log.debug("Address Book has keys: %s", self.address_book.keys())
+        self.log.info("Starting all dependent actors...")
         self.send(self.address_book.get(ActorNames.LIQUID_CRYSTAL), Requests.START)
         self.send(self.address_book.get(ActorNames.ULTRASONIC), Requests.START)
 

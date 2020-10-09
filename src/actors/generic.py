@@ -77,7 +77,7 @@ class GenericActor(ActorTypeDispatcher, ABC):
         """
         if self.loop_enabled:
             self.wakeupAfter(self.loop_period_seconds)
-        self.log.debug("Received %s from sender %s", message, sender)
+        self.log.debug("Waking up.")
         self.loop()
 
     def receiveMsg_Requests(self, message: Requests, sender: ActorAddress):
@@ -100,7 +100,7 @@ class GenericActor(ActorTypeDispatcher, ABC):
         elif message is Requests.ARE_YOU_ALIVE:
             self.send(sender, Requests.YES)
         elif message in Requests:
-            self.log.debug("No known action for this message.")
+            pass
         else:
             msg = "Unrecognized Request Enum value sent."
             self.log.error(msg)

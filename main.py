@@ -43,7 +43,6 @@ def main():
 
     # Send the complete address book to each thread:
     # Currently the AddressBook arrives EMPTY! So we just send the stored dictionary instead.
-    log.debug("Address Book has keys: %s", address_book.all().keys())
     all_addresses = address_book.all()
     for actor in address_book.all().values():
         system.tell(actor, all_addresses)  # Tell each actor everyone's address!
