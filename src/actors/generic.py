@@ -13,16 +13,22 @@ class GenericActor(ActorTypeDispatcher, ABC):
     # Setting up log when loaded in main omits all log setup,
     # So a helper function/class must be created to load and start
     # all the actors, including the main actor.
-    log = logging.getLogger(__name__)
+    log = None
     parent = None
     name = None
 
-    def __init__(self, *args, **kw):
-        super(GenericActor, self).__init__(*args, **kw)
+    def __init__(self, *args, **kwargs):
         if not self.name:
             raise Exception("Please provide a 'name' class variable for this actor!")
-        self.log = logging.getLogger(self.name)
-        self.log.info(f"Init actor '{self.name}', be sure to START this actor.")
+
+        # We can init a new log as long as children of this class provide 'name', but
+        # it's very hard to get these children to use the original thread's logging params.
+        if not self.log:
+            self.log = logging.getLogger(self.name)
+
+        # Init the ActorTypeDispatcher
+        super(ActorTypeDispatcher, self).__init__(*args, **kwargs)
+        self.log.info(f"Initialized actor '{self.name}'.")
 
     def receiveMsg_str(self, message: str, sender: ActorAddress):
         """Parses incoming messages containing strings."""
