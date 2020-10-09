@@ -9,7 +9,11 @@ from thespian.actors import Actor, ActorSystem, ActorTypeDispatcher
 
 
 class BellBoy(ActorTypeDispatcher):
-    """Lead actor. Starts other actors and co-ordinates system actions."""
+    """
+    Lead actor.
+
+    Starts other actors and co-ordinates system actions.
+    """
 
     log = logging.getLogger("BellBoy")
     event_count = 0
@@ -17,7 +21,7 @@ class BellBoy(ActorTypeDispatcher):
     # ---- MESSAGE HANDLING --- #
     # TO DO class messages instead of strings/dicts
     def receiveMsg_str(self, message, sender):
-        """Handles string messages sent to the BellBoy actor"""
+        """Handles string messages sent to the BellBoy actor."""
         self.log.info("Received message %s from sender %s", message, sender)
 
         if message == "start":
@@ -78,19 +82,24 @@ class BellBoy(ActorTypeDispatcher):
 
 class StatusWebGUI(Actor):
     """
-    Will eventually deploy a simple Flask site as a simple frontend for the device.
-    Simple actors that inherit from Actor only need to implement recieveMessage.
+    Will eventually deploy a simple Flask site as a simple frontend for the
+    device.
+
+    Simple actors that inherit from Actor only need to implement
+    recieveMessage.
     """
 
     log = logging.getLogger("StatusWebGUI")
 
     def receiveMessage(self, message, sender):
-        """Handles all messages sent to the StatusWebGUI actor"""
+        """Handles all messages sent to the StatusWebGUI actor."""
         self.log.info("Received message %s from sender %s", message, sender)
 
 
 def configure_logging(log_level):
-    """configures logging globally through root logger.
+    """
+    configures logging globally through root logger.
+
     :param log_level: log verbosity
     :type log_level: logging.LEVEL
     """

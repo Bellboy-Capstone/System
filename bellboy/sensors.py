@@ -14,7 +14,9 @@ US_PER_SEC = 1000000
 
 
 class SensorModule(ActorTypeDispatcher):
-    """SensorModule actor handles sensors which connect to RPI.
+    """
+    SensorModule actor handles sensors which connect to RPI.
+
     Sensors can only be created through a request to this module
     """
 
@@ -80,8 +82,11 @@ class SensorModule(ActorTypeDispatcher):
             self._ready = False
 
     def receiveMsg_UltrasonicSensorReq(self, message, sender):
-        """an actor has requested an ultrasonic sensor.
-        creates the sensor and send init msg, indicating the actor who requested it/ will be subscribed to it
+        """
+        an actor has requested an ultrasonic sensor.
+
+        creates the sensor and send init msg, indicating the actor who
+        requested it/ will be subscribed to it
         """
         if not self._ready:
             self.logger.warning("sensor module not ready!")
@@ -196,7 +201,9 @@ class UltrasonicSensor(AbstractSensor):
         GPIO.setup(echoPin, GPIO.IN)  # set echoPin to INPUT mode
 
     def _sensor_loop(self):
-        """sensor loop, every period it:
+        """
+        sensor loop, every period it:
+
         - stores a depth reading, and
         - analyzes recent readings to test for an event
         until thread terminate flag is raised.
@@ -232,7 +239,7 @@ class UltrasonicSensor(AbstractSensor):
         self.logger.info("polling thread terminated")
 
     def receiveMsg_str(self, message, sender):
-        """most messages are strings for now """
+        """most messages are strings for now."""
 
         logger.info(str.format("Received message {} from {}", message, sender))
         if "poll" in message:
@@ -242,7 +249,7 @@ class UltrasonicSensor(AbstractSensor):
             self._terminate_thread = True
 
     def receiveMsg_dict(self, message, sender):
-        """message handler for more involved messages"""
+        """message handler for more involved messages."""
 
         if message["type"] == "init":
             self.init_sensor()

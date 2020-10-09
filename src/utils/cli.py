@@ -4,27 +4,20 @@ from argparse import ArgumentParser
 
 from src.utils.constants import LogLevels, RunLevels
 
-global log_level
-global run_level
-
 
 class CLI:
     """Opens the program with specific networking and logging settings."""
 
-    args = None
+    run_level = None
+    log_level = None
     log_file = ""
 
     def setup(self, args):
 
-        # Use the global/static variables for run/log level
-        global run_level
-        global log_level
-
         parser = ArgumentParser(
             prog="python<x> main.py",
             description="Bellboy embedded Python 3 program, for use on Rasperry Pi 3/4 systems.",
-            epilog="To develop locally, use DEBUG and LOCAL_STANDALONE settings."
-
+            epilog="To develop locally, use DEBUG and LOCAL_STANDALONE settings.",
         )
         log = logging.getLogger("CLI")
 
@@ -48,29 +41,24 @@ class CLI:
             nargs="?",
             choices=RunLevels.get_names(),
             help="Run Level: Specify features to use (default: %(default)s), "
-                 "LOCAL runs the system contacting services at localhost:8000, "
-                 "LOCAL_STANDALONE runs the system without networking, "
-                 "PRODUCTION runs against Heroku-deployed network services.",
+            "LOCAL runs the system contacting services at localhost:8000, "
+            "LOCAL_STANDALONE runs the system without networking, "
+            "PRODUCTION runs against Heroku-deployed network services.",
         )
 
         log.debug("Parsing arguments: %s", args)
         parsed_args = parser.parse_args(args[1:])
 
         # Persist args to class as enums:
-        run_level = RunLevels[parsed_args.run_level]
-        log_level = LogLevels[parsed_args.log_level]
+        self.run_level = RunLevels[parsed_args.run_level]
+        self.log_level = LogLevels[parsed_args.log_level]
 
-        log.info(f"Running at log level {log_level.name} and run level {run_level.name}")
+        log.info(
+            f"Running at log level {self.log_level.name} and run level {self.run_level.name}"
+        )
 
-        self.configure_logging(main=True)
-
-    @staticmethod
-    def configure_logging(main=False):
-
-        # Use the global log level
-        global log_level
-
-        log_level_str = logging.getLevelName(log_level.name)
+        # Set up logs:
+        log_level_str = logging.getLevelName(self.log_level.name)
         log_filename = "bellboy_log.txt"
         root_logger = logging.getLogger()
         root_logger.setLevel(log_level_str)
@@ -93,11 +81,9 @@ class CLI:
             handler.setFormatter(formatter)
             handler.setLevel(log_level_str)
 
-        # If configuring for the first time, log:
-        if main:
-            root_logger.info(
-                "Logging configured to console and {} at {} level".format(
-                    os.path.abspath(log_filename),
-                    logging.getLevelName(root_logger.getEffectiveLevel()),
-                )
+        root_logger.info(
+            "Logging configured to console and {} at {} level".format(
+                os.path.abspath(log_filename),
+                logging.getLevelName(root_logger.getEffectiveLevel()),
             )
+        )

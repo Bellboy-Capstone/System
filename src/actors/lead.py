@@ -2,17 +2,16 @@ import logging
 
 from thespian.actors import ActorTypeDispatcher
 
-from src.utils.cli import CLI
 from src.utils.constants import Requests
 
 
 class LeadActor(ActorTypeDispatcher):
-    """The lead actor orchestrates all other Bellboy services"""
+    """The lead actor orchestrates all other Bellboy services."""
 
     # Setting up log when loaded in main omits all log setup,
     # So a helper function/class must be created to load and start
     # all the actors, including the main actor.
-    log = None
+    log = logging.getLogger("LeadActor")
 
     def receiveMsg_str(self, message, sender):
         """Parses incoming messages containing strings."""
@@ -28,13 +27,6 @@ class LeadActor(ActorTypeDispatcher):
 
     def receiveMsg_Requests(self, message, sender):
         """Parses incoming messages containing Request enumerations."""
-
-        # The first message any actor receives should be Requests.START
-        if not self.log:
-            global_log = logging.getLogger()
-            CLI.configure_logging()
-            self.log = global_log.getChild("LeadActor")
-
         self.log.info("Received enum %s from sender %s", message, sender)
 
         if message is Requests.START:

@@ -2,9 +2,8 @@ import logging
 import sys
 from time import sleep
 
-from thespian.actors import ActorSystem, ActorAddress
+from thespian.actors import ActorAddress, ActorSystem
 
-from src.actors.lead import LeadActor
 from src.utils.cli import CLI
 from src.utils.constants import Requests
 
@@ -21,6 +20,9 @@ def main() -> int:
     # Parse arguments and configure logging.
     cli = CLI()
     cli.setup(sys.argv)
+
+    # Import the lead actor. This must be done here to correctly init logs.
+    from src.actors.lead import LeadActor
 
     # Initialize the Actor system:
     system: ActorSystem = ActorSystem(systemBase="multiprocQueueBase")
