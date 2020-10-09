@@ -1,34 +1,53 @@
 import logging
+import sys
 from time import sleep
 
-from thespian.actors import ActorSystem
+from thespian.actors import ActorSystem, ActorAddress
 
 from src.actors.lead import LeadActor
 from src.utils.cli import CLI
 from src.utils.constants import Requests
 
 
-def main():
-    # cmd line argument handling
+def main() -> int:
+    """
+    Starts the Bellboy system.
+
+    :return: exit code
+    """
+    log = logging.getLogger("Bellboy")
+    log.info("Starting the Bellboy system")
+
+    # Parse arguments and configure logging.
     cli = CLI()
-    cli.parse_args()
+    cli.setup(sys.argv)
 
-    # create multiprocessing system, housing all our actors
-    system = ActorSystem("multiprocQueueBase")
-
-    # create lead actor
-    lead = system.createActor(LeadActor)
+    # Initialize the Actor system:
+    system: ActorSystem = ActorSystem(systemBase="multiprocQueueBase")
+    lead: ActorAddress = system.createActor(LeadActor)
+    log.info("Created lead actor")
     try:
+        # Ask the lead actor to start his work
         response = system.ask(lead, Requests.START)
+
+        # If the lead actor does not reply that he is starting, something is wrong
         if response != Requests.STARTING:
             raise Exception("Lead actor did not start correctly.")
+        else:
+            log.info(f"Lead actor replied with '{response.name}'")
+
+        # Run this while loop for the duration of the program.
         while True:
-            sleep(5)
+            sleep(10)
+            log.debug("Sending Heartbeat request to lead actor.")
+            system.tell(lead, Requests.ARE_YOU_ALIVE)
+
     except KeyboardInterrupt:
-        logging.error("The bellboy system was interrupted by the keyboard.")
+        log.error("The bellboy system was interrupted by the keyboard.")
     finally:
         system.tell(lead, Requests.STOP)
         system.shutdown()
+        return 0
 
 
 if __name__ == "__main__":
