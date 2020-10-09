@@ -6,53 +6,59 @@ from thespian.actors import ActorAddress, ActorTypeDispatcher
 from src.utils.constants import Requests
 
 
-class BellboyActor(ActorTypeDispatcher, ABC):
-    """The lead actor orchestrates all other Bellboy services."""
+class GenericActor(ActorTypeDispatcher, ABC):
+    """Provides a Generic Actor to simplify the process of setting up logs and
+    parsing input."""
 
     # Setting up log when loaded in main omits all log setup,
     # So a helper function/class must be created to load and start
     # all the actors, including the main actor.
     log = logging.getLogger(__name__)
     parent = None
+    name = None
 
-    def receiveMsg_str(self, message, sender):
+    def __init__(self, *args, **kw):
+        super(GenericActor, self).__init__(*args, **kw)
+        if not self.name:
+            raise Exception("Please provide a 'name' class variable for this actor!")
+        self.log = logging.getLogger(self.name)
+        self.log.info(f"Init actor '{self.name}', be sure to START this actor.")
+
+    def receiveMsg_str(self, message: str, sender: ActorAddress):
         """Parses incoming messages containing strings."""
         self.log.debug("Received str %s from sender %s", message, sender)
 
-    def receiveMsg_int(self, message, sender):
+    def receiveMsg_int(self, message: int, sender: ActorAddress):
         """Parses incoming messages containing integers."""
         self.log.debug("Received int %s from sender %s", message, sender)
 
-    def receiveMsg_dict(self, message, sender):
+    def receiveMsg_dict(self, message: dict, sender: ActorAddress):
         """Parses incoming messages containing dictionaries."""
         self.log.debug("Received dict %s from sender %s", message, sender)
 
-    def receiveMsg_Requests(self, message, sender: ActorAddress):
+    def receiveMsg_Requests(self, message: Requests, sender: ActorAddress):
         """Parses incoming messages containing Request enumerations."""
-        self.log.debug(
-            "Received enum %s from sender %s", message, sender.actorAddressString
-        )
+        self.log.debug("Received enum %s from sender %s", message.name, sender)
 
         if message is Requests.START:
+            # When the start message is sent to an actor, record the sender as the parent.
             self.parent = sender
-            self.start()
             self.send(sender, Requests.STARTING)
+            self.start(message, sender)
         elif message is Requests.STOP:
-            self.stop()
             self.send(sender, Requests.STOPPING)
+            self.stop(message, sender)
         elif message is Requests.ARE_YOU_ALIVE:
-            self.log.info("Yep, I am alive.")
+            self.send(sender, Requests.YES)
         else:
             msg = "Unrecognized Request Enum value sent."
             self.log.error(msg)
             raise Exception(msg)
 
     @abstractmethod
-    def start(self):
+    def start(self, message: Requests, sender: ActorAddress):
         self.log.info("Performing START action.")
-        pass
 
     @abstractmethod
-    def stop(self):
+    def stop(self, message: Requests, sender: ActorAddress):
         self.log.debug("Performing STOP action.")
-        pass

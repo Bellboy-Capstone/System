@@ -28,6 +28,7 @@ class Requests(ChoicesEnum):
     STOP = auto()
     STOPPING = auto()
     ARE_YOU_ALIVE = auto()
+    YES = auto()
 
 
 class RunLevels(ChoicesEnum):
