@@ -8,12 +8,15 @@ from src.utils.cli import CLI
 from src.utils.constants import Requests
 
 
-def main() -> int:
+def main():
     """
-    Starts the Bellboy system.
+    Starts the Bellboy system by configuring logging, creating an ActorSystem,
+    creating the LeadActor, and asking it to START.
 
-    :return: exit code
+    The lead actor loads all other required actors. The system can be
+    halted with a keyboard interrupt (CTRL+C)
     """
+
     log = logging.getLogger("Bellboy")
     log.info("Starting the Bellboy system")
 
@@ -21,7 +24,8 @@ def main() -> int:
     cli = CLI()
     cli.setup(sys.argv)
 
-    # Import the lead actor. This must be done here to correctly init logs.
+    # Import the lead actor. This must be done here to allow the log configuration to correctly propagate over
+    # the multi-threaded Thespian configurations with Queue or UDP bases.
     from src.actors.lead import LeadActor
 
     # Initialize the Actor system:
@@ -35,8 +39,6 @@ def main() -> int:
         # If the lead actor does not reply that he is starting, something is wrong
         if response != Requests.STARTING:
             raise Exception("Lead actor did not start correctly.")
-        else:
-            log.info(f"Lead actor replied with '{response.name}'")
 
         # Run this while loop for the duration of the program.
         while True:
@@ -45,7 +47,7 @@ def main() -> int:
             system.tell(lead, Requests.ARE_YOU_ALIVE)
 
     except KeyboardInterrupt:
-        log.error("The bellboy system was interrupted by the keyboard.")
+        log.error("The bellboy system was interrupted by the keyboard, exiting...")
     finally:
         system.tell(lead, Requests.STOP)
         system.shutdown()
