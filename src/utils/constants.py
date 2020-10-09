@@ -42,3 +42,9 @@ class LogLevels(ChoicesEnum):
     INFO = auto()
     WARNING = auto()
     ERROR = auto()
+
+
+class ActorNames(ChoicesEnum):
+    LEAD = auto()
+    ULTRASONIC = auto()
+    LIQUID_CRYSTAL = auto()

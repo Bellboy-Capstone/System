@@ -3,15 +3,19 @@ import logging
 from thespian.actors import ActorAddress
 
 from src.actors.generic import GenericActor
-from src.utils.constants import Requests
+from src.utils.constants import ActorNames, Requests
 
 
 class LeadActor(GenericActor):
-    name = "Lead Actor"
-    log = logging.getLogger("Lead Actor")
+    actor = ActorNames.LEAD
+    log = logging.getLogger(ActorNames.LEAD.name)
 
     def start(self, message: Requests, sender: ActorAddress):
-        self.log.info("Starting all child actors...")
+        self.set_loop_period_seconds(3)
+        self.set_loop_enabled(True)
 
     def stop(self, message: Requests, sender: ActorAddress):
         self.log.info("Stopping all child actors...")
+
+    def loop(self):
+        pass
