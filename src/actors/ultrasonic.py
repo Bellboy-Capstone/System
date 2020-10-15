@@ -8,7 +8,7 @@ from src.utils.constants import ActorNames, Requests
 
 class UltrasonicActor(GenericActor):
     actor = ActorNames.ULTRASONIC
-    log = logging.getLogger(ActorNames.ULTRASONIC.name)
+    log = logging.getLogger(actor.name)
 
     def start(self, message: Requests, sender: ActorAddress):
         self.log.debug("Starting the UltraSonic detection loop...")
