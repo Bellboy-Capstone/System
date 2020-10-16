@@ -2,8 +2,8 @@ import logging
 
 from thespian.actors import ActorAddress
 
-from src.actors.generic import GenericActor
-from src.utils.constants import ActorNames, Requests
+from generic import GenericActor
+from bellboy.utils.constants import ActorNames, Requests
 
 
 class LiquidCrystalActor(GenericActor):
@@ -20,5 +20,3 @@ class LiquidCrystalActor(GenericActor):
         """Parses incoming messages containing integers."""
         self.log.info("Printing to LCD =>  '%s' ", message)
 
-    def loop(self):
-        pass
