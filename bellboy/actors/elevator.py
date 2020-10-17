@@ -27,6 +27,8 @@ def buttonHovered(depth_deque):
     # only check data in quantums
     if len(depth_deque) % DATA_TO_COUNT != 0:
         return None
+    
+    log.debug(str.format("data: {}", format_deque(depth_deque)))
 
     btn_chosen = "button1"
     count = 0
@@ -39,7 +41,7 @@ def buttonHovered(depth_deque):
             break
 
     if btn_chosen == "button1":
-        log.debug(str.format("data: {}", depth_deque))
+        log.debug(str.format("data: {}", format_deque(depth_deque)))
         return SensorEventMsg(
             eventType=SensorEvent.BUTTON_HOVERED, eventData="button1 was hovered"
         )
@@ -54,9 +56,13 @@ def buttonHovered(depth_deque):
             break
 
     if btn_chosen == "button2":
-        log.debug(str.format("data: {}", depth_deque))
+        log.debug(str.format("data: {}", format_deque(depth_deque)))
         return SensorEventMsg(
             eventType=SensorEvent.BUTTON_HOVERED, eventData="button2 was hovered"
         )
 
     return None
+
+def format_deque(d):
+    return [ '%.2f' % elem for elem in d ]
+    
