@@ -8,14 +8,12 @@ Embedded Raspberry Pi Program
 ## Usage
 ```sh
 cd System/bellboy
-python bellboy [-h]
+python3 main.py [-h]
 ```
-Status: only prints some logs.
-Change log verbosity on cmd line like this
-```sh
-python bellboy loglevel
-```
-loglevel can be INFO, DEBUG, WARNING or ERROR
+Status:
+Starts bellboy services,
+runs ultrasonic sensor for event.
+(soon) camera stuff 
 
 ## Development
 
@@ -30,4 +28,4 @@ pre-commit install
 ## Resources
 
 1. [Actor tutorial w/Thespian](https://bytes.yingw787.com/posts/2019/02/02/concurrency_with_python_actor_models/)
-1. [Thespian docs](https://thespianpy.com/doc/)
+1. [Thespian docs](https://thespianpy.com/doc/using.pdf)
