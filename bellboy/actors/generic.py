@@ -1,10 +1,10 @@
-import logging
 from abc import ABC, abstractmethod
 
 from thespian.actors import ActorAddress, ActorTypeDispatcher
 
-from bellboy.utils.messages import Request, Response
+from utils.messages import Request, Response, Init
 
+from actors import log
 
 class GenericActor(ActorTypeDispatcher, ABC):
     """Generic Actor to unify logging and some message handling."""
@@ -16,9 +16,12 @@ class GenericActor(ActorTypeDispatcher, ABC):
         # private attributes
         self.parent = None
         self.name = None
-        self.log = logging.getLogger(self.globalName)
-        if self.globalName == None:
-            log.warning("Unnamed actor created.")
+        self.log = None
+
+    def receiveMsg_Init(self, message, sender):
+        self.log = log.getChild(self.globalName)
+        self.parent = sender
+        self.log.info(str.format("{} created by {}", self.globalName, sender))
 
     def receiveMsg_str(self, message: str, sender: ActorAddress):
         self.log.debug("Received str %s from sender %s", message, sender)
@@ -35,14 +38,13 @@ class GenericActor(ActorTypeDispatcher, ABC):
         """
         self.send(sender, Response.AWAKE)
 
-    def receiveMsg_Requests(self, message: Requests, sender: ActorAddress):
+    def receiveMsg_Request(self, message: Request, sender: ActorAddress):
         """
         handles messages of type Request enum.
         """
         self.log.debug("Received enum %s from sender %s", message.name, sender)
 
         if message is Request.START:
-            self.parent = sender
             self.start()
 
         elif message is Request.STOP:
@@ -62,3 +64,18 @@ class GenericActor(ActorTypeDispatcher, ABC):
     def stop(self):
         """The STOP method contains all teardown code for the actor."""
         pass
+
+    
+    # to createbellboy actors that use our logging convention.
+
+    def createActor(self, actorClass,
+                    targetActorRequirements=None,
+                    globalName=None,
+                    sourceHash=None):
+        actor = super().createActor(actorClass,
+                    targetActorRequirements,
+                    globalName,
+                    sourceHash)
+        self.send(actor, Init())
+        return actor
+

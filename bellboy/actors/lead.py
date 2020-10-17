@@ -3,31 +3,32 @@ import logging
 import RPi.GPIO as GPIO
 from thespian.actors import ActorAddress
 
-from bellboy.actors.generic import GenericActor
-from bellboy.actors.ultrasonic import UltrasonicActor
-from bellboy.utils.messages import *
-
-# simple "buttons", only have a position (depth) value and a radius.. all in cm
-BTN1_POS = 15
-BTN2_POS = 30
-BTN_RAD = 2
+from actors import log
+from actors.generic import GenericActor
+from actors.ultrasonic import UltrasonicActor
+from actors.elevator import buttonHovered
+from utils.messages import *
 
 class BellboyLeadActor(GenericActor):
     def __init__(self):
         """define Bellboy's private variables."""
+        super().__init__()
         self.ultrasonic_sensor = None
+        self.log = log.getChild("bellboy_lead")
+        self.event_count = 0
 
     def start(self):
         """
         Starts bellboy lead actor services. Configures global RPI Board.
         Spawns and sets up child actors (ultrasonic sensor).
-        """     
-
+        """
         self.log.info("Starting bellboy services.")
 
         # configure RPI GPIO board
+        self.log.info(str.format("mode: {}", GPIO.getmode()))  # use PHYSICAL GPIO Numbering
         GPIO.setmode(GPIO.BOARD)  # use PHYSICAL GPIO Numbering
         self.log.debug("GPIO mode set to BOARD")
+        self.log.info(str.format("mode: {}", GPIO.getmode()))  # use PHYSICAL GPIO Numbering
 
         # spawn actors
         self.log.info("Starting all dependent actors...")
@@ -45,8 +46,9 @@ class BellboyLeadActor(GenericActor):
             ),
         )
 
-    def stop(self, message: Requests, sender: ActorAddress):
+    def stop(self):
         self.log.info("Stopping all child actors...")
+        self.send(self.ultrasonic_sensor, SensorReq.STOP)
 
     def receiveMsg_SensorResp(self, message, sender):
         self.log.info(str.format("Received message {} from {}", message, sender))
@@ -63,8 +65,8 @@ class BellboyLeadActor(GenericActor):
                     ),
                 )
 
-
     def receiveMsg_SensorEventMsg(self, message, sender):
+        self.event_count += 1
         self.log.info(str.format("Received message {} from {}", message, sender))
         self.log.info(
             str.format(
@@ -76,27 +78,7 @@ class BellboyLeadActor(GenericActor):
             )
         )
 
+        if self.event_count == 3:
+            self.log.debug("received 3 events, turning off sensor.")
+            self.send(self.ultrasonic_sensor, SensorReq.STOP)
 
-def buttonHovered(depth_array):
-    "rough implementation of a buttonHovered method. tells us which button was hovered given array of depth values"
-
-    btn_chosen = "button1"
-    for depth in depth_array[-10:]:
-        if depth < BTN1_POS - BTN_RAD or depth > BTN1_POS + BTN_RAD:
-            # btn1 wasnt chosen
-            btn_chosen = "button2"
-            break
-    
-    if btn_chosen == "button1":
-        return SensorEventMsg(eventType=SensorEvent.BUTTON_HOVERED, eventData="button1 was hovered")
-
-    for depth in depth_array[-10:]:
-        if depth < BTN1_POS - BTN_RAD or depth > BTN1_POS + BTN_RAD:
-            # btn2 wasnt chosen
-            btn_chosen = None
-            break
-    
-    if btn_chosen == "button2":
-        return SensorEventMsg(eventType=SensorEvent.BUTTON_HOVERED, eventData="button2 was hovered")
-    
-    return None

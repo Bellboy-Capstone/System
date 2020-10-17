@@ -2,7 +2,7 @@ import logging
 
 from thespian.actors import ActorAddress
 
-from generic import GenericActor
+from bellboy.actors.generic import GenericActor
 from bellboy.utils.constants import ActorNames, Requests
 
 

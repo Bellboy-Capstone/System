@@ -2,12 +2,13 @@ import logging
 import time
 from threading import Thread
 
-import RPi.GPIO as GPIO
 from collections import deque
 from thespian.actors import ActorAddress, ActorTypeDispatcher
 
-from bellboy.utils.messages import *
-from bellboy.utils.UltrasonicRanging import pulseIn
+from actors.generic import GenericActor
+from actors.lead import GPIO
+from utils.messages import *
+from utils.UltrasonicRanging import pulseIn
 
 
 # conversion factors
@@ -16,6 +17,7 @@ MS_PER_SEC = 1000
 
 # constants
 BUFFER_SIZE = 6000  # 6000 entries at a polling rate of 100 ms = 600 secs of data = 5 mins.
+
 
 class UltrasonicActor(GenericActor):
     """
@@ -50,6 +52,8 @@ class UltrasonicActor(GenericActor):
         self._max_depth_cm = max_depth_cm
         self._pulse_width = pulse_width_us
         self._time_out = max_depth_cm * 60 * 0.000001
+        GPIO.setmode(GPIO.BOARD)  # TODO: why isnt setting mode in lead actor reflecting in here..
+        self.log.info(str.format("mode: {}", GPIO.getmode()))  # use PHYSICAL GPIO Numbering
 
     def _sensor_loop(self):
         """
@@ -58,6 +62,7 @@ class UltrasonicActor(GenericActor):
             - analyzes recent readings to test for an event
         until thread terminate flag is raised.
         """
+        self.log.info(str.format("mode: {}", GPIO.getmode()))  # use PHYSICAL GPIO Numbering
 
         GPIO.setup(self._trigPin, GPIO.OUT)
         GPIO.setup(self._echoPin, GPIO.IN)
@@ -74,7 +79,7 @@ class UltrasonicActor(GenericActor):
             pingTime = pulseIn(self._echoPin, GPIO.HIGH, self._time_out / 0.000001)
             distance = pingTime * 340.0 / 2.0 / 10000.0
 
-            self._buffer.append(distance)
+            self._buffer.appendleft(distance)
             self.log.debug(
                 str.format(
                     "Ultrasonic depth recorded: {}", self._buffer[len(self._buffer) - 1]
@@ -109,8 +114,9 @@ class UltrasonicActor(GenericActor):
 
     """ START / STOP METHODS """
 
-    def stop(self, message: Requests, sender: ActorAddress):
+    def stop(self):
         self.log.debug("Stopping the UltraSonic detection loop...")
+        self._terminate_thread = True
 
     """ MESSAGE HANDLING METHODS """
 
@@ -122,6 +128,7 @@ class UltrasonicActor(GenericActor):
         self.log.info(str.format("Received message {} from {}", message, sender))
 
         if message == SensorReq.STOP:
+            print("here")
             if sender != self.parent:
                 self.log.warning("Received STOP req from unauthorized sender!")
                 return
@@ -153,3 +160,9 @@ class UltrasonicActor(GenericActor):
             self._eventFunc = message.sensorEventFunc
             self._poll_period = message.pollPeriod_ms
             self._begin()
+
+    def start(self):
+        pass
+
+    def stop(self):
+        pass
