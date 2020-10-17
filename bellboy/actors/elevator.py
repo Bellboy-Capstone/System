@@ -7,8 +7,8 @@ from utils.messages import SensorEvent, SensorEventMsg
 
 
 # simple "buttons", only have a position (depth) value and a radius.. all in cm
-BTN1_POS = 15
-BTN2_POS = 30
+BTN1_POS = 8
+BTN2_POS = 14.5
 BTN_RAD = 2
 
 DATA_TO_COUNT = 10  # 10 * 100 ms = 2 sec of data
