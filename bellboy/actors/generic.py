@@ -16,21 +16,16 @@ class GenericActor(ActorTypeDispatcher, ABC):
         self.parent = None
         self.name = None
         self.log = None
-    def receiveMsg_WakeupMessage(self, message: dict, sender: ActorAddress):
-        """
-        On wakeup request
-        """
-        self.send(sender, Response.AWAKE)
-        
+
     # overidden to createbellboy actors that use our logging convention.
     def createActor(self, actorClass,
                     targetActorRequirements=None,
                     globalName=None,
                     sourceHash=None):
         actor = super().createActor(actorClass,
-                    targetActorRequirements,
-                    globalName,
-                    sourceHash)
+                                    targetActorRequirements,
+                                    globalName,
+                                    sourceHash)
         self.send(actor, Init())
         return actor
 
@@ -38,3 +33,9 @@ class GenericActor(ActorTypeDispatcher, ABC):
         self.log = log.getChild(self.globalName)
         self.parent = sender
         self.log.info(str.format("{} created by {}", self.globalName, sender))
+
+    def receiveMsg_WakeupMessage(self, message: dict, sender: ActorAddress):
+        """
+        On wakeup request
+        """
+        self.send(sender, Response.AWAKE)

@@ -55,9 +55,6 @@ class UltrasonicActor(GenericActor):
         GPIO.setmode(
             GPIO.BOARD
         )  # TODO: why isnt setting mode in lead actor reflecting in here..
-        self.log.info(
-            str.format("mode: {}", GPIO.getmode())
-        )  # use PHYSICAL GPIO Numbering
 
     def _sensor_loop(self):
         """
@@ -66,9 +63,6 @@ class UltrasonicActor(GenericActor):
             - analyzes recent readings to test for an event
         until thread terminate flag is raised.
         """
-        self.log.info(
-            str.format("mode: {}", GPIO.getmode())
-        )  # use PHYSICAL GPIO Numbering
 
         GPIO.setup(self._trigPin, GPIO.OUT)
         GPIO.setup(self._echoPin, GPIO.IN)
@@ -86,11 +80,6 @@ class UltrasonicActor(GenericActor):
             distance = pingTime * 340.0 / 2.0 / 10000.0
 
             self._buffer.appendleft(distance)
-            self.log.debug(
-                str.format(
-                    "Ultrasonic depth recorded: {}", self._buffer[len(self._buffer) - 1]
-                )
-            )
 
             # check for event, if occurred send msg to subscriber
             event = self._eventFunc(self._buffer)
@@ -110,7 +99,7 @@ class UltrasonicActor(GenericActor):
             str.format("cleared GPIO pins {}, {}", self._trigPin, self._echoPin)
         )
 
-    def _begin_poling(self):
+    def _begin_polling(self):
         """
         Begins running the polling thread.
         """
@@ -134,7 +123,6 @@ class UltrasonicActor(GenericActor):
         self.log.info(str.format("Received message {} from {}", message, sender))
 
         if message == SensorReq.STOP:
-            print("here")
             if sender != self.parent:
                 self.log.warning("Received STOP req from unauthorized sender!")
                 return

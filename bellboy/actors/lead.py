@@ -65,6 +65,9 @@ class BellboyLeadActor(GenericActor):
         elif message is Request.STOP:
             self.stopBellboyLead()
 
+        elif message is Request.STATUS:
+            self.log.debug(str.format("Status check - {}", Response.ALIVE.name))
+
         else:
             msg = "Unhandled Request Enum value sent."
             self.log.error(msg)

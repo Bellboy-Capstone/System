@@ -26,7 +26,6 @@ def buttonHovered(depth_deque):
    
     # only check data in quantums
     if len(depth_deque) % DATA_TO_COUNT != 0:
-        log.debug("not enough data to process: %d", len(depth_deque))
         return None
 
     btn_chosen = "button1"

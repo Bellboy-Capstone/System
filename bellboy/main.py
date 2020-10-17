@@ -24,8 +24,14 @@ def main():
     bellboy = system.createActor(BellboyLeadActor, globalName="bellboy_lead")
 
     try:
-        # Ask bellboy to start his work
-        system.ask(bellboy, Request.START)
+        # tell bellboy to start his work
+        system.tell(bellboy, Request.START)
+
+        # Run this while loop for the duration of the program.
+        while True:
+            sleep(10)
+            log.debug("Sending Heartbeat request to lead actor.")
+            system.tell(bellboy, Request.STATUS)
 
     except KeyboardInterrupt:
         log.error("The bellboy system was interrupted by the keyboard, exiting...")
