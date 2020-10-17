@@ -1,4 +1,4 @@
-"""class for the elevator and button related stuff. in actors for now.. cuold move"""
+"""class for the elevator and button related stuff. in actors for now.. could move"""
 
 from collections import deque
 
@@ -15,9 +15,17 @@ DATA_TO_COUNT = 10  # 10 * 100 ms = 2 sec of data
 
 
 def buttonHovered(depth_deque):
-    "rough implementation of a buttonHovered method. tells us which button was hovered given array of depth values"
-    log.debug(str.format("data: {}", depth_deque))
-    if len(depth_deque) < DATA_TO_COUNT:
+    """
+    rough implementation of a buttonHovered method. processes data deque.
+    tells us which button was hovered.
+    """
+    
+    # free up bloated deque
+    while len(depth_deque) > depth_deque.maxlen - DATA_TO_COUNT:
+        depth_deque.pop()
+   
+    # only check data in quantums
+    if len(depth_deque) % DATA_TO_COUNT != 0:
         log.debug("not enough data to process: %d", len(depth_deque))
         return None
 
@@ -32,7 +40,10 @@ def buttonHovered(depth_deque):
             break
 
     if btn_chosen == "button1":
-        return SensorEventMsg(eventType=SensorEvent.BUTTON_HOVERED, eventData="button1 was hovered")
+        log.debug(str.format("data: {}", depth_deque))
+        return SensorEventMsg(
+            eventType=SensorEvent.BUTTON_HOVERED, eventData="button1 was hovered"
+        )
 
     count = 0
     while count < DATA_TO_COUNT:
@@ -44,6 +55,9 @@ def buttonHovered(depth_deque):
             break
 
     if btn_chosen == "button2":
-        return SensorEventMsg(eventType=SensorEvent.BUTTON_HOVERED, eventData="button2 was hovered")
+        log.debug(str.format("data: {}", depth_deque))
+        return SensorEventMsg(
+            eventType=SensorEvent.BUTTON_HOVERED, eventData="button2 was hovered"
+        )
 
     return None

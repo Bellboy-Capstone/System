@@ -2,11 +2,12 @@ import logging
 import time
 from threading import Thread
 
+from actors.generic import GenericActor
+from actors.lead import GPIO
+
 from collections import deque
 from thespian.actors import ActorAddress, ActorTypeDispatcher
 
-from actors.generic import GenericActor
-from actors.lead import GPIO
 from utils.messages import *
 from utils.UltrasonicRanging import pulseIn
 
@@ -17,7 +18,6 @@ MS_PER_SEC = 1000
 
 # constants
 BUFFER_SIZE = 6000  # 6000 entries at a polling rate of 100 ms = 600 secs of data = 5 mins.
-
 
 class UltrasonicActor(GenericActor):
     """
@@ -45,15 +45,19 @@ class UltrasonicActor(GenericActor):
         self._sensor_thread = Thread(target=self._sensor_loop)
         self._terminate_thread = True
 
-    def setup_sensor(self, trigPin, echoPin, max_depth_cm, pulse_width_us=10):
+    def _setup_sensor(self, trigPin, echoPin, max_depth_cm, pulse_width_us=10):
         """setup sensor paramaters"""
         self._trigPin = trigPin
         self._echoPin = echoPin
         self._max_depth_cm = max_depth_cm
         self._pulse_width = pulse_width_us
         self._time_out = max_depth_cm * 60 * 0.000001
-        GPIO.setmode(GPIO.BOARD)  # TODO: why isnt setting mode in lead actor reflecting in here..
-        self.log.info(str.format("mode: {}", GPIO.getmode()))  # use PHYSICAL GPIO Numbering
+        GPIO.setmode(
+            GPIO.BOARD
+        )  # TODO: why isnt setting mode in lead actor reflecting in here..
+        self.log.info(
+            str.format("mode: {}", GPIO.getmode())
+        )  # use PHYSICAL GPIO Numbering
 
     def _sensor_loop(self):
         """
@@ -62,7 +66,9 @@ class UltrasonicActor(GenericActor):
             - analyzes recent readings to test for an event
         until thread terminate flag is raised.
         """
-        self.log.info(str.format("mode: {}", GPIO.getmode()))  # use PHYSICAL GPIO Numbering
+        self.log.info(
+            str.format("mode: {}", GPIO.getmode())
+        )  # use PHYSICAL GPIO Numbering
 
         GPIO.setup(self._trigPin, GPIO.OUT)
         GPIO.setup(self._echoPin, GPIO.IN)
@@ -104,7 +110,7 @@ class UltrasonicActor(GenericActor):
             str.format("cleared GPIO pins {}, {}", self._trigPin, self._echoPin)
         )
 
-    def _begin(self):
+    def _begin_poling(self):
         """
         Begins running the polling thread.
         """
@@ -112,13 +118,13 @@ class UltrasonicActor(GenericActor):
         self.log.info("starting sensor's thread")
         self._sensor_thread.start()
 
-    """ START / STOP METHODS """
-
-    def stop(self):
+    def _stop_polling(self):
         self.log.debug("Stopping the UltraSonic detection loop...")
         self._terminate_thread = True
 
-    """ MESSAGE HANDLING METHODS """
+    # --------------------------#
+    # MESSAGE HANDLING METHODS #
+    # --------------------------#
 
     def receiveMsg_SensorReq(self, message, sender):
         """
@@ -132,19 +138,15 @@ class UltrasonicActor(GenericActor):
             if sender != self.parent:
                 self.log.warning("Received STOP req from unauthorized sender!")
                 return
+            self._stop_polling()
 
-            self.log.info("Terminating polling thread")
-            self._terminate_thread = True
 
-    # more involved sensor requests
     def receiveMsg_SensorReqMsg(self, message, sender):
         self.log.info(str.format("Received message {} from {}", message, sender))
 
         if message.type == SensorReq.SETUP:
-
-            # setup sensor and assign its parent.
-            self.parent = sender
-            self.setup_sensor(
+            # setup sensor
+            self._setup_sensor(
                 trigPin=message.trigPin,
                 echoPin=message.echoPin,
                 max_depth_cm=message.maxDepth_cm,
@@ -159,10 +161,4 @@ class UltrasonicActor(GenericActor):
 
             self._eventFunc = message.sensorEventFunc
             self._poll_period = message.pollPeriod_ms
-            self._begin()
-
-    def start(self):
-        pass
-
-    def stop(self):
-        pass
+            self._begin_polling()
