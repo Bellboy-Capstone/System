@@ -3,7 +3,6 @@ from threading import Thread
 
 from collections import deque
 
-from actors import nameOf
 from actors.generic import GenericActor
 from actors.lead import GPIO
 from utils.messages import Request, Response, SensorReq, SensorReqMsg, SensorResp
@@ -16,6 +15,7 @@ MS_PER_SEC = 1000.0
 
 # constants
 BUFFER_SIZE = 6000  # 6000 entries at a polling rate of 100 ms = 600 secs of data = 5 mins.
+
 
 class UltrasonicActor(GenericActor):
     """

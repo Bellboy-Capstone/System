@@ -1,11 +1,12 @@
 import RPi.GPIO as GPIO
 from thespian.actors import ActorAddress
 
-from actors import log, addressBook, nameOf
+from actors import log
 from actors.generic import GenericActor
 from actors.ultrasonic import UltrasonicActor
 from actors.elevator import buttonHovered
-from utils.messages import Request, Response, SensorReq, SensorResp, SensorReqMsg
+from utils.messages import *
+
 
 class BellboyLeadActor(GenericActor):
     def __init__(self):
@@ -14,7 +15,7 @@ class BellboyLeadActor(GenericActor):
         self.ultrasonic_sensor = None
         self.event_count = 0
 
-        # since lead actor gets spawned by the system, 
+        # since lead actor gets spawned by the system,
         # it must run this explicitly.
         self.log = log.getChild("bellboy_lead")
 
@@ -24,16 +25,19 @@ class BellboyLeadActor(GenericActor):
         Spawns and sets up child actors (ultrasonic sensor).
         """
         self.log.info("Starting bellboy services.")
-        
 
         # configure RPI GPIO board
         GPIO.setmode(GPIO.BOARD)  # use PHYSICAL GPIO Numbering
         self.log.debug("GPIO mode set to BOARD")
-        self.log.info(str.format("mode: {}", GPIO.getmode()))  # use PHYSICAL GPIO Numbering
+        self.log.info(
+            str.format("mode: {}", GPIO.getmode())
+        )  # use PHYSICAL GPIO Numbering
 
         # spawn actors
         self.log.info("Starting all dependent actors...")
-        self.ultrasonic_sensor = self.createActor(UltrasonicActor, globalName="ultrasonic")
+        self.ultrasonic_sensor = self.createActor(
+            UltrasonicActor, globalName="ultrasonic"
+        )
 
         # request to setup sensor
         self.send(
@@ -105,4 +109,3 @@ class BellboyLeadActor(GenericActor):
         if self.event_count == 10:
             self.log.debug("received 10 events, turning off sensor.")
             self.send(self.ultrasonic_sensor, SensorReq.STOP)
-
