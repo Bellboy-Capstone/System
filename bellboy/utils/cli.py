@@ -38,14 +38,6 @@ def configure_logging(log_level):
     )
 
 
-global_run_level = None
-
-
-def set_run_level(run_level):
-    "sets run level..."
-    global_run_level = run_level
-
-
 # parse arguments
 
 
@@ -85,7 +77,6 @@ def configure_bellboy():
 
     # configure system to chosen settings.
     configure_logging(args.log_level)
-    set_run_level(args.run_level)
     logging.getLogger().info(
         f"Running at log level {args.log_level} and run level {args.run_level}"
     )
