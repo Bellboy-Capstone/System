@@ -1,20 +1,19 @@
-import logging
 import time
 from threading import Thread
 
+from actors import nameOf
 from actors.generic import GenericActor
 from actors.lead import GPIO
 
 from collections import deque
-from thespian.actors import ActorAddress, ActorTypeDispatcher
 
-from utils.messages import *
+from utils.messages import Request, Response, SensorReq, SensorResp, SensorReqMsg
 from utils.UltrasonicRanging import pulseIn
 
 
 # conversion factors
-US_PER_SEC = 1000000
-MS_PER_SEC = 1000
+US_PER_SEC = 1000000.0
+MS_PER_SEC = 1000.0
 
 # constants
 BUFFER_SIZE = 6000  # 6000 entries at a polling rate of 100 ms = 600 secs of data = 5 mins.

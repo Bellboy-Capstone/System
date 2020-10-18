@@ -1,21 +1,22 @@
-import logging
-
 import RPi.GPIO as GPIO
 from thespian.actors import ActorAddress
 
-from actors import log
+from actors import log, addressBook, nameOf
 from actors.generic import GenericActor
 from actors.ultrasonic import UltrasonicActor
 from actors.elevator import buttonHovered
-from utils.messages import *
+from utils.messages import Request, Response, SensorReq, SensorResp, SensorReqMsg
 
 class BellboyLeadActor(GenericActor):
     def __init__(self):
         """define Bellboy's private variables."""
         super().__init__()
         self.ultrasonic_sensor = None
-        self.log = log.getChild("bellboy_lead")
         self.event_count = 0
+
+        # since lead actor gets spawned by the system, 
+        # it must run this explicitly.
+        self.log = log.getChild("bellboy_lead")
 
     def startBellboyLead(self):
         """
@@ -23,9 +24,9 @@ class BellboyLeadActor(GenericActor):
         Spawns and sets up child actors (ultrasonic sensor).
         """
         self.log.info("Starting bellboy services.")
+        
 
         # configure RPI GPIO board
-        self.log.info(str.format("mode: {}", GPIO.getmode()))  # use PHYSICAL GPIO Numbering
         GPIO.setmode(GPIO.BOARD)  # use PHYSICAL GPIO Numbering
         self.log.debug("GPIO mode set to BOARD")
         self.log.info(str.format("mode: {}", GPIO.getmode()))  # use PHYSICAL GPIO Numbering
@@ -50,9 +51,9 @@ class BellboyLeadActor(GenericActor):
         self.log.info("Stopping all child actors...")
         self.send(self.ultrasonic_sensor, SensorReq.STOP)
 
-    #--------------------------#
-    # MESSAGE HANDLING METHODS #
-    #--------------------------#
+    # --------------------------#
+    # MESSAGE HANDLING METHODS  #
+    # --------------------------#
     def receiveMsg_Request(self, message: Request, sender: ActorAddress):
         """
         handles messages of type Request enum.
@@ -101,7 +102,7 @@ class BellboyLeadActor(GenericActor):
             )
         )
 
-        if self.event_count == 3:
-            self.log.debug("received 3 events, turning off sensor.")
+        if self.event_count == 10:
+            self.log.debug("received 10 events, turning off sensor.")
             self.send(self.ultrasonic_sensor, SensorReq.STOP)
 

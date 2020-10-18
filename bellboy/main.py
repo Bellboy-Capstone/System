@@ -1,8 +1,7 @@
 import logging
-import os
 from time import sleep
 
-from thespian.actors import ActorAddress, ActorSystem
+from thespian.actors import ActorSystem
 
 from actors.lead import BellboyLeadActor
 from utils.cli import configure_bellboy

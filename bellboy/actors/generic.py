@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 
 from actors import log
 from thespian.actors import ActorAddress, ActorTypeDispatcher
-from utils.messages import Init, Request, Response
+from utils.messages import Init
 
 
 class GenericActor(ActorTypeDispatcher, ABC):

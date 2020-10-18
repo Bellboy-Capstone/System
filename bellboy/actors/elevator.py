@@ -7,27 +7,19 @@ from utils.messages import SensorEvent, SensorEventMsg
 
 
 # simple "buttons", only have a position (depth) value and a radius.. all in cm
-BTN1_POS = 8
-BTN2_POS = 14.5
+BTN1_POS = 9
+BTN2_POS = 18.5
 BTN_RAD = 2
 
-DATA_TO_COUNT = 10  # 10 * 100 ms = 2 sec of data
+DATA_TO_COUNT = 10  # 10 * 100 ms = 1 sec of data
 
 
-def buttonHovered(depth_deque):
+def buttonHovered(depth_deque: deque):
     """
     rough implementation of a buttonHovered method. processes data deque.
     tells us which button was hovered.
     """
-    
-    # free up bloated deque
-    while len(depth_deque) > depth_deque.maxlen - DATA_TO_COUNT:
-        depth_deque.pop()
-   
-    # only check data in quantums
-    if len(depth_deque) % DATA_TO_COUNT != 0:
-        return None
-    
+
     log.debug(str.format("data: {}", format_deque(depth_deque)))
 
     btn_chosen = "button1"
@@ -50,7 +42,7 @@ def buttonHovered(depth_deque):
     while count < DATA_TO_COUNT:
         depth = depth_deque[count]
         count += 1
-        if depth < BTN1_POS - BTN_RAD or depth > BTN1_POS + BTN_RAD:
+        if depth < BTN2_POS - BTN_RAD or depth > BTN2_POS + BTN_RAD:
             # btn2 wasnt chosen
             btn_chosen = None
             break
@@ -63,6 +55,7 @@ def buttonHovered(depth_deque):
 
     return None
 
+
 def format_deque(d):
-    return [ '%.2f' % elem for elem in d ]
-    
+    # format to two decimal places.
+    return ['%.2f' % elem for elem in d]

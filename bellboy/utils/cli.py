@@ -4,6 +4,7 @@ import logging
 import os
 from argparse import ArgumentParser
 
+
 def configure_logging(log_level):
     """configures logging globally through root logger.
     :param log_level: log verbosity
@@ -38,11 +39,15 @@ def configure_logging(log_level):
 
 
 global_run_level = None
+
+
 def set_run_level(run_level):
     "sets run level..."
     global_run_level = run_level
 
 # parse arguments
+
+
 def configure_bellboy():
     # command line argument parsing
     parser = ArgumentParser(
@@ -75,8 +80,6 @@ def configure_bellboy():
         "LOCAL_STANDALONE runs the system without networking, "
         "PRODUCTION runs against Heroku-deployed network services.",
     )
-
-    parsed_args = parser.parse_args()
     args = parser.parse_args()
 
     # configure system to chosen settings.
@@ -85,4 +88,3 @@ def configure_bellboy():
     logging.getLogger().info(
         f"Running at log level {args.log_level} and run level {args.run_level}"
     )
-

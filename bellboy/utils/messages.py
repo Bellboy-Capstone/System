@@ -2,6 +2,8 @@ from enum import Enum
 
 """ Global messages, non-actor specifc """
 # init
+
+
 class Init:
     pass
 
@@ -21,6 +23,7 @@ class Response(Enum):
 # sensor requests
 class SensorReq(Enum):
     SETUP, CLOSE, POLL, STOP = range(4)
+
 
 # sensor responses
 class SensorResp(Enum):
@@ -46,10 +49,9 @@ class SensorReqMsg:
         self.pulseWidth_us = pulseWidth_us
         self.sensorEventFunc = triggerFunc
         self.pollPeriod_ms = pollPeriod_ms
-    
+
     def __str__(self):
         return self.type.name
-
 
 
 # sensor events
