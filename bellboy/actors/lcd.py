@@ -19,4 +19,3 @@ class LiquidCrystalActor(GenericActor):
     def receiveMsg_str(self, message: str, sender: ActorAddress):
         """Parses incoming messages containing integers."""
         self.log.info("Printing to LCD =>  '%s' ", message)
-

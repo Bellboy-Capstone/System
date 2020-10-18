@@ -1,8 +1,8 @@
-from abc import ABC, abstractmethod
+from abc import ABC
 
 from actors import log
 from thespian.actors import ActorAddress, ActorTypeDispatcher
-from utils.messages import Init
+from utils.messages import Init, Response
 
 
 class GenericActor(ActorTypeDispatcher, ABC):
@@ -33,6 +33,7 @@ class GenericActor(ActorTypeDispatcher, ABC):
         self.log = log.getChild(self.globalName)
         self.parent = sender
         self.log.info(str.format("{} created by {}", self.globalName, sender))
+        self.send(sender, Response.READY)
 
     def receiveMsg_WakeupMessage(self, message: dict, sender: ActorAddress):
         """

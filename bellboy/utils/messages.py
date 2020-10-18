@@ -1,9 +1,9 @@
 from enum import Enum
 
 """ Global messages, non-actor specifc """
+
+
 # init
-
-
 class Init:
     pass
 
@@ -20,6 +20,8 @@ class Response(Enum):
 
 
 """ Sensor related messages. """
+
+
 # sensor requests
 class SensorReq(Enum):
     SETUP, CLOSE, POLL, STOP = range(4)

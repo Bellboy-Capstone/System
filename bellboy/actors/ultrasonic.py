@@ -1,13 +1,12 @@
 import time
 from threading import Thread
 
+from collections import deque
+
 from actors import nameOf
 from actors.generic import GenericActor
 from actors.lead import GPIO
-
-from collections import deque
-
-from utils.messages import Request, Response, SensorReq, SensorResp, SensorReqMsg
+from utils.messages import Request, Response, SensorReq, SensorReqMsg, SensorResp
 from utils.UltrasonicRanging import pulseIn
 
 
@@ -126,7 +125,6 @@ class UltrasonicActor(GenericActor):
                 self.log.warning("Received STOP req from unauthorized sender!")
                 return
             self._stop_polling()
-
 
     def receiveMsg_SensorReqMsg(self, message, sender):
         self.log.info(str.format("Received message {} from {}", message, sender))
