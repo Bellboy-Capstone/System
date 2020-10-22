@@ -1,10 +1,8 @@
 import RPi.GPIO as GPIO
-from thespian.actors import ActorAddress
-
-from actors import log
+from actors.elevator import buttonHovered
 from actors.generic import GenericActor
 from actors.ultrasonic import UltrasonicActor
-from actors.elevator import buttonHovered
+from thespian.actors import ActorAddress
 from utils.messages import *
 
 
@@ -70,7 +68,7 @@ class BellboyLeadActor(GenericActor):
 
         elif message is Request.STATUS:
             self.log.debug(str.format("Status check - {}", Response.ALIVE.name))
-            
+
         else:
             msg = "Unhandled Request Enum value sent."
             self.log.error(msg)
@@ -110,7 +108,7 @@ class BellboyLeadActor(GenericActor):
             self.log.debug("received 10 events, turning off sensor.")
             self.send(self.ultrasonic_sensor, SensorReq.STOP)
 
-    def receiveMsg_SummaryReq(self, message, sender): 
+    def receiveMsg_SummaryReq(self, message, sender):
         """sends a summary of the actor."""
-        # TODO flesh this out... 
+        # TODO flesh this out...
         self.send(sender, self.status)

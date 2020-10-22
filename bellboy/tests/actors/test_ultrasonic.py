@@ -1,4 +1,10 @@
+import pytest
+from actors.elevator import buttonHovered
+from actors.lead import BellboyLeadActor, GenericActor
+from actors.ultrasonic import UltrasonicActor
+from thespian.actors import ActorSystem
 from utils.messages import (
+    Init,
     Response,
     SensorReq,
     SensorReqMsg,
@@ -7,20 +13,7 @@ from utils.messages import (
     StatusReq,
     SummaryReq,
     TestMode,
-    Init
 )
-from actors.ultrasonic import UltrasonicActor
-from actors.lead import BellboyLeadActor, GenericActor
-from actors.elevator import buttonHovered
-import sys
-import os
-import pytest
-
-from thespian.actors import ActorSystem
-
-import logging
-from utils.cli import configure_logging
-configure_logging("DEBUG")
 
 
 test_system = ActorSystem(systemBase="multiprocQueueBase")
@@ -88,11 +81,14 @@ def check_ultrasonicActor_poll(ultrasonic_actor):
     status = test_system.ask(ultrasonic_actor, SensorReq.CLEAR)
     assert status == Response.READY
 
+
 # main test
 def test_ultrasonicActor():
 
     # create actor, ensure its ready to recieve messages
-    ultrasonic_actor = test_system.createActor(UltrasonicActor, globalName="test_ultrasonic")
+    ultrasonic_actor = test_system.createActor(
+        UltrasonicActor, globalName="test_ultrasonic"
+    )
     ultrasonic_status = test_system.ask(ultrasonic_actor, Init())
     assert ultrasonic_status == Response.READY
     test_system.tell(ultrasonic_actor, TestMode())

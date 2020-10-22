@@ -4,21 +4,24 @@ from enum import Enum
 
 
 # init
-class Init():
-    def __init__(self, testMode=False):
-        self.testing = testMode
+class Init:
+    pass
+
 
 # for checking status
 class StatusReq:
     pass
 
+
 # for getting a summary
 class SummaryReq:
     pass
 
+
 # to run actors in testmode
 class TestMode:
     pass
+
 
 # general requests
 class Request(Enum):
@@ -39,6 +42,7 @@ class Response(Enum):
 class SensorReq(Enum):
     SETUP, CLOSE, POLL, STOP, CLEAR = range(5)
 
+
 # for requests with more info
 class SensorReqMsg:
     def __init__(
@@ -58,15 +62,18 @@ class SensorReqMsg:
         self.pulseWidth_us = pulseWidth_us
         self.sensorEventFunc = triggerFunc
         self.pollPeriod_ms = pollPeriod_ms
-    
+
     def __str__(self):
         return self.type.name
+
 
 # sensor responses
 class SensorResp(Enum):
     READY, POLLING, UNSET, SUMMARY = range(4)
 
+
 # for responses with more info
+# TODO consolidate sensor req/resp msgs into one claass cuz theyre redundant
 class SensorRespMsg:
     def __init__(
         self,
@@ -85,7 +92,7 @@ class SensorRespMsg:
         self.pulseWidth_us = pulseWidth_us
         self.sensorEventFunc = triggerFunc
         self.pollPeriod_ms = pollPeriod_ms
-    
+
     def __str__(self):
         return self.type.name
 

@@ -1,7 +1,6 @@
-from thespian.actors import ActorSystem
-
 from actors.lead import BellboyLeadActor
-from utils.messages import Request, Response, TestMode, Init
+from thespian.actors import ActorSystem
+from utils.messages import Init, Request, Response, TestMode
 
 
 class TestLeadActor:

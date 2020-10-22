@@ -5,7 +5,14 @@ from collections import deque
 
 from actors.generic import GenericActor
 from actors.lead import GPIO
-from utils.messages import Request, Response, SensorReq, SensorReqMsg, SensorRespMsg, SensorResp
+from utils.messages import (
+    Request,
+    Response,
+    SensorReq,
+    SensorReqMsg,
+    SensorRespMsg,
+    SensorResp,
+)
 from utils.UltrasonicRanging import pulseIn
 
 
@@ -14,9 +21,8 @@ US_PER_SEC = 1000000.0
 MS_PER_SEC = 1000.0
 
 # constants
-BUFFER_SIZE = (
-    6000  # 6000 entries at a polling rate of 100 ms = 600 secs of data = 5 mins.
-)
+# 6000 entries at a polling rate of 100 ms = 600 secs of data = 5 mins.
+BUFFER_SIZE = 6000
 
 
 class UltrasonicActor(GenericActor):
@@ -44,6 +50,9 @@ class UltrasonicActor(GenericActor):
         self._buffer = deque(maxlen=BUFFER_SIZE)
         self._sensor_thread = Thread(target=self._sensor_loop)
         self._terminate_thread = True
+
+        """[summary]
+        """
 
     def _setup_sensor(self, trigPin, echoPin, max_depth_cm, pulse_width_us=10):
         """setup sensor paramaters"""
@@ -109,6 +118,10 @@ class UltrasonicActor(GenericActor):
             )
         self.status = SensorResp.READY
 
+    # --------------------------#
+    # STATE MODIFYING METHODS   #
+    # --------------------------#
+
     def _begin_polling(self):
         """
         Begins running the polling thread.
@@ -138,7 +151,7 @@ class UltrasonicActor(GenericActor):
         self.status = Response.READY
 
     # --------------------------#
-    # MESSAGE HANDLING METHODS #
+    # MESSAGE HANDLING METHODS  #
     # --------------------------#
 
     def receiveMsg_SensorReq(self, message, sender):
@@ -158,7 +171,9 @@ class UltrasonicActor(GenericActor):
 
         elif message == SensorReq.CLEAR:
             if self.status == SensorResp.POLLING:
-                self.log.warning("Polling sensor must be stopped before it can be cleared!")
+                self.log.warning(
+                    "Polling sensor must be stopped before it can be cleared!"
+                )
                 self.send(sender, Response.FAIL)
                 return
 
@@ -168,7 +183,7 @@ class UltrasonicActor(GenericActor):
                 return
 
             self._clear()
-        
+
         self.send(sender, self.status)
 
     def receiveMsg_SensorReqMsg(self, message, sender):
@@ -207,8 +222,13 @@ class UltrasonicActor(GenericActor):
 
     def receiveMsg_SummaryReq(self, message, sender):
         """sends a summary of the actor."""
-        self.send(sender, SensorRespMsg(
-            respType=SensorResp.SUMMARY, trigPin=self._trigPin,
-            echoPin=self._echoPin,
-            maxDepth_cm=self._max_depth_cm,
-            pulseWidth_us=self._pulse_width))
+        self.send(
+            sender,
+            SensorRespMsg(
+                respType=SensorResp.SUMMARY,
+                trigPin=self._trigPin,
+                echoPin=self._echoPin,
+                maxDepth_cm=self._max_depth_cm,
+                pulseWidth_us=self._pulse_width,
+            ),
+        )

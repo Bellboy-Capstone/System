@@ -135,4 +135,5 @@ dmypy.json
 # yusra's ignore list
 *log.txt
 bellboy/functest.py
-.vscode/settings.json
+*/.vscode/*
+*launch.json
