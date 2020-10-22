@@ -4,11 +4,12 @@
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/4150c01ff4e54051a6d930103ea02747)](https://www.codacy.com/gh/Bellboy-Capstone/System/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Bellboy-Capstone/System&amp;utm_campaign=Badge_Grade)
 
 Embedded Raspberry Pi Program
+Requires python3
 
 ## Usage
 ```sh
-cd System/bellboy
-python3 main.py [-h]
+cd bellboy
+python main.py [-h]
 ```
 Status:
 Starts bellboy services,
@@ -25,7 +26,17 @@ pip install -r requirements/REQUIRMEMENTS.txt
 pre-commit install
 ```
 
+## Off-Target Testing
+
+```sh
+cd bellboy
+python -m pytest tests/
+
+# to enable log prints during testing
+python -m pytest -s tests/
+
 ## Resources
 
 1. [Actor tutorial w/Thespian](https://bytes.yingw787.com/posts/2019/02/02/concurrency_with_python_actor_models/)
-1. [Thespian docs](https://thespianpy.com/doc/using.pdf)
+2. [Thespian docs](https://thespianpy.com/doc/using.pdf)
+3. [Bellboy System Design Docs] https://docs.google.com/document/d/1evlRdKOI3afeYZ6nM9aUaCTM6Om1ZHrmEGwIfv0Pv6I/edit?usp=sharing
