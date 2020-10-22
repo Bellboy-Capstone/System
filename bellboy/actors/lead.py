@@ -15,10 +15,6 @@ class BellboyLeadActor(GenericActor):
         self.ultrasonic_sensor = None
         self.event_count = 0
 
-        # since lead actor gets spawned by the system,
-        # it must run this explicitly.
-        self.log = log.getChild("bellboy_lead")
-
     def startBellboyLead(self):
         """
         Starts bellboy lead actor services. Configures global RPI Board.
@@ -50,10 +46,12 @@ class BellboyLeadActor(GenericActor):
                 pulseWidth_us=10,
             ),
         )
+        self.status = Response.STARTED
 
     def stopBellboyLead(self):
         self.log.info("Stopping all child actors...")
         self.send(self.ultrasonic_sensor, SensorReq.STOP)
+        self.status = Response.DONE
 
     # --------------------------#
     # MESSAGE HANDLING METHODS  #
@@ -72,11 +70,13 @@ class BellboyLeadActor(GenericActor):
 
         elif message is Request.STATUS:
             self.log.debug(str.format("Status check - {}", Response.ALIVE.name))
-
+            
         else:
             msg = "Unhandled Request Enum value sent."
             self.log.error(msg)
             raise Exception(msg)
+
+        self.send(sender, self.status)
 
     def receiveMsg_SensorResp(self, message, sender):
         self.log.info(str.format("Received message {} from {}", message, sender))
@@ -109,3 +109,8 @@ class BellboyLeadActor(GenericActor):
         if self.event_count == 10:
             self.log.debug("received 10 events, turning off sensor.")
             self.send(self.ultrasonic_sensor, SensorReq.STOP)
+
+    def receiveMsg_SummaryReq(self, message, sender): 
+        """sends a summary of the actor."""
+        # TODO flesh this out... 
+        self.send(sender, self.status)

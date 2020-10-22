@@ -5,7 +5,7 @@ from thespian.actors import ActorSystem
 
 from actors.lead import BellboyLeadActor
 from utils.cli import configure_bellboy
-from utils.messages import Request, Response
+from utils.messages import Request, Response, Init
 
 
 def main():
@@ -21,6 +21,7 @@ def main():
     # Initialize the Actor system
     system = ActorSystem(systemBase="multiprocQueueBase")
     bellboy = system.createActor(BellboyLeadActor, globalName="bellboy_lead")
+    status = system.ask(bellboy, Init())
 
     try:
         # tell bellboy to start his work

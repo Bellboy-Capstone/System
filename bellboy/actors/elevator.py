@@ -7,11 +7,11 @@ from utils.messages import SensorEvent, SensorEventMsg
 
 
 # simple "buttons", only have a position (depth) value and a radius.. all in cm
-BTN1_POS = 9
-BTN2_POS = 18.5
-BTN_RAD = 2
+BTN1_POS = 8.5
+BTN2_POS = 16
+BTN_RAD = 3
 
-DATA_TO_COUNT = 10  # 10 * 100 ms = 1 sec of data
+DATA_TO_COUNT = 10 # 10 * 100 ms = 1 sec of data
 
 
 def buttonHovered(depth_deque: deque):
@@ -20,7 +20,11 @@ def buttonHovered(depth_deque: deque):
     tells us which button was hovered.
     """
 
-    log.debug(str.format("data: {}", format_deque(depth_deque)))
+    #log.debug(str.format("data: {}", format_deque(depth_deque)))
+
+    #for now only take in quantums
+    if len(depth_deque) % DATA_TO_COUNT != 0:
+        return
 
     btn_chosen = "button1"
     count = 0

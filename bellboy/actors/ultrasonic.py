@@ -5,7 +5,7 @@ from collections import deque
 
 from actors.generic import GenericActor
 from actors.lead import GPIO
-from utils.messages import Request, Response, SensorReq, SensorReqMsg, SensorResp
+from utils.messages import Request, Response, SensorReq, SensorReqMsg, SensorRespMsg, SensorResp
 from utils.UltrasonicRanging import pulseIn
 
 
@@ -75,6 +75,7 @@ class UltrasonicActor(GenericActor):
 
         while not self._terminate_thread:
             distance = 0.0
+            t0 = time.time()
 
             if not self.TEST_MODE:
                 # send ultrasonic ping
@@ -115,18 +116,19 @@ class UltrasonicActor(GenericActor):
         self._terminate_thread = False
         self.log.info("starting sensor's thread")
         self._sensor_thread.start()
+        self.status = SensorResp.POLLING
 
     def _stop_polling(self):
         self.log.debug("Stopping the UltraSonic detection loop...")
         self._terminate_thread = True
-    
+        self.status = SensorResp.READY
+
     def _clear(self):
         self._trigPin = 0
         self._echoPin = 0
         self._max_depth_cm = 0.0
         self._pulse_width = 0.0
         self._time_out = 0.0
-        self.parent = None
 
         self._eventFunc = None
         self._poll_period = 0.0
@@ -149,8 +151,25 @@ class UltrasonicActor(GenericActor):
         if message == SensorReq.STOP:
             if sender != self.parent:
                 self.log.warning("Received STOP req from unauthorized sender!")
+                self.send(sender, Response.UNAUTHORIZED)
                 return
+
             self._stop_polling()
+
+        elif message == SensorReq.CLEAR:
+            if self.status == SensorResp.POLLING:
+                self.log.warning("Polling sensor must be stopped before it can be cleared!")
+                self.send(sender, Response.FAIL)
+                return
+
+            if sender != self.parent:
+                self.log.warning("Received POLL req from unauthorized sender!")
+                self.send(sender, Response.UNAUTHORIZED)
+                return
+
+            self._clear()
+        
+        self.send(sender, self.status)
 
     def receiveMsg_SensorReqMsg(self, message, sender):
         self.log.info(str.format("Received message {} from {}", message, sender))
@@ -158,7 +177,7 @@ class UltrasonicActor(GenericActor):
         if message.type == SensorReq.SETUP:
             # setup sensor
             if sender != self.parent:
-                self.log.warning("Received POLL req from unauthorized sender!")
+                self.log.warning("Received SETUP req from unauthorized sender!")
                 self.send(sender, Response.UNAUTHORIZED)
                 return
 
@@ -168,7 +187,6 @@ class UltrasonicActor(GenericActor):
                 max_depth_cm=message.maxDepth_cm,
                 pulse_width_us=message.pulseWidth_us,
             )
-            self.send(self.parent, SensorResp.READY)
 
         elif message.type == SensorReq.POLL:
             if self.status != SensorResp.READY:
@@ -178,20 +196,19 @@ class UltrasonicActor(GenericActor):
 
             if sender != self.parent:
                 self.log.warning("Received POLL req from unauthorized sender!")
+                self.send(sender, Response.UNAUTHORIZED)
                 return
 
             self._eventFunc = message.sensorEventFunc
             self._poll_period = message.pollPeriod_ms
             self._begin_polling()
 
-        elif message.type == SensorReq.CLEAR:
-            if self.status == SensorResp.POLLING:
-                self.log.warning("Polling sensor must be stopped before it can be cleared!")
-                self.send(sender, Response.FAIL)
+        self.send(sender, self.status)
 
-            if sender != self.parent:
-                self.log.warning("Received POLL req from unauthorized sender!")
-                self.send(sender, Response.UNAUTHORIZED)
-                return
-
-            self._clear
+    def receiveMsg_SummaryReq(self, message, sender):
+        """sends a summary of the actor."""
+        self.send(sender, SensorRespMsg(
+            respType=SensorResp.SUMMARY, trigPin=self._trigPin,
+            echoPin=self._echoPin,
+            maxDepth_cm=self._max_depth_cm,
+            pulseWidth_us=self._pulse_width))

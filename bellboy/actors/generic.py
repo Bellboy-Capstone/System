@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 
 from actors import log
 from thespian.actors import ActorAddress, ActorTypeDispatcher
-from utils.messages import Init, Response, StatusReq, SummaryReq
+from utils.messages import Init, Response, StatusReq, SummaryReq, TestMode
 
 
 class GenericActor(ActorTypeDispatcher, ABC):
@@ -19,22 +19,39 @@ class GenericActor(ActorTypeDispatcher, ABC):
         self.status = Response.NOT_READY
         self.TEST_MODE = False
 
-    # overidden to createbellboy actors that use our logging convention.
+    # overidden to create bellboy actors that use our logging convention.
     def createActor(self, actorClass,
                     targetActorRequirements=None,
                     globalName=None,
                     sourceHash=None):
+
         actor = super().createActor(actorClass,
                                     targetActorRequirements,
                                     globalName,
                                     sourceHash)
+        
+                
+
+        # all initialization msgs unique to bellboy actors get sent now
         self.send(actor, Init())
+
+        # if this actor is in test mode, all its children should be as well.
+        if self.TEST_MODE:
+            self.send(actor, TestMode())
+
+        # self.log.setLevel("DEBUG")
         return actor
 
     def receiveMsg_Init(self, message, sender):
-        self.log = log.getChild(self.globalName)
         self.parent = sender
-        self.log.info(str.format("{} created by {}", self.globalName, sender))
+
+        if self.globalName == None:
+            log.warning("unnamed actor created!")
+            self.log = log.getChild("UNNAMED")
+        else:
+            self.log = log.getChild(self.globalName)
+            self.log.info(str.format("{} created by {}", self.globalName, sender))
+        
         self.status = Response.READY
         self.send(sender, self.status)
 

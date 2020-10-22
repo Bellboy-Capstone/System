@@ -26,9 +26,10 @@ class Request(Enum):
 
 
 # general responses
-# responses are a direct and simple reply to a request.
+# responses are usually a direct and simple reply to a request.
+# they also are used to indicate an actors status.
 class Response(Enum):
-    READY, NOT_READY, SUCCESS, FAIL, DONE, ALIVE, UNAUTHORIZED = range(7)
+    READY, NOT_READY, SUCCESS, FAIL, DONE, ALIVE, UNAUTHORIZED, STARTED = range(8)
 
 
 """ Sensor related messages. """
@@ -36,7 +37,7 @@ class Response(Enum):
 
 # sensor requests
 class SensorReq(Enum):
-    SETUP, CLOSE, POLL, STOP = range(4)
+    SETUP, CLOSE, POLL, STOP, CLEAR = range(5)
 
 # for requests with more info
 class SensorReqMsg:
@@ -69,7 +70,7 @@ class SensorResp(Enum):
 class SensorRespMsg:
     def __init__(
         self,
-        reqType: SensorResp,
+        respType: SensorResp,
         trigPin=0,
         echoPin=0,
         maxDepth_cm=0.0,
@@ -77,7 +78,7 @@ class SensorRespMsg:
         triggerFunc=None,
         pollPeriod_ms=0.0,
     ):
-        self.type = reqType
+        self.type = respType
         self.trigPin = trigPin
         self.echoPin = echoPin
         self.maxDepth_cm = maxDepth_cm
