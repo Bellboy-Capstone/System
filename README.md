@@ -34,6 +34,7 @@ python -m pytest tests/
 
 # to enable log prints during testing
 python -m pytest -s tests/
+```
 
 ## Resources
 
