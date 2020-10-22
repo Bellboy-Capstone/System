@@ -40,4 +40,4 @@ python -m pytest -s tests/
 
 1. [Actor tutorial w/Thespian](https://bytes.yingw787.com/posts/2019/02/02/concurrency_with_python_actor_models/)
 2. [Thespian docs](https://thespianpy.com/doc/using.pdf)
-3. [Bellboy System Design Docs]https://docs.google.com/document/d/1evlRdKOI3afeYZ6nM9aUaCTM6Om1ZHrmEGwIfv0Pv6I/edit?usp=sharing
+3. [Bellboy System Design Docs](https://docs.google.com/document/d/1evlRdKOI3afeYZ6nM9aUaCTM6Om1ZHrmEGwIfv0Pv6I/edit?usp=sharing)
