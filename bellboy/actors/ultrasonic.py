@@ -1,17 +1,9 @@
 import time
 from threading import Thread
 
-from collections import deque
-
 from actors.generic import GenericActor
-from actors.lead import GPIO
-from utils.messages import (
-    Response,
-    SensorReq,
-    SensorReqMsg,
-    SensorRespMsg,
-    SensorResp,
-)
+from collections import deque
+from utils.messages import Response, SensorReq, SensorReqMsg, SensorResp, SensorRespMsg
 from utils.UltrasonicRanging import pulseIn
 
 
@@ -50,9 +42,6 @@ class UltrasonicActor(GenericActor):
         self._sensor_thread = Thread(target=self._sensor_loop)
         self._terminate_thread = True
 
-        """[summary]
-        """
-
     def _setup_sensor(self, trigPin, echoPin, max_depth_cm, pulse_width_us=10):
         """setup sensor paramaters"""
         self._trigPin = trigPin
@@ -63,7 +52,8 @@ class UltrasonicActor(GenericActor):
         self.status = SensorResp.READY
 
         if not self.TEST_MODE:
-            GPIO.setmode(GPIO.BOARD)
+            RPi.GPIO.setmode(GPIO.BOARD)  # use PHYSICAL GPIO Numbering
+            self.log.debug("GPIO mode set to BOARD")
             # TODO: why isnt setting mode in lead actor reflecting in here..
 
     def _sensor_loop(self):
@@ -76,10 +66,10 @@ class UltrasonicActor(GenericActor):
         self.status = SensorResp.POLLING
         self._buffer.clear()
 
-        # testing mode enabled, dont want to use actual GPIO.
+        # testing mode enabled, dont want to use actual RPi.GPIO.
         if not self.TEST_MODE:
-            GPIO.setup(self._trigPin, GPIO.OUT)
-            GPIO.setup(self._echoPin, GPIO.IN)
+            RPi.GPIO.setup(self._trigPin, RPi.GPIO.OUT)
+            RPi.GPIO.setup(self._echoPin, RPi.GPIO.IN)
 
         while not self._terminate_thread:
             distance = 0.0
@@ -88,12 +78,14 @@ class UltrasonicActor(GenericActor):
             if not self.TEST_MODE:
                 # send ultrasonic ping
                 t0 = time.time()
-                GPIO.output(self._trigPin, GPIO.HIGH)
+                RPi.GPIO.output(self._trigPin, RPi.GPIO.HIGH)
                 time.sleep(self._pulse_width / US_PER_SEC)
-                GPIO.output(self._trigPin, GPIO.LOW)
+                RPi.GPIO.output(self._trigPin, RPi.GPIO.LOW)
 
                 # calculate distance from reflected ping
-                pingTime = pulseIn(self._echoPin, GPIO.HIGH, self._time_out / 0.000001)
+                pingTime = pulseIn(
+                    self._echoPin, RPi.GPIO.HIGH, self._time_out / 0.000001
+                )
                 distance = pingTime * 340.0 / 2.0 / 10000.0
 
             self._buffer.appendleft(distance)
@@ -110,10 +102,10 @@ class UltrasonicActor(GenericActor):
 
         # cleanup pins, so none are left on
         if not self.TEST_MODE:
-            GPIO.cleanup(self._trigPin)
-            GPIO.cleanup(self._echoPin)
+            RPi.GPIO.cleanup(self._trigPin)
+            RPi.GPIO.cleanup(self._echoPin)
             self.log.debug(
-                str.format("cleared GPIO pins {}, {}", self._trigPin, self._echoPin)
+                str.format("cleared RPi.GPIO pins {}, {}", self._trigPin, self._echoPin)
             )
         self.status = SensorResp.READY
 

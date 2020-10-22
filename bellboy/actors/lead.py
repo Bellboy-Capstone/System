@@ -1,15 +1,8 @@
-import RPi.GPIO as GPIO
 from actors.elevator import buttonHovered
 from actors.generic import GenericActor
 from actors.ultrasonic import UltrasonicActor
 from thespian.actors import ActorAddress
-from utils.messages import (
-    SensorReq,
-    SensorResp,
-    SensorReqMsg,
-    Response,
-    Request,
-)
+from utils.messages import Request, Response, SensorReq, SensorReqMsg, SensorResp
 
 
 class BellboyLeadActor(GenericActor):
@@ -25,10 +18,6 @@ class BellboyLeadActor(GenericActor):
         Spawns and sets up child actors (ultrasonic sensor).
         """
         self.log.info("Starting bellboy services.")
-
-        # configure RPI GPIO board
-        GPIO.setmode(GPIO.BOARD)  # use PHYSICAL GPIO Numbering
-        self.log.debug("GPIO mode set to BOARD")
 
         # spawn actors
         self.log.info("Starting all dependent actors...")
