@@ -42,7 +42,7 @@ class GenericActor(ActorTypeDispatcher, ABC):
         """
         self.parent = sender
 
-        if self.globalName == None:
+        if self.globalName is None:
             log.warning("unnamed actor created!")
             self.log = log.getChild("UNNAMED")
         else:
@@ -59,7 +59,7 @@ class GenericActor(ActorTypeDispatcher, ABC):
         self.TEST_MODE = True
         self.log.info("Set to TEST mode")
 
-    def receiveMsg_StatusReq(self, message, sender):
+    def receiveMsg_StatusReq(self, message: StatusReq, sender):
         """
         Sends a status update to sender.
         """
@@ -80,7 +80,7 @@ class GenericActor(ActorTypeDispatcher, ABC):
 # pls read if ur gonna write an actor that extends this class:
 #
 # 1. If d actor isnt created by a bellboy actor, u must send the Init msg to it explicitly in order to use bellboy logs.
-#     (This should only matter for the lead actor and during testing, 
+#     (This should only matter for the lead actor and during testing,
 #     cus all actors are sposed to be created thru bellboy lead anyways.)
 #     Reason is bc the actors are running in independent processes, they dont share globals, i.e. the logger.
 #     Everything is communicated thru messaging.
