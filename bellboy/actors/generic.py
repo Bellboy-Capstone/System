@@ -72,15 +72,16 @@ class GenericActor(ActorTypeDispatcher, ABC):
         self.send(sender, Response.AWAKE)
 
     @abstractmethod
-    def receiveMsg_SummaryReq(self, message, sender):
+    def receiveMsg_SummaryReq(self, message: SummaryReq, sender):
         """sends a summary of the actor to the sender. to be defined in child classes."""
         pass
 
 
 # pls read if ur gonna write an actor that extends this class:
 #
-# 1. If the actor isnt created by a bellboy actor, u must send the Init msg to it explicitly in order to use bellboy logs.
-#    (This should only matter for the lead actor and during testing, cus all actors are sposed to be created thru bellboy lead anyways.)
+# 1. If d actor isnt created by a bellboy actor, u must send the Init msg to it explicitly in order to use bellboy logs.
+#     (This should only matter for the lead actor and during testing, 
+#     cus all actors are sposed to be created thru bellboy lead anyways.)
 #     Reason is bc the actors are running in independent processes, they dont share globals, i.e. the logger.
 #     Everything is communicated thru messaging.
 #

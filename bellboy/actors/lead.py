@@ -7,7 +7,6 @@ from utils.messages import (
     SensorReq,
     SensorResp,
     SensorReqMsg,
-    SensorRespMsg,
     Response,
     Request,
 )

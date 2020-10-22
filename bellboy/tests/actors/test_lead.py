@@ -7,6 +7,8 @@ class TestLeadActor:
     def test_receiveMsg_Requests(self, actor_system: ActorSystem):
         lead = actor_system.createActor(BellboyLeadActor, globalName="test_lead")
         status = actor_system.ask(lead, Init())
+        assert status == Response.READY
+
         actor_system.tell(lead, TestMode())
 
         # Actor should reply that it is starting when asked.
