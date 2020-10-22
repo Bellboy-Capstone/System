@@ -1,10 +1,10 @@
 import time
 from threading import Thread
 
+import RPi
 from actors.generic import GenericActor
 from collections import deque
 from utils.messages import Response, SensorReq, SensorReqMsg, SensorResp, SensorRespMsg
-from utils.UltrasonicRanging import pulseIn
 
 
 # conversion factors
@@ -52,7 +52,7 @@ class UltrasonicActor(GenericActor):
         self.status = SensorResp.READY
 
         if not self.TEST_MODE:
-            RPi.GPIO.setmode(GPIO.BOARD)  # use PHYSICAL GPIO Numbering
+            RPi.GPIO.setmode(RPi.GPIO.BOARD)  # use PHYSICAL GPIO Numbering
             self.log.debug("GPIO mode set to BOARD")
             # TODO: why isnt setting mode in lead actor reflecting in here..
 
@@ -83,7 +83,7 @@ class UltrasonicActor(GenericActor):
                 RPi.GPIO.output(self._trigPin, RPi.GPIO.LOW)
 
                 # calculate distance from reflected ping
-                pingTime = pulseIn(
+                pingTime = utils.UltrasonicRanging.pulseIn(
                     self._echoPin, RPi.GPIO.HIGH, self._time_out / 0.000001
                 )
                 distance = pingTime * 340.0 / 2.0 / 10000.0
