@@ -8,7 +8,7 @@
 ########################################################################
 import time
 
-import RPi.GPIO as GPIO
+import RPi
 
 
 trigPin = 16
@@ -21,11 +21,11 @@ timeOut = (
 
 def pulseIn(pin, level, timeOut):  # obtain pulse time of a pin under timeOut
     t0 = time.time()
-    while GPIO.input(pin) != level:
+    while RPi.GPIO.input(pin) != level:
         if (time.time() - t0) > timeOut * 0.000001:
             return 0
     t0 = time.time()
-    while GPIO.input(pin) == level:
+    while RPi.GPIO.input(pin) == level:
         if (time.time() - t0) > timeOut * 0.000001:
             return 0
     pulseTime = (time.time() - t0) * 1000000
@@ -33,10 +33,10 @@ def pulseIn(pin, level, timeOut):  # obtain pulse time of a pin under timeOut
 
 
 def getSonar():  # get the measurement results of ultrasonic module,with unit: cm
-    GPIO.output(trigPin, GPIO.HIGH)  # make trigPin output 10us HIGH level
+    RPi.GPIO.output(trigPin, RPi.GPIO.HIGH)  # make trigPin output 10us HIGH level
     time.sleep(0.1)  # 10us
-    GPIO.output(trigPin, GPIO.LOW)  # make trigPin output LOW level
-    pingTime = pulseIn(echoPin, GPIO.HIGH, timeOut)  # read plus time of echoPin
+    RPi.GPIO.output(trigPin, RPi.GPIO.LOW)  # make trigPin output LOW level
+    pingTime = pulseIn(echoPin, RPi.GPIO.HIGH, timeOut)  # read plus time of echoPin
     distance = (
         pingTime * 340.0 / 2.0 / 10000.0
     )  # calculate distance with sound speed 340m/s
@@ -44,9 +44,9 @@ def getSonar():  # get the measurement results of ultrasonic module,with unit: c
 
 
 def setup():
-    GPIO.setmode(GPIO.BOARD)  # use PHYSICAL GPIO Numbering
-    GPIO.setup(trigPin, GPIO.OUT)  # set trigPin to OUTPUT mode
-    GPIO.setup(echoPin, GPIO.IN)  # set echoPin to INPUT mode
+    RPi.GPIO.setmode(RPi.GPIO.BOARD)  # use PHYSICAL RPi.GPIO Numbering
+    RPi.GPIO.setup(trigPin, RPi.GPIO.OUT)  # set trigPin to OUTPUT mode
+    RPi.GPIO.setup(echoPin, RPi.GPIO.IN)  # set echoPin to INPUT mode
 
 
 def looop():
@@ -62,4 +62,4 @@ if __name__ == "__main__":  # Program entrance
     try:
         looop()
     except KeyboardInterrupt:  # Press ctrl-c to end the program.
-        GPIO.cleanup()  # release GPIO resource
+        RPi.GPIO.cleanup()  # release RPi.GPIO resource

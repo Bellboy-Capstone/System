@@ -5,7 +5,7 @@ import RPi
 from actors.generic import GenericActor
 from collections import deque
 from utils.messages import Response, SensorReq, SensorReqMsg, SensorResp, SensorRespMsg
-
+from utils.UltrasonicRanging import pulseIn
 
 # conversion factors
 US_PER_SEC = 1000000.0
@@ -83,7 +83,7 @@ class UltrasonicActor(GenericActor):
                 RPi.GPIO.output(self._trigPin, RPi.GPIO.LOW)
 
                 # calculate distance from reflected ping
-                pingTime = utils.UltrasonicRanging.pulseIn(
+                pingTime = pulseIn(
                     self._echoPin, RPi.GPIO.HIGH, self._time_out / 0.000001
                 )
                 distance = pingTime * 340.0 / 2.0 / 10000.0
