@@ -11,7 +11,7 @@ BTN1_POS = 8.5
 BTN2_POS = 16
 BTN_RAD = 3
 
-DATA_TO_COUNT = 10 # 10 * 100 ms = 1 sec of data
+DATA_TO_COUNT = 10  # 10 * 100 ms = 1 sec of data
 
 
 def buttonHovered(depth_deque: deque):
@@ -20,9 +20,9 @@ def buttonHovered(depth_deque: deque):
     tells us which button was hovered.
     """
 
-    #log.debug(str.format("data: {}", format_deque(depth_deque)))
+    # log.debug(str.format("data: {}", format_deque(depth_deque)))
 
-    #for now only take in quantums
+    # for now only take in quantums
     if len(depth_deque) % DATA_TO_COUNT != 0:
         return
 
@@ -62,4 +62,4 @@ def buttonHovered(depth_deque: deque):
 
 def format_deque(d):
     # format to two decimal places.
-    return ['%.2f' % elem for elem in d]
+    return ["%.2f" % elem for elem in d]

@@ -1,6 +1,4 @@
-import pytest
 from actors.elevator import buttonHovered
-from actors.lead import BellboyLeadActor, GenericActor
 from actors.ultrasonic import UltrasonicActor
 from thespian.actors import ActorSystem
 from utils.messages import (

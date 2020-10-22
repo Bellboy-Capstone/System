@@ -5,7 +5,7 @@ from thespian.actors import ActorSystem
 
 from actors.lead import BellboyLeadActor
 from utils.cli import configure_bellboy
-from utils.messages import Request, Response, Init
+from utils.messages import Request, Init
 
 
 def main():

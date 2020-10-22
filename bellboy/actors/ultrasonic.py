@@ -6,7 +6,6 @@ from collections import deque
 from actors.generic import GenericActor
 from actors.lead import GPIO
 from utils.messages import (
-    Request,
     Response,
     SensorReq,
     SensorReqMsg,
@@ -186,7 +185,7 @@ class UltrasonicActor(GenericActor):
 
         self.send(sender, self.status)
 
-    def receiveMsg_SensorReqMsg(self, message, sender):
+    def receiveMsg_SensorReqMsg(self, message: SensorReqMsg, sender):
         self.log.info(str.format("Received message {} from {}", message, sender))
 
         if message.type == SensorReq.SETUP:
