@@ -51,7 +51,9 @@ def check_ultrasonicActor_poll(ultrasonic_actor):
     poll_req = SensorMsg(
         type=SensorReq.POLL, triggerFunc=buttonHovered, pollPeriod_ms=100.0
     )
-    setup_req = SensorMsg(type=SensorReq.SETUP, trigPin=10, echoPin=11, maxDepth_cm=100.0)
+    setup_req = SensorMsg(
+        type=SensorReq.SETUP, trigPin=10, echoPin=11, maxDepth_cm=100.0
+    )
 
     # try polling before setup
     response = test_system.ask(ultrasonic_actor, poll_req)

@@ -70,7 +70,7 @@ class BellboyLeadActor(GenericActor):
 
     def receiveMsg_SensorResp(self, message, sender):
         self.log.info(str.format("Received message {} from {}", message, sender))
-        
+
         # if bellboy is complete, we can ignore any response msgs.
 
         if message == SensorResp.SET:

@@ -1,12 +1,12 @@
 import time
 from threading import Thread
 
+import gpiozero
 from gpiozero import DistanceSensor
 from gpiozero.pins.mock import MockFactory
 from actors.generic import GenericActor
 from collections import deque
 from utils.messages import Response, SensorReq, SensorMsg, SensorResp, SensorMsg
-from utils.UltrasonicRanging import pulseIn
 
 # conversion factors
 US_PER_SEC = 1000000.0
@@ -41,8 +41,6 @@ class UltrasonicActor(GenericActor):
         self._sensor_thread = None
         self._terminate_thread = True
 
-
-
     # --------------------------#
     # STATE MODIFYING METHODS   #
     # --------------------------#
@@ -53,12 +51,14 @@ class UltrasonicActor(GenericActor):
         self._echoPin = echoPin
         self._max_depth_cm = max_depth_cm
 
-        pinFactory = None
         if self.TEST_MODE:
-            pinFactory = MockFactory()
+            gpiozero.Device.pin_factory = MockFactory()
+            # TODO should this be "globally" set in the test suites...
+            # but then will it even be recognized in other domains...
 
-        self._sensor = DistanceSensor(echo = self._echoPin, trigger = self._trigPin, max_distance = max_depth_cm/100.0,
-        pin_factory=pinFactory)
+        self._sensor = DistanceSensor(
+            echo=self._echoPin, trigger=self._trigPin, max_distance=max_depth_cm / 100.0
+        )
 
         self.status = SensorResp.SET
 
@@ -74,7 +74,7 @@ class UltrasonicActor(GenericActor):
 
         while not self._terminate_thread:
             t0 = time.time()
-            self._buffer.appendleft(self._sensor.distance*100.0)
+            self._buffer.appendleft(self._sensor.distance * 100.0)
 
             # check for event, if occurred send msg to subscriber
             event = self._eventFunc(self._buffer)
@@ -82,13 +82,18 @@ class UltrasonicActor(GenericActor):
                 self.send(self.parent, event)
 
             # sleep till next period
-            dt_msec = (time.time() - t0 )* MS_PER_SEC
+            dt_msec = (time.time() - t0) * MS_PER_SEC
             # wait till next period if time took too long.
 
             if dt_msec > self._poll_period:
-                self.log.warning(str.format("operation took {} ms, consider having a longer poll period.", dt_msec))
+                self.log.warning(
+                    str.format(
+                        "operation took {} ms, consider having a longer poll period.",
+                        dt_msec,
+                    )
+                )
 
-            time.sleep( ((self._poll_period - dt_msec) % self._poll_period)/MS_PER_SEC )
+            time.sleep(((self._poll_period - dt_msec) % self._poll_period) / MS_PER_SEC)
 
         self.log.info("polling thread terminated")
         self.status = SensorResp.SET
@@ -136,10 +141,12 @@ class UltrasonicActor(GenericActor):
         """
 
         self.log.info(str.format("Received message {} from {}", message, sender))
-        
+
         # ignore unauthorized requests
         if sender != self.parent:
-            self.log.warning(str.format("Received {} req from unauthorized sender!", message))
+            self.log.warning(
+                str.format("Received {} req from unauthorized sender!", message)
+            )
             self.send(sender, Response.UNAUTHORIZED)
             return
 
@@ -159,7 +166,9 @@ class UltrasonicActor(GenericActor):
         self.log.info(str.format("Received message {} from {}", message, sender))
 
         if sender != self.parent:
-            self.log.warning(str.format("Received {} req from unauthorized sender!", message.type))
+            self.log.warning(
+                str.format("Received {} req from unauthorized sender!", message.type)
+            )
             self.send(sender, Response.UNAUTHORIZED)
             return
 
