@@ -27,7 +27,7 @@ pre-commit install
 ```
 
 To create a new bellboy actor class (that extends generic actor) heres an organization tip:\
-Divide the class into:\
+Divide the class into
   * state modifying methods (private) and\
   * message handling methods (public).
     
