@@ -1,10 +1,11 @@
 import time
 from threading import Thread
 
-import RPi
+from gpiozero import DistanceSensor
+from gpiozero.pins.mock import MockFactory
 from actors.generic import GenericActor
 from collections import deque
-from utils.messages import Response, SensorReq, SensorReqMsg, SensorResp, SensorRespMsg
+from utils.messages import Response, SensorReq, SensorMsg, SensorResp, SensorMsg
 from utils.UltrasonicRanging import pulseIn
 
 # conversion factors
@@ -29,9 +30,7 @@ class UltrasonicActor(GenericActor):
         self._trigPin = 0
         self._echoPin = 0
         self._max_depth_cm = 0.0
-        self._pulse_width = 0.0
-        self._time_out = 0.0
-        self.parent = None
+        self._sensor = None
 
         # the following are set on poll request
         self._eventFunc = None
@@ -39,22 +38,29 @@ class UltrasonicActor(GenericActor):
 
         # for data collection and polling
         self._buffer = deque(maxlen=BUFFER_SIZE)
-        self._sensor_thread = Thread(target=self._sensor_loop)
+        self._sensor_thread = None
         self._terminate_thread = True
 
-    def _setup_sensor(self, trigPin, echoPin, max_depth_cm, pulse_width_us=10):
+
+
+    # --------------------------#
+    # STATE MODIFYING METHODS   #
+    # --------------------------#
+
+    def _setup_sensor(self, trigPin, echoPin, max_depth_cm):
         """setup sensor paramaters"""
         self._trigPin = trigPin
         self._echoPin = echoPin
         self._max_depth_cm = max_depth_cm
-        self._pulse_width = pulse_width_us
-        self._time_out = max_depth_cm * 60 * 0.000001
-        self.status = SensorResp.READY
 
-        if not self.TEST_MODE:
-            RPi.GPIO.setmode(RPi.GPIO.BOARD)  # use PHYSICAL GPIO Numbering
-            self.log.debug("GPIO mode set to BOARD")
-            # TODO: why isnt setting mode in lead actor reflecting in here..
+        pinFactory = None
+        if self.TEST_MODE:
+            pinFactory = MockFactory()
+
+        self._sensor = DistanceSensor(echo = self._echoPin, trigger = self._trigPin, max_distance = max_depth_cm/100.0,
+        pin_factory=pinFactory)
+
+        self.status = SensorResp.SET
 
     def _sensor_loop(self):
         """
@@ -66,73 +72,52 @@ class UltrasonicActor(GenericActor):
         self.status = SensorResp.POLLING
         self._buffer.clear()
 
-        # testing mode enabled, dont want to use actual RPi.GPIO.
-        if not self.TEST_MODE:
-            RPi.GPIO.setup(self._trigPin, RPi.GPIO.OUT)
-            RPi.GPIO.setup(self._echoPin, RPi.GPIO.IN)
-
         while not self._terminate_thread:
-            distance = 0.0
             t0 = time.time()
+            self._buffer.appendleft(self._sensor.distance*100.0)
 
-            if not self.TEST_MODE:
-                # send ultrasonic ping
-                t0 = time.time()
-                RPi.GPIO.output(self._trigPin, RPi.GPIO.HIGH)
-                time.sleep(self._pulse_width / US_PER_SEC)
-                RPi.GPIO.output(self._trigPin, RPi.GPIO.LOW)
-
-                # calculate distance from reflected ping
-                pingTime = pulseIn(
-                    self._echoPin, RPi.GPIO.HIGH, self._time_out / 0.000001
-                )
-                distance = pingTime * 340.0 / 2.0 / 10000.0
-
-            self._buffer.appendleft(distance)
             # check for event, if occurred send msg to subscriber
             event = self._eventFunc(self._buffer)
             if event:
                 self.send(self.parent, event)
 
             # sleep till next period
-            dt_sec = time.time() - t0  # TO-DO: ensure dt_sec < poll_period
-            time.sleep(self._poll_period / MS_PER_SEC - dt_sec)
+            dt_msec = (time.time() - t0 )* MS_PER_SEC
+            # wait till next period if time took too long.
+
+            if dt_msec > self._poll_period:
+                self.log.warning(str.format("operation took {} ms, consider having a longer poll period.", dt_msec))
+
+            time.sleep( ((self._poll_period - dt_msec) % self._poll_period)/MS_PER_SEC )
 
         self.log.info("polling thread terminated")
-
-        # cleanup pins, so none are left on
-        if not self.TEST_MODE:
-            RPi.GPIO.cleanup(self._trigPin)
-            RPi.GPIO.cleanup(self._echoPin)
-            self.log.debug(
-                str.format("cleared RPi.GPIO pins {}, {}", self._trigPin, self._echoPin)
-            )
-        self.status = SensorResp.READY
-
-    # --------------------------#
-    # STATE MODIFYING METHODS   #
-    # --------------------------#
+        self.status = SensorResp.SET
 
     def _begin_polling(self):
         """
         Begins running the polling thread.
         """
         self._terminate_thread = False
+        self._sensor_thread = Thread(target=self._sensor_loop)
         self.log.info("starting sensor's thread")
         self._sensor_thread.start()
         self.status = SensorResp.POLLING
 
     def _stop_polling(self):
+        if self._terminate_thread:
+            self.log.debug("no thread to stop")
+            return
+
         self.log.debug("Stopping the UltraSonic detection loop...")
         self._terminate_thread = True
-        self.status = SensorResp.READY
+        self.status = SensorResp.SET
 
     def _clear(self):
         self._trigPin = 0
         self._echoPin = 0
         self._max_depth_cm = 0.0
-        self._pulse_width = 0.0
-        self._time_out = 0.0
+
+        self._sensor.close()
 
         self._eventFunc = None
         self._poll_period = 0.0
@@ -151,13 +136,14 @@ class UltrasonicActor(GenericActor):
         """
 
         self.log.info(str.format("Received message {} from {}", message, sender))
+        
+        # ignore unauthorized requests
+        if sender != self.parent:
+            self.log.warning(str.format("Received {} req from unauthorized sender!", message))
+            self.send(sender, Response.UNAUTHORIZED)
+            return
 
         if message == SensorReq.STOP:
-            if sender != self.parent:
-                self.log.warning("Received STOP req from unauthorized sender!")
-                self.send(sender, Response.UNAUTHORIZED)
-                return
-
             self._stop_polling()
 
         elif message == SensorReq.CLEAR:
@@ -167,42 +153,27 @@ class UltrasonicActor(GenericActor):
                 )
                 self.send(sender, Response.FAIL)
                 return
-
-            if sender != self.parent:
-                self.log.warning("Received POLL req from unauthorized sender!")
-                self.send(sender, Response.UNAUTHORIZED)
-                return
-
             self._clear()
 
-        self.send(sender, self.status)
-
-    def receiveMsg_SensorReqMsg(self, message: SensorReqMsg, sender):
+    def receiveMsg_SensorMsg(self, message: SensorMsg, sender):
         self.log.info(str.format("Received message {} from {}", message, sender))
 
-        if message.type == SensorReq.SETUP:
-            # setup sensor
-            if sender != self.parent:
-                self.log.warning("Received SETUP req from unauthorized sender!")
-                self.send(sender, Response.UNAUTHORIZED)
-                return
+        if sender != self.parent:
+            self.log.warning(str.format("Received {} req from unauthorized sender!", message.type))
+            self.send(sender, Response.UNAUTHORIZED)
+            return
 
+        if message.type == SensorReq.SETUP:
             self._setup_sensor(
                 trigPin=message.trigPin,
                 echoPin=message.echoPin,
                 max_depth_cm=message.maxDepth_cm,
-                pulse_width_us=message.pulseWidth_us,
             )
 
         elif message.type == SensorReq.POLL:
-            if self.status != SensorResp.READY:
+            if self.status != SensorResp.SET:
                 self.log.warning("Sensor isn't setup to start polling!")
                 self.send(sender, Response.FAIL)
-                return
-
-            if sender != self.parent:
-                self.log.warning("Received POLL req from unauthorized sender!")
-                self.send(sender, Response.UNAUTHORIZED)
                 return
 
             self._eventFunc = message.sensorEventFunc
@@ -215,11 +186,10 @@ class UltrasonicActor(GenericActor):
         """sends a summary of the actor."""
         self.send(
             sender,
-            SensorRespMsg(
-                respType=SensorResp.SUMMARY,
+            SensorMsg(
+                type=Response.SUMMARY,
                 trigPin=self._trigPin,
                 echoPin=self._echoPin,
                 maxDepth_cm=self._max_depth_cm,
-                pulseWidth_us=self._pulse_width,
             ),
         )

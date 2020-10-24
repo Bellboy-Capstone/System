@@ -5,9 +5,8 @@ from utils.messages import (
     Init,
     Response,
     SensorReq,
-    SensorReqMsg,
     SensorResp,
-    SensorRespMsg,
+    SensorMsg,
     StatusReq,
     SummaryReq,
     TestMode,
@@ -22,37 +21,37 @@ def check_ultrasonicActor_setup(ultrasonic_actor):
     test_trigPin = 10
     test_echoPin = 11
     test_maxDepth = 50.0
-    setup_req = SensorReqMsg(
-        reqType=SensorReq.SETUP,
+    setup_req = SensorMsg(
+        type=SensorReq.SETUP,
         trigPin=test_trigPin,
         echoPin=test_echoPin,
         maxDepth_cm=test_maxDepth,
-        pulseWidth_us=10.0,
     )
 
     # ensure the sensor is ready to poll.
     status = test_system.ask(ultrasonic_actor, setup_req)
-    assert status == SensorResp.READY
+    assert status == SensorResp.SET
 
     # ensure it was set to our values.
     summary = test_system.ask(ultrasonic_actor, SummaryReq())
     assert (
-        isinstance(summary, SensorRespMsg)
+        isinstance(summary, SensorMsg)
         and summary.trigPin == test_trigPin
         and summary.echoPin == test_echoPin
         and summary.maxDepth_cm == test_maxDepth
     )
 
-    # testing authorized clear sensor
-    status = test_system.ask(ultrasonic_actor, SensorReq.CLEAR)
+    # test clear sensor
+    test_system.tell(ultrasonic_actor, SensorReq.CLEAR)
+    status = test_system.ask(ultrasonic_actor, StatusReq())
     assert status == Response.READY
 
 
 def check_ultrasonicActor_poll(ultrasonic_actor):
-    poll_req = SensorReqMsg(
-        reqType=SensorReq.POLL, triggerFunc=buttonHovered, pollPeriod_ms=100.0
+    poll_req = SensorMsg(
+        type=SensorReq.POLL, triggerFunc=buttonHovered, pollPeriod_ms=100.0
     )
-    setup_req = SensorReqMsg(reqType=SensorReq.SETUP, trigPin=0, echoPin=0)
+    setup_req = SensorMsg(type=SensorReq.SETUP, trigPin=10, echoPin=11, maxDepth_cm=100.0)
 
     # try polling before setup
     response = test_system.ask(ultrasonic_actor, poll_req)
@@ -60,7 +59,7 @@ def check_ultrasonicActor_poll(ultrasonic_actor):
 
     # setup then poll, ensure now the sensor is polling
     status = test_system.ask(ultrasonic_actor, setup_req)
-    assert status == SensorResp.READY
+    assert status == SensorResp.SET
 
     status = test_system.ask(ultrasonic_actor, poll_req)
     assert status == SensorResp.POLLING
@@ -73,10 +72,12 @@ def check_ultrasonicActor_poll(ultrasonic_actor):
     assert status == SensorResp.POLLING
 
     # stop polling
-    status = test_system.ask(ultrasonic_actor, SensorReq.STOP)
-    assert status == SensorResp.READY
+    status = test_system.tell(ultrasonic_actor, SensorReq.STOP)
+    status = test_system.ask(ultrasonic_actor, StatusReq())
+    assert status == SensorResp.SET
 
-    status = test_system.ask(ultrasonic_actor, SensorReq.CLEAR)
+    status = test_system.tell(ultrasonic_actor, SensorReq.CLEAR)
+    status = test_system.ask(ultrasonic_actor, StatusReq())
     assert status == Response.READY
 
 

@@ -137,3 +137,4 @@ dmypy.json
 bellboy/functest.py
 */.vscode/*
 *launch.json
+.vscode/settings.json

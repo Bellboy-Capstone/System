@@ -2,7 +2,7 @@ from actors.elevator import buttonHovered
 from actors.generic import GenericActor
 from actors.ultrasonic import UltrasonicActor
 from thespian.actors import ActorAddress
-from utils.messages import Request, Response, SensorReq, SensorReqMsg, SensorResp
+from utils.messages import Request, Response, SensorReq, SensorMsg, SensorResp
 
 
 class BellboyLeadActor(GenericActor):
@@ -28,20 +28,20 @@ class BellboyLeadActor(GenericActor):
         # request to setup sensor
         self.send(
             self.ultrasonic_sensor,
-            SensorReqMsg(
+            SensorMsg(
                 SensorReq.SETUP,
-                trigPin=16,
-                echoPin=18,
+                trigPin=23,
+                echoPin=24,
                 maxDepth_cm=200,
-                pulseWidth_us=10,
             ),
         )
         self.status = Response.STARTED
 
     def stopBellboyLead(self):
         self.log.info("Stopping all child actors...")
-        self.send(self.ultrasonic_sensor, SensorReq.STOP)
         self.status = Response.DONE
+        self.send(self.ultrasonic_sensor, SensorReq.STOP)
+        self.send(self.ultrasonic_sensor, SensorReq.CLEAR)
 
     # --------------------------#
     # MESSAGE HANDLING METHODS  #
@@ -70,13 +70,15 @@ class BellboyLeadActor(GenericActor):
 
     def receiveMsg_SensorResp(self, message, sender):
         self.log.info(str.format("Received message {} from {}", message, sender))
+        
+        # if bellboy is complete, we can ignore any response msgs.
 
-        if message == SensorResp.READY:
+        if message == SensorResp.SET:
             if sender == self.ultrasonic_sensor:
                 # sensor is setup and ready to go, lets start polling for a hovered button.
                 self.send(
                     sender,
-                    SensorReqMsg(
+                    SensorMsg(
                         SensorReq.POLL,
                         pollPeriod_ms=100,
                         triggerFunc=buttonHovered,
@@ -96,8 +98,8 @@ class BellboyLeadActor(GenericActor):
             )
         )
 
-        if self.event_count == 10:
-            self.log.debug("received 10 events, turning off sensor.")
+        if self.event_count == 3:
+            self.log.debug("received 3 events, turning off sensor.")
             self.send(self.ultrasonic_sensor, SensorReq.STOP)
 
     def receiveMsg_SummaryReq(self, message, sender):

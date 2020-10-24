@@ -20,9 +20,9 @@ def buttonHovered(depth_deque: deque):
     tells us which button was hovered.
     """
 
-    # log.debug(str.format("data: {}", format_deque(depth_deque)))
+    log.debug(str.format("data: {}", format_deque(depth_deque)))
 
-    # for now only take in quantums
+    # for now only test in quantums
     if len(depth_deque) % DATA_TO_COUNT != 0:
         return
 

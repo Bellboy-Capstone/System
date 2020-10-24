@@ -32,7 +32,7 @@ class Request(Enum):
 # responses are usually a direct and simple reply to a request.
 # they also are used to indicate an actors status.
 class Response(Enum):
-    READY, NOT_READY, SUCCESS, FAIL, DONE, ALIVE, UNAUTHORIZED, STARTED = range(8)
+    READY, NOT_READY, SUCCESS, FAIL, DONE, ALIVE, UNAUTHORIZED, STARTED, SUMMARY = range(9)
 
 
 """ Sensor related messages. """
@@ -40,56 +40,32 @@ class Response(Enum):
 
 # sensor requests
 class SensorReq(Enum):
-    SETUP, CLOSE, POLL, STOP, CLEAR = range(5)
+    SETUP, POLL, STOP, CLEAR = range(4)
 
 
-# for requests with more info
-class SensorReqMsg:
-    def __init__(
-        self,
-        reqType: SensorReq,
-        trigPin=0,
-        echoPin=0,
-        maxDepth_cm=0.0,
-        pulseWidth_us=0.0,
-        triggerFunc=None,
-        pollPeriod_ms=0.0,
-    ):
-        self.type = reqType
-        self.trigPin = trigPin
-        self.echoPin = echoPin
-        self.maxDepth_cm = maxDepth_cm
-        self.pulseWidth_us = pulseWidth_us
-        self.sensorEventFunc = triggerFunc
-        self.pollPeriod_ms = pollPeriod_ms
-
-    def __str__(self):
-        return self.type.name
 
 
 # sensor responses
 class SensorResp(Enum):
-    READY, POLLING, UNSET, SUMMARY = range(4)
+    SET, POLLING = range(2)
 
 
-# for responses with more info
+# for req/resp with more info
 # TODO consolidate sensor req/resp msgs into one claass cuz theyre redundant
-class SensorRespMsg:
+class SensorMsg:
     def __init__(
         self,
-        respType: SensorResp,
+        type,
         trigPin=0,
         echoPin=0,
         maxDepth_cm=0.0,
-        pulseWidth_us=0.0,
         triggerFunc=None,
         pollPeriod_ms=0.0,
     ):
-        self.type = respType
+        self.type = type
         self.trigPin = trigPin
         self.echoPin = echoPin
         self.maxDepth_cm = maxDepth_cm
-        self.pulseWidth_us = pulseWidth_us
         self.sensorEventFunc = triggerFunc
         self.pollPeriod_ms = pollPeriod_ms
 
