@@ -6,7 +6,7 @@ from gpiozero import DistanceSensor
 from gpiozero.pins.mock import MockFactory
 from actors.generic import GenericActor
 from collections import deque
-from utils.messages import Response, SensorReq, SensorMsg, SensorResp, SensorMsg
+from utils.messages import Response, SensorReq, SensorResp, SensorMsg
 
 # conversion factors
 US_PER_SEC = 1000000.0

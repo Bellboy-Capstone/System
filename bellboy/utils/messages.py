@@ -32,7 +32,17 @@ class Request(Enum):
 # responses are usually a direct and simple reply to a request.
 # they also are used to indicate an actors status.
 class Response(Enum):
-    READY, NOT_READY, SUCCESS, FAIL, DONE, ALIVE, UNAUTHORIZED, STARTED, SUMMARY = range(9)
+    (
+        READY,
+        NOT_READY,
+        SUCCESS,
+        FAIL,
+        DONE,
+        ALIVE,
+        UNAUTHORIZED,
+        STARTED,
+        SUMMARY,
+    ) = range(9)
 
 
 """ Sensor related messages. """
@@ -41,8 +51,6 @@ class Response(Enum):
 # sensor requests
 class SensorReq(Enum):
     SETUP, POLL, STOP, CLEAR = range(4)
-
-
 
 
 # sensor responses
