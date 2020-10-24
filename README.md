@@ -26,16 +26,14 @@ pip install -r requirements/REQUIRMEMENTS.txt
 pre-commit install
 ```
 
-To create a new bellboy actor class (that extends generic actor) heres an Organization tip:
-Divide the class into:
-
-    a) state modifying methods (private) and
+To create a new bellboy actor class (that extends generic actor) heres an organization tip:\
+Divide the class into:\
+    a) state modifying methods (private) and\
+    b) message handling methods (public).\
     
-    b) message handling methods (public).
-    
-Send any response messages in the message handling methods only. 
+Send any response messages in the message handling methods only.\
 
-Change Actor's status in the private methods Only.
+Change Actor's status in the private methods Only.\
 
 It will be neat and make testing much easier!
 
