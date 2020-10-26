@@ -52,5 +52,5 @@ jobs:
           python -m pip install -r requirements/REQUIREMENTS.txt
 
       - name: Test with pytest
-        run: pytest
+        run: cd bellboy && python -m pytest
 
