@@ -7,7 +7,7 @@ from utils.messages import Request, Response, SensorReq, SensorMsg, SensorResp
 
 class BellboyLeadActor(GenericActor):
     def __init__(self):
-        """define Bellboy's private variables."""
+        """Define Bellboy's private variables."""
         super().__init__()
         self.ultrasonic_sensor = None
         self.event_count = 0
