@@ -140,7 +140,9 @@ class UltrasonicActor(GenericActor):
         responding to simple sensor requests
         """
 
-        self.log.info(str.format("Received message {} from {}", message, sender))
+        self.log.info(
+            str.format("Received message {} from {}", message, self.nameOf(sender))
+        )
 
         # ignore unauthorized requests
         if sender != self.parent:
@@ -163,7 +165,9 @@ class UltrasonicActor(GenericActor):
             self._clear()
 
     def receiveMsg_SensorMsg(self, message: SensorMsg, sender):
-        self.log.info(str.format("Received message {} from {}", message, sender))
+        self.log.info(
+            str.format("Received message {} from {}", message, self.nameOf(sender))
+        )
 
         if sender != self.parent:
             self.log.warning(
