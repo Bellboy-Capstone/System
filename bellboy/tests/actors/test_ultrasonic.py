@@ -90,7 +90,9 @@ def test_ultrasonicActor():
     ultrasonic_actor = test_system.createActor(
         UltrasonicActor, globalName="test_ultrasonic"
     )
-    ultrasonic_status = test_system.ask(ultrasonic_actor, Init())
+    ultrasonic_status = test_system.ask(
+        ultrasonic_actor, Init(senderName="test_system")
+    )
     assert ultrasonic_status == Response.READY
     test_system.tell(ultrasonic_actor, TestMode())
 

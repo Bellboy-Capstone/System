@@ -50,7 +50,9 @@ class BellboyLeadActor(GenericActor):
         """
         handles messages of type Request enum.
         """
-        self.log.debug("Received enum %s from sender %s", message.name, sender)
+        self.log.debug(
+            "Received enum %s from sender %s", message.name, self.nameOf(sender)
+        )
 
         if message is Request.START:
             self.startBellboyLead()
@@ -69,7 +71,9 @@ class BellboyLeadActor(GenericActor):
         self.send(sender, self.status)
 
     def receiveMsg_SensorResp(self, message, sender):
-        self.log.info(str.format("Received message {} from {}", message, sender))
+        self.log.info(
+            str.format("Received message {} from {}", message, self.nameOf(sender))
+        )
 
         # if bellboy is complete, we can ignore any response msgs.
 
@@ -87,7 +91,9 @@ class BellboyLeadActor(GenericActor):
 
     def receiveMsg_SensorEventMsg(self, message, sender):
         self.event_count += 1
-        self.log.info(str.format("Received message {} from {}", message, sender))
+        self.log.info(
+            str.format("Received message {} from {}", message, self.nameOf(sender))
+        )
         self.log.info(
             str.format(
                 "#{}: {} event from {} - {}",
