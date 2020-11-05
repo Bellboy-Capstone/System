@@ -1,4 +1,8 @@
-""" Setup of Bellboy run configurations, i.e. logging and run level. All command line processing here. """
+"""
+Setup of Bellboy run configurations, i.e. logging and run level.
+
+All command line processing here.
+"""
 
 import logging
 import os
@@ -6,7 +10,9 @@ from argparse import ArgumentParser
 
 
 def configure_logging(log_level):
-    """configures logging globally through root logger.
+    """
+    configures logging globally through root logger.
+
     :param log_level: log verbosity
     :type log_level: logging.LEVEL
     """
