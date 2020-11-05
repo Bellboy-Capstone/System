@@ -121,6 +121,11 @@ class UltrasonicActor(GenericActor):
         self._terminate_thread = True
         self.status = SensorResp.SET
 
+    def receiveMsg_ActorExitRequest(self, msg, sender):
+        self.stop = True
+        self._stop_polling()
+        self.log.debug("Stopped Ultrasonic thread")
+
     def _clear(self):
         self._trigPin = 0
         self._echoPin = 0
