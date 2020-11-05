@@ -1,7 +1,7 @@
 from thespian.actors import ActorSystem
 
-from actors.elevator import buttonHovered
-from actors.ultrasonic import UltrasonicActor
+from bellboy.actors.elevator import buttonHovered
+from bellboy.actors.ultrasonic import UltrasonicActor
 from utils.messages import (
     Init,
     Response,

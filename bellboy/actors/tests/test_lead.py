@@ -2,7 +2,7 @@ import time
 
 from thespian.actors import ActorSystem
 
-from actors.lead import BellboyLeadActor
+from bellboy.actors.lead import BellboyLeadActor
 from utils.messages import Init, Request, Response, TestMode
 
 
