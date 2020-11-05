@@ -1,4 +1,4 @@
-from bellboy.system import add
+from experiments.system import add
 
 
 def test_add():
