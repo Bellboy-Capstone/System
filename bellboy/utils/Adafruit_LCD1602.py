@@ -107,67 +107,67 @@ class Adafruit_CharLCD(object):
         self.write4bits(self.LCD_SETDDRAMADDR | (col + self.row_offsets[row]))
 
     def noDisplay(self):
-        """ Turn the display off (quickly) """
+        """Turn the display off (quickly)"""
         self.displaycontrol &= ~self.LCD_DISPLAYON
         self.write4bits(self.LCD_DISPLAYCONTROL | self.displaycontrol)
 
     def display(self):
-        """ Turn the display on (quickly) """
+        """Turn the display on (quickly)"""
         self.displaycontrol |= self.LCD_DISPLAYON
         self.write4bits(self.LCD_DISPLAYCONTROL | self.displaycontrol)
 
     def noCursor(self):
-        """ Turns the underline cursor off """
+        """Turns the underline cursor off."""
         self.displaycontrol &= ~self.LCD_CURSORON
         self.write4bits(self.LCD_DISPLAYCONTROL | self.displaycontrol)
 
     def cursor(self):
-        """ Turns the underline cursor on """
+        """Turns the underline cursor on."""
         self.displaycontrol |= self.LCD_CURSORON
         self.write4bits(self.LCD_DISPLAYCONTROL | self.displaycontrol)
 
     def noBlink(self):
-        """ Turn the blinking cursor off """
+        """Turn the blinking cursor off."""
         self.displaycontrol &= ~self.LCD_BLINKON
         self.write4bits(self.LCD_DISPLAYCONTROL | self.displaycontrol)
 
     def blink(self):
-        """ Turn the blinking cursor on """
+        """Turn the blinking cursor on."""
         self.displaycontrol |= self.LCD_BLINKON
         self.write4bits(self.LCD_DISPLAYCONTROL | self.displaycontrol)
 
     def DisplayLeft(self):
-        """ These commands scroll the display without changing the RAM """
+        """These commands scroll the display without changing the RAM."""
         self.write4bits(self.LCD_CURSORSHIFT | self.LCD_DISPLAYMOVE | self.LCD_MOVELEFT)
 
     def scrollDisplayRight(self):
-        """ These commands scroll the display without changing the RAM """
+        """These commands scroll the display without changing the RAM."""
         self.write4bits(
             self.LCD_CURSORSHIFT | self.LCD_DISPLAYMOVE | self.LCD_MOVERIGHT
         )
 
     def leftToRight(self):
-        """ This is for text that flows Left to Right """
+        """This is for text that flows Left to Right."""
         self.displaymode |= self.LCD_ENTRYLEFT
         self.write4bits(self.LCD_ENTRYMODESET | self.displaymode)
 
     def rightToLeft(self):
-        """ This is for text that flows Right to Left """
+        """This is for text that flows Right to Left."""
         self.displaymode &= ~self.LCD_ENTRYLEFT
         self.write4bits(self.LCD_ENTRYMODESET | self.displaymode)
 
     def autoscroll(self):
-        """ This will 'right justify' text from the cursor """
+        """This will 'right justify' text from the cursor."""
         self.displaymode |= self.LCD_ENTRYSHIFTINCREMENT
         self.write4bits(self.LCD_ENTRYMODESET | self.displaymode)
 
     def noAutoscroll(self):
-        """ This will 'left justify' text from the cursor """
+        """This will 'left justify' text from the cursor."""
         self.displaymode &= ~self.LCD_ENTRYSHIFTINCREMENT
         self.write4bits(self.LCD_ENTRYMODESET | self.displaymode)
 
     def write4bits(self, bits, char_mode=False):
-        """ Send command to LCD """
+        """Send command to LCD."""
         self.delayMicroseconds(1000)  # 1000 microsecond sleep
         bits = bin(bits)[2:].zfill(8)
         self.GPIO.output(self.pin_rs, char_mode)
@@ -199,7 +199,11 @@ class Adafruit_CharLCD(object):
         self.delayMicroseconds(1)  # commands need > 37us to settle
 
     def message(self, text):
-        """ Send string to LCD. Newline wraps to second line"""
+        """
+        Send string to LCD.
+
+        Newline wraps to second line
+        """
         for char in text:
             if char == "\n":
                 self.write4bits(0xC0)  # next line
