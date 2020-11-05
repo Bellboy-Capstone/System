@@ -2,11 +2,13 @@ import time
 from threading import Thread
 
 import gpiozero
+from collections import deque
 from gpiozero import DistanceSensor
 from gpiozero.pins.mock import MockFactory
+
 from actors.generic import GenericActor
-from collections import deque
-from utils.messages import Response, SensorReq, SensorResp, SensorMsg
+from utils.messages import Response, SensorMsg, SensorReq, SensorResp
+
 
 # conversion factors
 US_PER_SEC = 1000000.0
@@ -19,7 +21,10 @@ BUFFER_SIZE = 6000
 
 class UltrasonicActor(GenericActor):
     """
-    Class for the ultrasonic sensor. Contains a polling thread which can be run or stopped on message request.
+    Class for the ultrasonic sensor.
+
+    Contains a polling thread which can be run or stopped on message
+    request.
     """
 
     def __init__(self):
@@ -46,7 +51,7 @@ class UltrasonicActor(GenericActor):
     # --------------------------#
 
     def _setup_sensor(self, trigPin, echoPin, max_depth_cm):
-        """setup sensor paramaters"""
+        """setup sensor paramaters."""
         self._trigPin = trigPin
         self._echoPin = echoPin
         self._max_depth_cm = max_depth_cm
@@ -65,6 +70,7 @@ class UltrasonicActor(GenericActor):
     def _sensor_loop(self):
         """
         sensor loop, every period it:
+
             - stores a depth reading, and
             - analyzes recent readings to test for an event
         until thread terminate flag is raised.
@@ -99,9 +105,7 @@ class UltrasonicActor(GenericActor):
         self.status = SensorResp.SET
 
     def _begin_polling(self):
-        """
-        Begins running the polling thread.
-        """
+        """Begins running the polling thread."""
         self._terminate_thread = False
         self._sensor_thread = Thread(target=self._sensor_loop)
         self.log.info("starting sensor's thread")
@@ -136,9 +140,7 @@ class UltrasonicActor(GenericActor):
     # --------------------------#
 
     def receiveMsg_SensorReq(self, message, sender):
-        """
-        responding to simple sensor requests
-        """
+        """responding to simple sensor requests."""
 
         self.log.info(
             str.format("Received message {} from {}", message, self.nameOf(sender))

@@ -14,7 +14,7 @@ python main.py [-h]
 Status:
 Starts bellboy services,
 runs ultrasonic sensor for event.
-(soon) camera stuff 
+(soon) camera stuff
 
 ## Development
 
@@ -30,7 +30,7 @@ To create a new bellboy actor class (that extends generic actor) heres an organi
 Divide the class into
   * state modifying methods (private) and
   * message handling methods (public).
-    
+
 Send any response messages in the message handling methods only.\
 Change Actor's status in the private methods Only.\
 It will be neat and make testing much easier!
