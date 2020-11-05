@@ -49,7 +49,7 @@ jobs:
       - name: Install pytest
         run: |
           python -m pip install --upgrade pip
-          python -m pip install -r requirements/REQUIREMENTS.txt
+          python -m pip install -r requirements.txt
 
       - name: Test with pytest
         run: cd bellboy && python -m pytest
