@@ -1,9 +1,18 @@
 from thespian.actors import ActorAddress
 
+from actors.comms import CommsActor
 from actors.elevator import buttonHovered
 from actors.generic import GenericActor
 from actors.ultrasonic import UltrasonicActor
-from utils.messages import Request, Response, SensorMsg, SensorReq, SensorResp
+from utils.messages import (
+    CommsReq,
+    CommsResp,
+    Request,
+    Response,
+    SensorMsg,
+    SensorReq,
+    SensorResp,
+)
 
 
 class BellboyLeadActor(GenericActor):
@@ -27,8 +36,10 @@ class BellboyLeadActor(GenericActor):
         self.ultrasonic_sensor = self.createActor(
             UltrasonicActor, globalName="ultrasonic"
         )
+        self.comms_actor = self.createActor(CommsActor, globalName="comms")
 
         # request to setup sensor
+        """
         self.send(
             self.ultrasonic_sensor,
             SensorMsg(
@@ -38,6 +49,10 @@ class BellboyLeadActor(GenericActor):
                 maxDepth_cm=200,
             ),
         )
+        """
+        # request to setup communications
+        self.send(self.comms_actor, CommsReq.AUTHENTICATE)
+
         self.status = Response.STARTED
 
     def stopBellboyLead(self):
@@ -89,6 +104,14 @@ class BellboyLeadActor(GenericActor):
                         triggerFunc=buttonHovered,
                     ),
                 )
+
+    def receiveMsg_CommsResp(self, message, sender):
+        self.log.info(
+            str.format("Received message {} from {}", message, self.nameOf(sender))
+        )
+
+        if message == CommsResp.SUCCESS:
+            self.log.info("Hooray! Comms work.")
 
     def receiveMsg_SensorEventMsg(self, message, sender):
         self.event_count += 1

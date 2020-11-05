@@ -96,3 +96,37 @@ class SensorEventMsg:
 
     def __str__(self):
         return self.eventType.name
+
+
+""" Communication related messages. """
+
+
+# comms requests
+class CommsReq(Enum):
+    AUTHENTICATE, HEARTBEAT, RESET = range(3)
+
+
+# comms responses
+class CommsResp(Enum):
+    SUCCESS, FAILURE = range(2)
+
+
+class SystemUpdateMsg:
+    def __init__(
+        self,
+        type,
+        trigPin=0,
+        echoPin=0,
+        maxDepth_cm=0.0,
+        triggerFunc=None,
+        pollPeriod_ms=0.0,
+    ):
+        self.type = type
+        self.trigPin = trigPin
+        self.echoPin = echoPin
+        self.maxDepth_cm = maxDepth_cm
+        self.sensorEventFunc = triggerFunc
+        self.pollPeriod_ms = pollPeriod_ms
+
+    def __str__(self):
+        return self.type.name
