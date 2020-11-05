@@ -1,8 +1,9 @@
+from thespian.actors import ActorAddress
+
 from actors.elevator import buttonHovered
 from actors.generic import GenericActor
 from actors.ultrasonic import UltrasonicActor
-from thespian.actors import ActorAddress
-from utils.messages import Request, Response, SensorReq, SensorMsg, SensorResp
+from utils.messages import Request, Response, SensorMsg, SensorReq, SensorResp
 
 
 class BellboyLeadActor(GenericActor):
@@ -14,8 +15,10 @@ class BellboyLeadActor(GenericActor):
 
     def startBellboyLead(self):
         """
-        Starts bellboy lead actor services. Configures global RPI Board.
-        Spawns and sets up child actors (ultrasonic sensor).
+        Starts bellboy lead actor services.
+
+        Configures global RPI Board. Spawns and sets up child actors
+        (ultrasonic sensor).
         """
         self.log.info("Starting bellboy services.")
 
@@ -47,9 +50,7 @@ class BellboyLeadActor(GenericActor):
     # MESSAGE HANDLING METHODS  #
     # --------------------------#
     def receiveMsg_Request(self, message: Request, sender: ActorAddress):
-        """
-        handles messages of type Request enum.
-        """
+        """handles messages of type Request enum."""
         self.log.debug(
             "Received enum %s from sender %s", message.name, self.nameOf(sender)
         )
