@@ -2,11 +2,10 @@ import time
 from threading import Thread
 
 import gpiozero
+from actors.generic import GenericActor
 from collections import deque
 from gpiozero import DistanceSensor
 from gpiozero.pins.mock import MockFactory
-
-from actors.generic import GenericActor
 from utils.messages import Response, SensorMsg, SensorReq, SensorResp
 
 

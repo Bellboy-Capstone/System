@@ -1,8 +1,7 @@
 from abc import ABC, abstractmethod
 
-from thespian.actors import ActorAddress, ActorTypeDispatcher
-
 from actors import log
+from thespian.actors import ActorAddress, ActorTypeDispatcher
 from utils.messages import Init, Response, StatusReq, SummaryReq, TestMode
 
 

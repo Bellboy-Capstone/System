@@ -1,7 +1,6 @@
-from thespian.actors import ActorSystem
-
 from actors.elevator import buttonHovered
 from actors.ultrasonic import UltrasonicActor
+from thespian.actors import ActorSystem
 from utils.messages import (
     Init,
     Response,

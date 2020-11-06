@@ -4,9 +4,8 @@ class for the elevator and button related stuff.
 in actors for now.. could move
 """
 
-from collections import deque
-
 from actors import log
+from collections import deque
 from utils.messages import SensorEvent, SensorEventMsg
 
 
