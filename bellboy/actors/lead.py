@@ -30,7 +30,7 @@ class BellboyLeadActor(GenericActor):
         # request to setup sensor
         self.send(
             self.ultrasonic_sensor,
-            SensorMsg(SensorReq.SETUP, trigPin=23, echoPin=24, maxDepth_cm=200,),
+            SensorMsg(SensorReq.SETUP, trigPin=23, echoPin=24, maxDepth_cm=200),
         )
         self.status = Response.STARTED
 
@@ -78,7 +78,7 @@ class BellboyLeadActor(GenericActor):
                 self.send(
                     sender,
                     SensorMsg(
-                        SensorReq.POLL, pollPeriod_ms=100, triggerFunc=buttonHovered,
+                        SensorReq.POLL, pollPeriod_ms=100, triggerFunc=buttonHovered
                     ),
                 )
 
