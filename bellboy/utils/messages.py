@@ -1,11 +1,13 @@
 from enum import Enum
 
+
 """ Global messages, non-actor specifc """
 
 
 # init
 class Init:
-    pass
+    def __init__(self, senderName=None):
+        self.senderName = senderName
 
 
 # for checking status

@@ -2,9 +2,14 @@
 
 ![CI](https://github.com/Bellboy-Capstone/System/workflows/CI/badge.svg)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/4150c01ff4e54051a6d930103ea02747)](https://www.codacy.com/gh/Bellboy-Capstone/System/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Bellboy-Capstone/System&amp;utm_campaign=Badge_Grade)
+[![Updates](https://pyup.io/repos/github/Bellboy-Capstone/System/shield.svg)](https://pyup.io/repos/github/Bellboy-Capstone/System/)
+[![Python
+3](https://pyup.io/repos/github/Bellboy-Capstone/System/python-3-shield.svg)](https://pyup.io/repos/github/Bellboy-Capstone/System/)
 
-Embedded Raspberry Pi Program
-Requires python3
+
+Embedded Raspberry Pi Program to run on Bellboy devices. Uses _pytest_ and
+_mock_ for unit tests, and _pyup.io_ to secure dependencies.
+
 
 ## Usage
 ```sh
@@ -14,7 +19,7 @@ python main.py [-h]
 Status:
 Starts bellboy services,
 runs ultrasonic sensor for event.
-(soon) camera stuff 
+(soon) camera stuff
 
 ## Development
 
@@ -30,7 +35,7 @@ To create a new bellboy actor class (that extends generic actor) heres an organi
 Divide the class into
   * state modifying methods (private) and
   * message handling methods (public).
-    
+
 Send any response messages in the message handling methods only.\
 Change Actor's status in the private methods Only.\
 It will be neat and make testing much easier!
