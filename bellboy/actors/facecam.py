@@ -2,7 +2,7 @@ import time
 from threading import Thread
 
 import gpiozero
-from gpiozero import LCD
+from gpiozero import FaceCam
 from gpiozero.pins.mock import MockFactory
 from actors.generic import GenericActor
 from collections import deque
@@ -12,5 +12,5 @@ from bellboy.actors.generic import GenericActor
 # from bellboy.utils.messages import
 
 
-class LiquidCrystalActor(GenericActor):
+class FaceCamActor(GenericActor):
     pass
