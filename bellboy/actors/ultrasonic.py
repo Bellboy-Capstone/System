@@ -46,6 +46,9 @@ class UltrasonicActor(GenericActor):
         self._sensor_thread = None
         self._terminate_thread = True
 
+
+
+
     # --------------------------#
     # STATE MODIFYING METHODS   #
     # --------------------------#
@@ -55,6 +58,10 @@ class UltrasonicActor(GenericActor):
         self._trigPin = trigPin
         self._echoPin = echoPin
         self._max_depth_cm = max_depth_cm
+
+        if True: #OFFTARGET:
+            self.log.warning("This is not an RPI - OFFTARGET mode enabled")
+            self.TEST_MODE = True
 
         if self.TEST_MODE:
             gpiozero.Device.pin_factory = MockFactory()
@@ -197,14 +204,20 @@ class UltrasonicActor(GenericActor):
 
         self.send(sender, self.status)
 
-    def receiveMsg_SummaryReq(self, message, sender):
+
+    # ----------#
+    # OVERRIDES #
+    # ----------#
+
+    def teardown(self):
+        """ Sensor teardown, ensures polling thread is dead"""
+        self._stop_polling()
+
+    def summary(self):
         """sends a summary of the actor."""
-        self.send(
-            sender,
-            SensorMsg(
+        return SensorMsg(
                 type=Response.SUMMARY,
                 trigPin=self._trigPin,
                 echoPin=self._echoPin,
                 maxDepth_cm=self._max_depth_cm,
-            ),
-        )
+            )

@@ -109,7 +109,7 @@ class BellboyLeadActor(GenericActor):
             self.log.debug("received 3 events, turning off sensor.")
             self.send(self.ultrasonic_sensor, SensorReq.STOP)
 
-    def receiveMsg_SummaryReq(self, message, sender):
-        """sends a summary of the actor."""
+    def summary(self):
+        """Returns a summary of the actor."""
+        return self.status
         # TODO flesh this out...
-        self.send(sender, self.status)
