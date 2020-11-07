@@ -11,6 +11,7 @@ Developed by Marcelo Rovai - MJRoBot.org @ 21Feb18
 import cv2
 import numpy as np
 import os 
+from faceFucnsimport collectNewFace 
 
 recognizer = cv2.face.LBPHFaceRecognizer_create()
 recognizer.read('trainer/trainer.yml')
@@ -26,7 +27,9 @@ floorNum = 0
 # names related to ids: example ==> Marcelo: id=1,  etc
 names = ['none','Marcelo','Peter','Dan','Yusra','Elma','Ryan','shriya','Nevin','Sein'] 
 floors = ['G',2,4,6,17,18,42,63,2,9]
+
 # Initialize and start realtime video capture
+
 cam = cv2.VideoCapture(-1)
 cam.set(3, 640) # set video widht
 cam.set(4, 480) # set video height
@@ -61,6 +64,7 @@ while True:
             floorNum = floors[id2]
             confidence = "  {0}%".format(round(100 - confidence))
         else:
+
             id = "unknown"
             floorNum = "unknown"
             confidence = "  {0}%".format(round(100 - confidence))

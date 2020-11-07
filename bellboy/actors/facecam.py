@@ -14,3 +14,7 @@ from bellboy.actors.generic import GenericActor
 
 class FaceCamActor(GenericActor):
     pass
+
+
+#setup sequence(usb or picam)
+
