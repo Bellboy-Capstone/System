@@ -96,3 +96,6 @@ class BellboyLeadActor(GenericActor):
         """Returns a summary of the actor."""
         return self.status
         # TODO flesh this out...
+
+    def teardown(self):
+        pass
