@@ -94,6 +94,7 @@ class GenericActor(ActorTypeDispatcher, ABC):
 
     def receiveMsg_ActorExitRequest(self, msg, sender):
         """This is last msg processed before the Actor is shutdown."""
+        self.log.debug("Received shutdown message!")
         self.teardown()
 
     # @abstractmethod
