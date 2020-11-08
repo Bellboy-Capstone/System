@@ -107,7 +107,7 @@ class GenericActor(ActorTypeDispatcher, ABC):
     @abstractmethod
     def summary(self):
         """
-        Returns a summary of the actor, more detailed than it's status. The summary us an object of any type described in the messages module.
+        Returns a summary of the actor. The summary can be an object of any type described in the messages module.
         :rtype: object
         """
         pass
