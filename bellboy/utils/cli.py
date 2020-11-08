@@ -6,6 +6,8 @@ import logging
 import os
 from argparse import ArgumentParser
 
+log_filename = "bellboy.log"
+
 
 def get_bellboy_configs():
     """Retrieve bellboy configuration information from command line arguments.
@@ -47,7 +49,11 @@ def get_bellboy_configs():
     args = parser.parse_args()
 
     logging.getLogger().info(
-        f"Running at log level {args.log_level} and run level {args.run_level}"
+        str.format(
+            "Logging configured to console and {} at {} level",
+            os.path.abspath(log_filename),
+            logging.getLevelName(args.log_level),
+        )
     )
 
     # using log config dictionary, check thespian docs for more
@@ -61,7 +67,7 @@ def get_bellboy_configs():
         "handlers": {
             "fh": {
                 "class": "logging.FileHandler",
-                "filename": "bellboy.log",
+                "filename": log_filename,
                 "formatter": "standard",
                 "level": args.log_level,
             },
