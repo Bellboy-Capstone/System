@@ -74,12 +74,12 @@ def check_ultrasonicActor_poll(ultrasonic_actor, test_system):
     status = test_system.ask(ultrasonic_actor, StatusReq())
     assert status == SensorResp.POLLING
 
-    time.sleep(3*pollperiod_ms/1000.0)
+    time.sleep(3 * pollperiod_ms / 1000.0)
 
     # stop polling
     status = test_system.tell(ultrasonic_actor, SensorReq.STOP)
 
-    time.sleep(pollperiod_ms/1000.0)
+    time.sleep(pollperiod_ms / 1000.0)
 
     status = test_system.ask(ultrasonic_actor, StatusReq())
     assert status == SensorResp.SET

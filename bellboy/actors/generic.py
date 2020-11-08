@@ -72,7 +72,12 @@ class GenericActor(ActorTypeDispatcher, ABC):
 
         self.log = logging.getLogger(self.globalName)
         self.log.info(
-            str.format("{} created by {}, pid={}", self.globalName, self.nameOf(sender), os.getpid())
+            str.format(
+                "{} created by {}, pid={}",
+                self.globalName,
+                self.nameOf(sender),
+                os.getpid(),
+            )
         )
 
         self.status = Response.READY
