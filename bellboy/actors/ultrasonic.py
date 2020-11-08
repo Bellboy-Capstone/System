@@ -45,9 +45,6 @@ class UltrasonicActor(GenericActor):
         self._sensor_thread = None
         self._terminate_thread = True
 
-
-
-
     # --------------------------#
     # STATE MODIFYING METHODS   #
     # --------------------------#
@@ -206,7 +203,6 @@ class UltrasonicActor(GenericActor):
 
         self.send(sender, self.status)
 
-
     # ----------#
     # OVERRIDES #
     # ----------#
@@ -218,8 +214,8 @@ class UltrasonicActor(GenericActor):
     def summary(self):
         """sends a summary of the actor."""
         return SensorMsg(
-                type=Response.SUMMARY,
-                trigPin=self._trigPin,
-                echoPin=self._echoPin,
-                maxDepth_cm=self._max_depth_cm,
-            )
+            type=Response.SUMMARY,
+            trigPin=self._trigPin,
+            echoPin=self._echoPin,
+            maxDepth_cm=self._max_depth_cm,
+        )

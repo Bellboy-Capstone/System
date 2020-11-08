@@ -1,7 +1,7 @@
 import logging
 from abc import ABC, abstractmethod
 
-from thespian.actors import ActorExitRequest, ActorAddress, ActorTypeDispatcher
+from thespian.actors import ActorAddress, ActorTypeDispatcher
 from utils.messages import Init, Response, StatusReq, SummaryReq, TestMode
 
 
@@ -97,11 +97,10 @@ class GenericActor(ActorTypeDispatcher, ABC):
         self.log.debug("Received shutdown message!")
         self.teardown()
 
-    # @abstractmethod
+    @abstractmethod
     def teardown(self):
         """
         Actor's teardown sequence, called before shutdown. (i.e. close threads, disconnect from services, etc)
-        should this be abstract? not all actors will need this, but its good to consider...
         """
         pass
 
