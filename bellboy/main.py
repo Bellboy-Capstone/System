@@ -3,7 +3,7 @@ from time import sleep
 
 from actors.lead import BellboyLeadActor
 from thespian.actors import ActorSystem
-from utils.cli import configure_bellboy
+from utils.cli import get_bellboy_configs
 from utils.messages import Init, Request, Response
 
 
@@ -11,13 +11,14 @@ def main():
     """Starts the Bellboy system by  creating an ActorSystem, creating the
     LeadActor, and asking it to START."""
 
-    configure_bellboy()
+    logcfgs = get_bellboy_configs()
 
-    log = logging.getLogger("Bellboy")
+    # for logging in main
+    log = logging.getLogger("Main")
     log.info("Starting the Bellboy system")
 
     # Initialize the Actor system
-    system = ActorSystem(systemBase="multiprocQueueBase")
+    system = ActorSystem(systemBase="multiprocQueueBase", logDefs=logcfgs)
     bellboy = system.createActor(BellboyLeadActor, globalName="bellboy_lead")
     status = system.ask(bellboy, Init())
 

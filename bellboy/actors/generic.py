@@ -1,6 +1,6 @@
+import logging
 from abc import ABC, abstractmethod
 
-from actors import log
 from thespian.actors import ActorAddress, ActorTypeDispatcher
 from utils.messages import Init, Response, StatusReq, SummaryReq, TestMode
 
@@ -67,11 +67,12 @@ class GenericActor(ActorTypeDispatcher, ABC):
         self._nameAddress(sender, message.senderName)
 
         if self.globalName is None:
-            log.warning("unnamed actor created!")
-            self.log = log.getChild(str(self.myAddress))
-        else:
-            self.log = log.getChild(self.globalName)
-            self.log.info(str.format("{} created by {}", self.globalName, sender))
+            self.globalName = str(self.myAddress)
+
+        self.log = logging.getLogger(self.globalName)
+        self.log.info(
+            str.format("{} created by {}", self.globalName, self.nameOf(sender))
+        )
 
         self.status = Response.READY
         self.send(sender, self.status)

@@ -55,6 +55,13 @@ class UltrasonicActor(GenericActor):
         self._echoPin = echoPin
         self._max_depth_cm = max_depth_cm
 
+        if not self.TEST_MODE:
+            try:
+                import RPi
+            except ImportError:
+                self.log.warning("Not on RPI - Offtarget mode on")
+                self.TEST_MODE = True
+
         if self.TEST_MODE:
             gpiozero.Device.pin_factory = MockFactory()
             # TODO should this be "globally" set in the test suites...
