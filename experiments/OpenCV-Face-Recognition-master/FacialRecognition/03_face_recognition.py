@@ -8,9 +8,13 @@ Developed by Marcelo Rovai - MJRoBot.org @ 21Feb18
 
 '''
 
+from faceFucnsimport collectNewFace
+import os
 import cv2
 import numpy as np
-import os
+<< << << < HEAD
+== == == =
+>>>>>> > f2a46049af05e125fbf6a93fa21a65a9eb5ac5d2
 
 recognizer = cv2.face.LBPHFaceRecognizer_create()
 recognizer.read('trainer/trainer.yml')
@@ -24,9 +28,13 @@ id = 0
 floorNum = 0
 
 # names related to ids: example ==> Marcelo: id=1,  etc
+
 names = ['none', 'Marcelo', 'Peter', 'Dan', 'Yusra', 'Elma', 'Ryan', 'shriya', 'Nevin', 'Sein']
 floors = ['G', 2, 4, 6, 17, 18, 42, 63, 2, 9]
+
+>>>>>> > f2a46049af05e125fbf6a93fa21a65a9eb5ac5d2
 # Initialize and start realtime video capture
+
 cam = cv2.VideoCapture(-1)
 cam.set(3, 640)  # set video widht
 cam.set(4, 480)  # set video height
@@ -61,6 +69,7 @@ while True:
             floorNum = floors[id2]
             confidence = "  {0}%".format(round(100 - confidence))
         else:
+
             id = "unknown"
             floorNum = "unknown"
             confidence = "  {0}%".format(round(100 - confidence))
