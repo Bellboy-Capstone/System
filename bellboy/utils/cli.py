@@ -1,53 +1,20 @@
 """
-Setup of Bellboy run configurations, i.e. logging and run level.
-
-All command line processing here.
+Bellboy command line argument processing goes here.
 """
 
 import logging
 import os
 from argparse import ArgumentParser
 
+log_filename = "bellboy.log"
 
-def configure_logging(log_level):
+
+def get_bellboy_configs():
+    """Retrieve bellboy configuration information from command line arguments.
+
+    :return: configs
+    :rtype: dict
     """
-    configures logging globally through root logger.
-
-    :param log_level: log verbosity
-    :type log_level: logging.LEVEL
-    """
-    log_filename = "bellboy_log.txt"
-    root_logger = logging.getLogger()
-    root_logger.setLevel(log_level)
-
-    # create file logging handler & console logging handler
-    fh = logging.FileHandler(log_filename)
-    fh.setLevel(log_level)
-    ch = logging.StreamHandler()
-    ch.setLevel(log_level)
-
-    # create formatter and add it to the handlers
-    formatter = logging.Formatter(
-        "%(asctime)s :: %(levelname)s :: %(name)s :: %(funcName)s() :: %(message)s"
-    )
-    fh.setFormatter(formatter)
-    ch.setFormatter(formatter)
-
-    # add the handlers to the logger
-    root_logger.addHandler(fh)
-    root_logger.addHandler(ch)
-    root_logger.info(
-        "Logging configured to console and {} at {} level".format(
-            os.path.abspath(log_filename),
-            logging.getLevelName(root_logger.getEffectiveLevel()),
-        )
-    )
-
-
-# parse arguments
-
-
-def configure_bellboy():
     # command line argument parsing
     parser = ArgumentParser(
         prog="python<x> main.py",
@@ -81,8 +48,37 @@ def configure_bellboy():
     )
     args = parser.parse_args()
 
-    # configure system to chosen settings.
-    configure_logging(args.log_level)
     logging.getLogger().info(
-        f"Running at log level {args.log_level} and run level {args.run_level}"
+        str.format(
+            "Logging configured to console and {} at {} level",
+            os.path.abspath(log_filename),
+            logging.getLevelName(args.log_level),
+        )
     )
+
+    # using log config dictionary, check thespian docs for more
+    logcfg = {
+        "version": 1,
+        "formatters": {
+            "standard": {
+                "format": "%(asctime)s :: %(levelname)s :: %(name)s :: %(funcName)s() :: %(message)s"
+            },
+        },
+        "handlers": {
+            "fh": {
+                "class": "logging.FileHandler",
+                "filename": log_filename,
+                "formatter": "standard",
+                "level": args.log_level,
+            },
+            "sh": {
+                "class": "logging.StreamHandler",
+                "stream": "ext://sys.stdout",
+                "formatter": "standard",
+                "level": args.log_level,
+            },
+        },
+        "loggers": {"": {"handlers": ["fh", "sh"], "level": logging.DEBUG}},
+    }
+
+    return logcfg

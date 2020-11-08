@@ -2,11 +2,10 @@ import time
 from threading import Thread
 
 import gpiozero
+from actors.generic import GenericActor
 from collections import deque
 from gpiozero import DistanceSensor
 from gpiozero.pins.mock import MockFactory
-
-from actors.generic import GenericActor
 from utils.messages import Response, SensorMsg, SensorReq, SensorResp
 
 
@@ -59,9 +58,12 @@ class UltrasonicActor(GenericActor):
         self._echoPin = echoPin
         self._max_depth_cm = max_depth_cm
 
-        if True: #OFFTARGET:
-            self.log.warning("This is not an RPI - OFFTARGET mode enabled")
-            self.TEST_MODE = True
+        if not self.TEST_MODE:
+            try:
+                import RPi  # noqa
+            except ImportError:
+                self.log.warning("Not on RPI - Offtarget mode on")
+                self.TEST_MODE = True
 
         if self.TEST_MODE:
             gpiozero.Device.pin_factory = MockFactory()
