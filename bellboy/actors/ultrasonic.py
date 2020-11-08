@@ -57,7 +57,7 @@ class UltrasonicActor(GenericActor):
 
         if not self.TEST_MODE:
             try:
-                import RPi # noqa
+                import RPi  # noqa
             except ImportError:
                 self.log.warning("Not on RPI - Offtarget mode on")
                 self.TEST_MODE = True
