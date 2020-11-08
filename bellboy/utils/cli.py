@@ -3,6 +3,7 @@ Bellboy command line argument processing goes here.
 """
 
 import logging
+import logging.config
 import os
 from argparse import ArgumentParser
 
@@ -48,16 +49,9 @@ def get_bellboy_configs():
     )
     args = parser.parse_args()
 
-    logging.getLogger().info(
-        str.format(
-            "Logging configured to console and {} at {} level",
-            os.path.abspath(log_filename),
-            logging.getLevelName(args.log_level),
-        )
-    )
-
-    # using log config dictionary, check thespian docs for more
-    logcfg = {
+    # using log config dictionary for actor logging, check thespian docs for more
+    configs = {}
+    configs["logcfg"] = {
         "version": 1,
         "formatters": {
             "standard": {
@@ -81,4 +75,15 @@ def get_bellboy_configs():
         "loggers": {"": {"handlers": ["fh", "sh"], "level": logging.DEBUG}},
     }
 
-    return logcfg
+    configs["run_level"] = args.run_level
+    configs["log_level"] = args.log_level
+    logging.config.dictConfig(configs["logcfg"])
+    logging.getLogger().info(
+        str.format(
+            "Logging configured to console and {} at {} level",
+            os.path.abspath(log_filename),
+            logging.getLevelName(logging.getLevelName(args.log_level)),
+        )
+    )
+
+    return configs

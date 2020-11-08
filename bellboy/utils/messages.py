@@ -27,7 +27,7 @@ class TestMode:
 
 # general requests
 class Request(Enum):
-    START, STOP, STATUS, CLEAR = range(4)
+    START, STOP, CLEAR = range(3)
 
 
 # general responses
