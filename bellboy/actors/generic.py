@@ -1,7 +1,7 @@
 import logging
 from abc import ABC, abstractmethod
 
-from thespian.actors import ActorAddress, ActorTypeDispatcher
+from thespian.actors import ActorExitRequest, ActorAddress, ActorTypeDispatcher
 from utils.messages import Init, Response, StatusReq, SummaryReq, TestMode
 
 
