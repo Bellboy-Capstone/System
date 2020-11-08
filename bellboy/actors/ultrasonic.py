@@ -83,20 +83,20 @@ class UltrasonicActor(GenericActor):
         """
         self.status = SensorResp.POLLING
         self._buffer.clear()
-
+        self.log.info("starting sensor loop")
         while not self._terminate_thread:
+
             t0 = time.time()
-            self._buffer.appendleft(self._sensor.distance * 100.0)
+            if not self.TEST_MODE:
+                self._buffer.appendleft(self._sensor.distance * 100.0)
 
-            # check for event, if occurred send msg to subscriber
-            event = self._eventFunc(self._buffer)
-            if event:
-                self.send(self.parent, event)
+                # check for event, if occurred send msg to subscriber
+                event = self._eventFunc(self._buffer)
+                if event:
+                    self.send(self.parent, event)
 
-            # sleep till next period
+            # sleep till next period, o next mltiple of period
             dt_msec = (time.time() - t0) * MS_PER_SEC
-            # wait till next period if time took too long.
-
             if dt_msec > self._poll_period:
                 self.log.warning(
                     str.format(
@@ -114,7 +114,6 @@ class UltrasonicActor(GenericActor):
         """Begins running the polling thread."""
         self._terminate_thread = False
         self._sensor_thread = Thread(target=self._sensor_loop)
-        self.log.info("starting sensor's thread")
         self._sensor_thread.start()
         self.status = SensorResp.POLLING
 
@@ -125,7 +124,6 @@ class UltrasonicActor(GenericActor):
 
         self.log.debug("Stopping the UltraSonic detection loop...")
         self._terminate_thread = True
-        self.status = SensorResp.SET
 
     def _clear(self):
         self._trigPin = 0

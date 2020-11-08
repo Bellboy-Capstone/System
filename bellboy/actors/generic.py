@@ -1,4 +1,5 @@
 import logging
+import os
 from abc import ABC, abstractmethod
 
 from thespian.actors import ActorAddress, ActorTypeDispatcher
@@ -71,7 +72,7 @@ class GenericActor(ActorTypeDispatcher, ABC):
 
         self.log = logging.getLogger(self.globalName)
         self.log.info(
-            str.format("{} created by {}", self.globalName, self.nameOf(sender))
+            str.format("{} created by {}, pid={}", self.globalName, self.nameOf(sender), os.getpid())
         )
 
         self.status = Response.READY

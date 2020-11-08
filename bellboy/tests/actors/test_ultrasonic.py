@@ -1,6 +1,7 @@
 from actors.elevator import buttonHovered
 from actors.ultrasonic import UltrasonicActor
 
+import time
 from tests import ActorSystem, logcfg
 from utils.messages import (
     Init,
@@ -46,8 +47,10 @@ def check_ultrasonicActor_setup(ultrasonic_actor, test_system):
 
 
 def check_ultrasonicActor_poll(ultrasonic_actor, test_system):
+
+    pollperiod_ms = 100.0
     poll_req = SensorMsg(
-        type=SensorReq.POLL, triggerFunc=buttonHovered, pollPeriod_ms=100.0
+        type=SensorReq.POLL, triggerFunc=buttonHovered, pollPeriod_ms=pollperiod_ms
     )
     setup_req = SensorMsg(
         type=SensorReq.SETUP, trigPin=10, echoPin=11, maxDepth_cm=100.0
@@ -71,8 +74,13 @@ def check_ultrasonicActor_poll(ultrasonic_actor, test_system):
     status = test_system.ask(ultrasonic_actor, StatusReq())
     assert status == SensorResp.POLLING
 
+    time.sleep(3*pollperiod_ms/1000.0)
+
     # stop polling
     status = test_system.tell(ultrasonic_actor, SensorReq.STOP)
+
+    time.sleep(pollperiod_ms/1000.0)
+
     status = test_system.ask(ultrasonic_actor, StatusReq())
     assert status == SensorResp.SET
 
