@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
 
-from actors import log
 from thespian.actors import ActorAddress, ActorTypeDispatcher
+
+from actors import log
 from utils.messages import Init, Response, StatusReq, SummaryReq, TestMode
 
 
@@ -9,7 +10,7 @@ class GenericActor(ActorTypeDispatcher, ABC):
     """Generic Actor to unify logging and some message handling."""
 
     def __init__(self, *args, **kwargs):
-        "Creates an empty actor, to be fleshed out by further messages."
+        """Creates an empty actor, to be fleshed out by further messages."""
         super().__init__()
 
         # private attributes
@@ -22,15 +23,14 @@ class GenericActor(ActorTypeDispatcher, ABC):
     def nameOf(self, address: ActorAddress):
         """
         Returns name of actor if it's entry exists in address book.
+        
         Else returns the toString of the actorAddress.
         """
 
         return self._address_book.get(str(address), str(address))
 
     def _nameAddress(self, address: ActorAddress, name: str):
-        """
-        Adds entry to my address book.
-        """
+        """Adds entry to my address book."""
         if name is not None:
             # using the str of the address as key bc the address itself is unhashable type
             self._address_book[str(address)] = name
@@ -38,9 +38,8 @@ class GenericActor(ActorTypeDispatcher, ABC):
     def createActor(
         self, actorClass, targetActorRequirements=None, globalName=None, sourceHash=None
     ):
-        """
-        Wrapper/Overrider for the thespian createActor, so all bellboy actors can be spawned with our conventions.
-        """
+        """Wrapper/Overrider for the thespian createActor, so all bellboy
+        actors can be spawned with our conventions."""
         actor = super().createActor(
             actorClass, targetActorRequirements, globalName, sourceHash
         )
@@ -59,7 +58,9 @@ class GenericActor(ActorTypeDispatcher, ABC):
 
     def receiveMsg_Init(self, message, sender):
         """
-        Initializes a bellboy actor for bellboy activities. i.e. setting up log. etc
+        Initializes a bellboy actor for bellboy activities.
+
+        i.e. setting up log. etc
         """
 
         # set parent and add them to our address book
@@ -77,27 +78,25 @@ class GenericActor(ActorTypeDispatcher, ABC):
         self.send(sender, self.status)
 
     def receiveMsg_TestMode(self, message, sender):
-        """
-        Puts the actor in test mode.
-        """
+        """Puts the actor in test mode."""
         self.TEST_MODE = True
         self.log.info("Set to TEST mode")
 
     def receiveMsg_StatusReq(self, message: StatusReq, sender):
-        """
-        Sends a status update to sender.
-        """
+        """Sends a status update to sender."""
         self.send(sender, self.status)
 
     def receiveMsg_WakeupMessage(self, message: dict, sender: ActorAddress):
-        """
-        On wakeup request
-        """
+        """On wakeup request."""
         self.send(sender, Response.AWAKE)
 
     @abstractmethod
     def receiveMsg_SummaryReq(self, message: SummaryReq, sender):
-        """sends a summary of the actor to the sender. to be defined in child classes."""
+        """
+        sends a summary of the actor to the sender.
+
+        to be defined in child classes.
+        """
         pass
 
 

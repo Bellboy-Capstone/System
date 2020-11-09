@@ -1,4 +1,8 @@
-"""class for the elevator and button related stuff. in actors for now.. could move"""
+"""
+class for the elevator and button related stuff.
+
+in actors for now.. could move
+"""
 
 from collections import deque
 
@@ -16,8 +20,9 @@ DATA_TO_COUNT = 10  # 10 * 100 ms = 1 sec of data
 
 def buttonHovered(depth_deque: deque):
     """
-    rough implementation of a buttonHovered method. processes data deque.
-    tells us which button was hovered.
+    rough implementation of a buttonHovered method.
+
+    processes data deque. tells us which button was hovered.
     """
 
     log.debug(str.format("data: {}", format_deque(depth_deque)))

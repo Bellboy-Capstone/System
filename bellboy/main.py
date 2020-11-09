@@ -5,13 +5,12 @@ from thespian.actors import ActorSystem
 
 from actors.lead import BellboyLeadActor
 from utils.cli import configure_bellboy
-from utils.messages import Request, Response, Init
+from utils.messages import Init, Request, Response
 
 
 def main():
-    """
-    Starts the Bellboy system by  creating an ActorSystem, creating the LeadActor, and asking it to START.
-    """
+    """Starts the Bellboy system by  creating an ActorSystem, creating the
+    LeadActor, and asking it to START."""
 
     configure_bellboy()
 
