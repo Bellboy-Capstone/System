@@ -1,17 +1,13 @@
 import time
-<<<<<<< HEAD
-from actors.lead import BellboyLeadActor
-=======
-
->>>>>>> 394e88d3b99306f4def6e40e78b6327d2d733ba7
-from thespian.actors import ActorSystem
 
 from actors.lead import BellboyLeadActor
+from tests import ActorSystem, logcfg
 from utils.messages import Init, Request, Response, TestMode
 
 
-class TestLeadActor:
-    def test_receiveMsg_Requests(self, actor_system: ActorSystem):
+def test_leadActor():
+
+    with ActorSystem("multiprocQueueBase", logcfg) as actor_system:
         lead = actor_system.createActor(BellboyLeadActor, globalName="test_lead")
         status = actor_system.ask(lead, Init(senderName="test_system"))
         assert status == Response.READY
