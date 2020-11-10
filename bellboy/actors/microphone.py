@@ -43,7 +43,6 @@ class MicrophoneActor(GenericActor):
             with sr.Microphone(device_index=self.micIx) as source:
                 try:
                     audio = self.recognizer.listen(source, timeout=timeout_sec)
-                    print("what")
                     try:
                         recognized_audio = self.recognizer.recognize_google(audio)
                         self.log.info(
