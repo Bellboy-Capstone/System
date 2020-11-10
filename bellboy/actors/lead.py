@@ -2,6 +2,8 @@ from actors.elevator import buttonHovered
 from actors.generic import GenericActor
 from actors.ultrasonic import UltrasonicActor
 from actors.microphone import MicrophoneActor
+
+from thespian.actors import ActorAddress
 from utils.messages import (
     Request,
     Response,
@@ -121,15 +123,16 @@ class BellboyLeadActor(GenericActor):
         )
         self.log.info(
             str.format(
-                "#{} event from {} - {}",
+                "{} event from {} - {}",
                 message.eventType,
                 self.nameOf(sender),
                 message.phraseHeard,
             )
         )
 
-    def receiveMsg_SummaryReq(self, message, sender):
-        """sends a summary of the actor."""
+    def summary(self):
+        """Returns a summary of the actor."""
+        return self.status
         # TODO flesh this out...
 
     def teardown(self):

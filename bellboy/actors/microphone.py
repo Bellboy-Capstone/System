@@ -41,10 +41,9 @@ class MicrophoneActor(GenericActor):
 
             # do the processing
             with sr.Microphone(device_index=self.micIx) as source:
-                print("Say something!")
                 try:
                     audio = self.recognizer.listen(source, timeout=timeout_sec)
-
+                    print("what")
                     try:
                         recognized_audio = self.recognizer.recognize_google(audio)
                         self.log.info(
@@ -86,6 +85,7 @@ class MicrophoneActor(GenericActor):
             self.log.info("Not listening")
             return
 
+        self.log.debug("Terminating listener thread")
         self.threadOn = False
         # join?
 
@@ -95,7 +95,7 @@ class MicrophoneActor(GenericActor):
             str.format("Received message {} from {}", msg, self.nameOf(sender))
         )
         if msg.msgType == MicReq.SETUP:
-            setupMicrophone(msg.micNumber)
+            self.setupMicrophone(msg.micNumber)
 
             if self.status != MicResp.SET:
                 self.send(sender, Response.FAIL)
@@ -116,6 +116,10 @@ class MicrophoneActor(GenericActor):
 
         elif msg == MicReq.STOP_LISTENING:
             self.stop_listening()
+
+    # overrides
+    def summary(self):
+        return self.status
 
     def teardown(self):
         stop_listening()

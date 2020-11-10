@@ -99,16 +99,19 @@ class SensorEventMsg:
 
 
 """Microphone messages"""
-class MicReq:
+class MicReq(Enum):
     SETUP, GET_MIC_LIST, START_LISTENING, STOP_LISTENING = range(4)
 
-class MicResp:
+class MicResp(Enum):
     SET, LISTENING, MIC_LIST= range(3)
 
 class MicMsg:
     def __init__(self, msgType, micNumber=None):
         self.msgType = msgType
         self.micNumber = micNumber 
+    
+    def __str__(self):
+        return self.msgType.name
 
 class MicEvent(Enum):
     FLOOR_CHOSEN, SPEECH_HEARD = range(2)
