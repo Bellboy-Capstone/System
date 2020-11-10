@@ -1,53 +1,114 @@
-# Using uberi speech_recognition
-# pip install SpeechRecognition
-# requires pyaudio. on windows I had to "pipwin install pyaudio" bc pyaudio not compatible w python3.7
-
-# pocket sphinx for local speech recognition
-# need to download swig for c/c++ support (?). add swig to ur Path 
-# python -m pip install --upgrade pip setuptools wheel
-# pip install --upgrade pocketsphinx
-
-# google cloud for cloud pip install google-cloud-speech
-#
-
 import speech_recognition as sr
 import time
 from threading import Thread
-# from actors.generic import GenericActor
 
-# class MicrophoneActor(GenericActor):
-#     """
-#     Class for the voice recognition microphone.
-#     """
+from utils.messages import MicEvent, MicMsg, MicEventMsg, MicReq, MicResp, Response
 
-#     def __init__(self):
-#         super().__init__()
+class MicrophoneActor(GenericActor):
+    """
+    Class for the voice recognition microphone.
+    """
 
-r = sr.Recognizer()
-with sr.Microphone() as source:
-    print("Say something!")
-    audio = r.listen(source)
+    def __init__(self):
+        super().__init__()
+        self.microphone = None
+        self.listening_thread = None
+        self.threadOn = False
+        self.recognizer = sr.Recognizer()
 
-# # recognize speech using Sphinx
-# try:
-#     print("Sphinx thinks you said " + r.recognize_sphinx(audio))
-# except sr.UnknownValueError:
-#     print("Sphinx could not understand audio")
-# except sr.RequestError as e:
-#     print("Sphinx error; {0}".format(e))
+    def microphoneList(self):
+        """return list of microphones in the system"""
+        return self.sr.Microphone.list_microphone_names()
 
+    # STATE METHODS
+    def setupMicrophone(self, micNumber: int):
+        """Choose system microphone to use as mic
 
-# recognize speech using Google Speech Recognition
-try:
-    # for testing purposes, we're just using the default API key
-    # to use another API key, use `r.recognize_google(audio, key="GOOGLE_SPEECH_RECOGNITION_API_KEY")`
-    # instead of `r.recognize_google(audio)`
-    print("Google Speech Recognition thinks you said " + r.recognize_google(audio))
-except sr.UnknownValueError:
-    print("Google Speech Recognition could not understand audio")
-except sr.RequestError as e:
-    print("Could not request results from Google Speech Recognition service; {0}".format(e))
+        :param micNumber: microphone number as indexed by microphoneList()
+        :type micNumber: int
+        """
+        self.micIx = micNumber
+        self.status = MicResp.SET
 
+    def listening_loop(self):
+        """To run in mic's thread. Listens for speech."""
 
+        self.status = MicResp.LISTENING
+        timeout_sec = 30.0
 
-    
+        while self.threadOn:
+
+            # do the processing
+            with sr.Microphone(device_index=self.micIx) as source:
+                print("Say something!")
+                try:
+                    audio = self.recognizer.listen(source, timeout=timeout_sec)
+
+                    try:
+                        recognized_audio = self.recognizer.recognize_google(audio)
+                        self.log.info(
+                            str.format("Someone said <<{}>>", recognized_audio)
+                        )
+                        if "floor" in str(recognized_audio):
+                            self.send(
+                                self.parent,
+                                MicEventMsg(
+                                    eventType=MicEvent.SPEECH_HEARD,
+                                    speechHeard=str(recognized_audio),
+                                ),
+                            )
+                    except sr.UnknownValueError:
+                        self.log.debug("Google API: unknown speech heard")
+                except sr.WaitTimeoutError:
+                    self.log.debug(
+                        str.format("Nothing was heard for {} seconds", timeout_sec)
+                    )
+
+        self.log.info("Stopped listening thread")
+        self.status = MicResp.SET
+
+    def start_listening(self):
+        if self.status != MicResp.SET:
+            self.log.warning("Mic not setup!")
+            return
+
+        if self.status == MicResp.LISTENING:
+            self.log.info("Alreay listening!")
+            return
+
+        self.threadOn = True
+        self.listening_thread = Thread(target=self.listening_loop)
+        self.listening_thread.start()
+
+    def stop_listening(self):
+        if not self.threadOn:
+            self.log.info("Not listening")
+            return
+
+        self.threadOn = False
+        # join?
+
+    # MSG HANDLING
+    def receiveMsg_MicMsg(self, msg, sender):
+        if msg.msgType == MicReq.SETUP:
+            setupMicrophone(msg.micNumber)
+
+            if self.status != MicResp.SET:
+                self.send(sender, Response.FAIL)
+
+            else:
+                self.send(sender, self.status)
+
+    def receiveMsg_MicReq(self, msg, sender):
+        if msg == MicReq.GET_MIC_LIST:
+            self.send(
+                sender, MicMsg(msgType=MicResp.MIC_LIST, micList=microphoneList())
+            )
+        elif msg == MicReq.START_LISTENING:
+            self.start_listening()
+
+        elif msg == MicReq.STOP_LISTENING:
+            self.stop_listening()
+
+    def teardown(self):
+        stop_listening()
