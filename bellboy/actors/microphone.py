@@ -2,6 +2,7 @@ import speech_recognition as sr
 import time
 from threading import Thread
 
+from actors.generic import GenericActor
 from utils.messages import MicEvent, MicMsg, MicEventMsg, MicReq, MicResp, Response
 
 class MicrophoneActor(GenericActor):
@@ -21,7 +22,7 @@ class MicrophoneActor(GenericActor):
         return self.sr.Microphone.list_microphone_names()
 
     # STATE METHODS
-    def setupMicrophone(self, micNumber: int):
+    def setupMicrophone(self, micNumber):
         """Choose system microphone to use as mic
 
         :param micNumber: microphone number as indexed by microphoneList()
@@ -90,6 +91,9 @@ class MicrophoneActor(GenericActor):
 
     # MSG HANDLING
     def receiveMsg_MicMsg(self, msg, sender):
+        self.log.info(
+            str.format("Received message {} from {}", msg, self.nameOf(sender))
+        )
         if msg.msgType == MicReq.SETUP:
             setupMicrophone(msg.micNumber)
 
@@ -100,6 +104,9 @@ class MicrophoneActor(GenericActor):
                 self.send(sender, self.status)
 
     def receiveMsg_MicReq(self, msg, sender):
+        self.log.info(
+            str.format("Received message {} from {}", msg.name, self.nameOf(sender))
+        )
         if msg == MicReq.GET_MIC_LIST:
             self.send(
                 sender, MicMsg(msgType=MicResp.MIC_LIST, micList=microphoneList())

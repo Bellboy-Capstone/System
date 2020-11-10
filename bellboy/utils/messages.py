@@ -106,7 +106,7 @@ class MicResp:
     SET, LISTENING, MIC_LIST= range(3)
 
 class MicMsg:
-    def __init__(self, msgType, micNumber):
+    def __init__(self, msgType, micNumber=None):
         self.msgType = msgType
         self.micNumber = micNumber 
 

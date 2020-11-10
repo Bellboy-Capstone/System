@@ -3,7 +3,17 @@ from thespian.actors import ActorAddress
 from actors.elevator import buttonHovered
 from actors.generic import GenericActor
 from actors.ultrasonic import UltrasonicActor
-from utils.messages import Request, Response, SensorMsg, SensorReq, SensorResp
+from actors.microphone import MicrophoneActor
+from utils.messages import (
+    Request,
+    Response,
+    SensorMsg,
+    SensorReq,
+    SensorResp,
+    MicReq,
+    MicMsg,
+    MicResp,
+)
 
 
 class BellboyLeadActor(GenericActor):
@@ -27,8 +37,10 @@ class BellboyLeadActor(GenericActor):
         self.ultrasonic_sensor = self.createActor(
             UltrasonicActor, globalName="ultrasonic"
         )
+        self.microphone = self.createActor(MicrophoneActor, globalName="microphone")
 
-        # request to setup sensor
+        # setup actors
+        # ultrasonic
         self.send(
             self.ultrasonic_sensor,
             SensorMsg(
@@ -38,6 +50,9 @@ class BellboyLeadActor(GenericActor):
                 maxDepth_cm=200,
             ),
         )
+
+        self.send(self.microphone, MicMsg(MicReq.SETUP))
+
         self.status = Response.STARTED
 
     def stopBellboyLead(self):
@@ -71,24 +86,22 @@ class BellboyLeadActor(GenericActor):
 
         self.send(sender, self.status)
 
+    # handling sensor msgs
     def receiveMsg_SensorResp(self, message, sender):
         self.log.info(
             str.format("Received message {} from {}", message, self.nameOf(sender))
         )
 
-        # if bellboy is complete, we can ignore any response msgs.
-
         if message == SensorResp.SET:
-            if sender == self.ultrasonic_sensor:
-                # sensor is setup and ready to go, lets start polling for a hovered button.
-                self.send(
-                    sender,
-                    SensorMsg(
-                        SensorReq.POLL,
-                        pollPeriod_ms=100,
-                        triggerFunc=buttonHovered,
-                    ),
-                )
+            # sensor is setup and ready to go, lets start polling for a hovered button.
+            self.send(
+                sender,
+                SensorMsg(
+                    SensorReq.POLL,
+                    pollPeriod_ms=100,
+                    triggerFunc=buttonHovered,
+                ),
+            )
 
     def receiveMsg_SensorEventMsg(self, message, sender):
         self.event_count += 1
@@ -108,6 +121,28 @@ class BellboyLeadActor(GenericActor):
         if self.event_count == 3:
             self.log.debug("received 3 events, turning off sensor.")
             self.send(self.ultrasonic_sensor, SensorReq.STOP)
+
+    # handling mic msgs
+    def receiveMsg_MicResp(self, message, sender):
+        self.log.info(
+            str.format("Received message {} from {}", message, self.nameOf(sender))
+        )
+
+        if message == MicResp.SET:
+            self.send(sender, MicReq.START_LISTENING)
+
+    def receiveMsg_MicEventMsg(self, message, sender):
+        self.log.info(
+            str.format("Received message {} from {}", message, self.nameOf(sender))
+        )
+        self.log.info(
+            str.format(
+                "#{} event from {} - {}",
+                message.eventType,
+                self.nameOf(sender),
+                message.phraseHeard,
+            )
+        )
 
     def receiveMsg_SummaryReq(self, message, sender):
         """sends a summary of the actor."""
