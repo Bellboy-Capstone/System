@@ -40,7 +40,7 @@ def main():
     except KeyboardInterrupt:
         log.error("The bellboy system was interrupted by the keyboard, exiting...")
     finally:
-        system.tell(bellboy, Request.STOP)
+        system.shutdown()
 
 
 if __name__ == "__main__":
