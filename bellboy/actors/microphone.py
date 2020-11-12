@@ -7,7 +7,7 @@ from utils.messages import MicEvent, MicMsg, MicEventMsg, MicReq, MicResp, Respo
 
 class MicrophoneActor(GenericActor):
     """
-    Class for the voice recognition microphone.
+    Class for the voice recognition microphone. nnn
     """
 
     def __init__(self):
