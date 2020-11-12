@@ -8,14 +8,10 @@ Developed by Marcelo Rovai - MJRoBot.org @ 21Feb18
 
 '''
 
-from faceFucnsimport collectNewFace
+#from faceFucns import collectNewFace
 import os
 import cv2
 import numpy as np
-<< << << < HEAD
-== == == =
->>>>>> > f2a46049af05e125fbf6a93fa21a65a9eb5ac5d2
-
 recognizer = cv2.face.LBPHFaceRecognizer_create()
 recognizer.read('trainer/trainer.yml')
 cascadePath = "haarcascade_frontalface_default.xml"
@@ -32,7 +28,6 @@ floorNum = 0
 names = ['none', 'Marcelo', 'Peter', 'Dan', 'Yusra', 'Elma', 'Ryan', 'shriya', 'Nevin', 'Sein']
 floors = ['G', 2, 4, 6, 17, 18, 42, 63, 2, 9]
 
->>>>>> > f2a46049af05e125fbf6a93fa21a65a9eb5ac5d2
 # Initialize and start realtime video capture
 
 cam = cv2.VideoCapture(-1)
