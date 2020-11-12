@@ -15,6 +15,7 @@ import numpy as np
 import os 
 import faceFucns 
 
+
 recognizer = cv2.face.LBPHFaceRecognizer_create()
 recognizer.read('trainer/trainer.yml')
 cascadePath = "haarcascade_frontalface_default.xml"
@@ -27,6 +28,9 @@ id = 0
 floorNum = 0
 
 # names related to ids: example ==> Marcelo: id=1,  etc
+
+names = ['none', 'Marcelo', 'Peter', 'Dan', 'Yusra', 'Elma', 'Ryan', 'shriya', 'Nevin', 'Sein']
+floors = ['G', 2, 4, 6, 17, 18, 42, 63, 2, 9]
 
 names = ['none', 'Marcelo', 'Peter', 'Dan', 'Yusra', 'Elma', 'Ryan', 'shriya', 'Nevin', 'Sein']
 floors = ['G', 2, 4, 6, 17, 18, 42, 63, 2, 9]
