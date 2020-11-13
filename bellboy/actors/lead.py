@@ -3,6 +3,7 @@ from thespian.actors import ActorAddress
 from actors.elevator import buttonHovered
 from actors.generic import GenericActor
 from actors.ultrasonic import UltrasonicActor
+from actors.lcd import LiquidCrystalActor
 from utils.messages import Request, Response, SensorMsg, SensorReq, SensorResp
 
 
@@ -11,6 +12,7 @@ class BellboyLeadActor(GenericActor):
         """define Bellboy's private variables."""
         super().__init__()
         self.ultrasonic_sensor = None
+        self.lcd= None
         self.event_count = 0
 
     def startBellboyLead(self):
@@ -28,6 +30,11 @@ class BellboyLeadActor(GenericActor):
             UltrasonicActor, globalName="ultrasonic"
         )
 
+        self.log.info("Starting all dependent actors...")
+        self.lcd = self.createActor(
+            LiquidCrystal, globalName="lcd"
+        )
+        
         # request to setup sensor
         self.send(
             self.ultrasonic_sensor,
@@ -37,6 +44,12 @@ class BellboyLeadActor(GenericActor):
                 echoPin=24,
                 maxDepth_cm=200,
             ),
+            self.lcd,
+            LCDMsg(
+                LCDReq.SETUP,
+                sdaPin = 2,
+                sclPin = 3
+            ),
         )
         self.status = Response.STARTED
 
@@ -45,7 +58,8 @@ class BellboyLeadActor(GenericActor):
         self.status = Response.DONE
         self.send(self.ultrasonic_sensor, SensorReq.STOP)
         self.send(self.ultrasonic_sensor, SensorReq.CLEAR)
-
+        self.send(self.lcd, SensorReq.STOP)
+        self.send(self.lcd, SensorReq.CLEAR)
     # --------------------------#
     # MESSAGE HANDLING METHODS  #
     # --------------------------#
@@ -108,6 +122,18 @@ class BellboyLeadActor(GenericActor):
         if self.event_count == 3:
             self.log.debug("received 3 events, turning off sensor.")
             self.send(self.ultrasonic_sensor, SensorReq.STOP)
+
+    def receiveMsg_LCDResp(self, sender):
+        self.log.info(
+            str.format("Received message from" , self.nameOf(sender))
+        )
+
+    def receiveMsg_LCDEventMsg(self, message, sender):
+        self.log.info(
+            str.format("Received message {} from {}", message, self.nameOf(sender))
+        )
+
+
 
     def receiveMsg_SummaryReq(self, message, sender):
         """sends a summary of the actor."""
