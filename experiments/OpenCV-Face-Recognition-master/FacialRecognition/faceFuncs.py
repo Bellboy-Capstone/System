@@ -60,7 +60,7 @@ def getImagesAndLabels(path):
 
 def recognizeFace():
     recognizer = cv2.face.LBPHFaceRecognizer_create()
-    recognizer.read('./trainer/trainer.yml')
+    recognizer.read('trainer/trainer.yml')
     cascadePath = "haarcascade_frontalface_default.xml"
     faceCascade = cv2.CascadeClassifier(cascadePath)
     font = cv2.FONT_HERSHEY_SIMPLEX
@@ -68,8 +68,8 @@ def recognizeFace():
     id = 0
     floorNum = 0
     # names related to ids: example ==> Marcelo: id=1,  etc
-    names = ['none', 'Marcelo', 'Peter', 'Dan', 'Yusra', 'Elma', 'Ryan', 'shriya', 'Nevin', 'Sein']
-    floors = ['G', 2, 4, 6, 17, 18, 42, 63, 2, 9]
+    names = ['none', 'Marcelo', 'Peter', 'Dan', 'Yusra', 'Elma', 'Ryan', 'shriya', 'Nevin', 'Sein', 'RyanG']
+    floors = ['G', 2, 4, 6, 17, 18, 42, 63, 2, 9, 2]
     # Initialize and start realtime video capture
     
     cam.set(3, 640)  # set video widht
