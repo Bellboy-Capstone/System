@@ -96,3 +96,36 @@ class SensorEventMsg:
 
     def __str__(self):
         return self.eventType.name
+
+
+"""LCD messages"""
+
+
+class LCDReq(Enum):
+    SETUP, DISPLAY= range(2)
+
+
+class LCDResp(Enum):
+    SET, DISPLAYING= range(2)
+
+
+class LCDMsg:
+    def __init__(self, msgType, LCDNumber=None):
+        self.msgType = msgType
+        self.LCDNumber = LCDNumber
+
+    def __str__(self):
+        return self.msgType.name
+
+
+class LCDEvent(Enum):
+    FLOOR_CHOSEN = range(1)
+
+
+class LCDEventMsg:
+    def __init__(self, eventType: LCDEvent, floorChoice=0):
+        self.eventType = eventType
+        self.floorChoice = floorChoice
+
+    def __str__(self):
+        return self.eventType.name
