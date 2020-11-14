@@ -27,7 +27,7 @@ class TestMode:
 
 # general requests
 class Request(Enum):
-    START, STOP, STATUS, CLEAR = range(4)
+    START, STOP, CLEAR = range(3)
 
 
 # general responses
@@ -90,9 +90,37 @@ class SensorEvent(Enum):
 
 # for event with more info
 class SensorEventMsg:
-    def __init__(self, eventType, eventData):
+    def __init__(self, eventType: SensorEvent, eventData):
         self.eventType = eventType
         self.eventData = eventData
+
+    def __str__(self):
+        return self.eventType.name
+
+
+"""Microphone messages"""
+class MicReq(Enum):
+    SETUP, GET_MIC_LIST, START_LISTENING, STOP_LISTENING = range(4)
+
+class MicResp(Enum):
+    SET, LISTENING, MIC_LIST= range(3)
+
+class MicMsg:
+    def __init__(self, msgType, micNumber=None):
+        self.msgType = msgType
+        self.micNumber = micNumber 
+    
+    def __str__(self):
+        return self.msgType.name
+
+class MicEvent(Enum):
+    FLOOR_CHOSEN, SPEECH_HEARD = range(2)
+
+class MicEventMsg:
+    def __init__(self, eventType: MicEvent, floorChoice=0, phraseHeard=None):
+        self.eventType = eventType
+        self.floorChoice = floorChoice
+        self.phraseHeard = phraseHeard
 
     def __str__(self):
         return self.eventType.name

@@ -1,8 +1,19 @@
 from actors.elevator import buttonHovered
 from actors.generic import GenericActor
 from actors.ultrasonic import UltrasonicActor
+from actors.microphone import MicrophoneActor
+
 from thespian.actors import ActorAddress
-from utils.messages import Request, Response, SensorMsg, SensorReq, SensorResp
+from utils.messages import (
+    Request,
+    Response,
+    SensorMsg,
+    SensorReq,
+    SensorResp,
+    MicReq,
+    MicMsg,
+    MicResp,
+)
 
 
 class BellboyLeadActor(GenericActor):
@@ -16,8 +27,7 @@ class BellboyLeadActor(GenericActor):
         """
         Starts bellboy lead actor services.
 
-        Configures global RPI Board. Spawns and sets up child actors
-        (ultrasonic sensor).
+        Spawns and sets up child actors
         """
         self.log.info("Starting bellboy services.")
 
@@ -26,12 +36,17 @@ class BellboyLeadActor(GenericActor):
         self.ultrasonic_sensor = self.createActor(
             UltrasonicActor, globalName="ultrasonic"
         )
+        self.microphone = self.createActor(MicrophoneActor, globalName="microphone")
 
-        # request to setup sensor
+        # setup actors
+        # ultrasonic
         self.send(
             self.ultrasonic_sensor,
             SensorMsg(SensorReq.SETUP, trigPin=23, echoPin=24, maxDepth_cm=200),
         )
+
+        self.send(self.microphone, MicMsg(MicReq.SETUP))
+
         self.status = Response.STARTED
 
     def stopBellboyLead(self):
@@ -55,32 +70,24 @@ class BellboyLeadActor(GenericActor):
         elif message is Request.STOP:
             self.stopBellboyLead()
 
-        elif message is Request.STATUS:
-            self.log.debug(str.format("Status check - {}", Response.ALIVE.name))
-
-        else:
-            msg = "Unhandled Request Enum value sent."
-            self.log.error(msg)
-            raise Exception(msg)
-
         self.send(sender, self.status)
 
+    # handling sensor msgs
     def receiveMsg_SensorResp(self, message, sender):
         self.log.info(
             str.format("Received message {} from {}", message, self.nameOf(sender))
         )
 
-        # if bellboy is complete, we can ignore any response msgs.
-
         if message == SensorResp.SET:
-            if sender == self.ultrasonic_sensor:
-                # sensor is setup and ready to go, lets start polling for a hovered button.
-                self.send(
-                    sender,
-                    SensorMsg(
-                        SensorReq.POLL, pollPeriod_ms=100, triggerFunc=buttonHovered
-                    ),
-                )
+            # sensor is setup and ready to go, lets start polling for a hovered button.
+            self.send(
+                sender,
+                SensorMsg(
+                    SensorReq.POLL,
+                    pollPeriod_ms=100,
+                    triggerFunc=buttonHovered,
+                ),
+            )
 
     def receiveMsg_SensorEventMsg(self, message, sender):
         self.event_count += 1
@@ -101,7 +108,32 @@ class BellboyLeadActor(GenericActor):
             self.log.debug("received 3 events, turning off sensor.")
             self.send(self.ultrasonic_sensor, SensorReq.STOP)
 
-    def receiveMsg_SummaryReq(self, message, sender):
-        """sends a summary of the actor."""
+    # handling mic msgs
+    def receiveMsg_MicResp(self, message, sender):
+        self.log.info(
+            str.format("Received message {} from {}", message, self.nameOf(sender))
+        )
+
+        if message == MicResp.SET:
+            self.send(sender, MicReq.START_LISTENING)
+
+    def receiveMsg_MicEventMsg(self, message, sender):
+        self.log.info(
+            str.format("Received message {} from {}", message, self.nameOf(sender))
+        )
+        self.log.info(
+            str.format(
+                "{} event from {} - {}",
+                message.eventType,
+                self.nameOf(sender),
+                message.phraseHeard,
+            )
+        )
+
+    def summary(self):
+        """Returns a summary of the actor."""
+        return self.status
         # TODO flesh this out...
-        self.send(sender, self.status)
+
+    def teardown(self):
+        pass
