@@ -2,17 +2,17 @@ import time
 from threading import Thread
 
 import gpiozero
-from gpiozero import LiquidCrystal
+from gpiozero import DigitalOutputDevice
 from gpiozero.pins.mock import MockFactory
 from actors.generic import GenericActor
-from collections import deque
-from utils.messages import Response, LCDMsg, LCDReq, LCDResp
+from utils.messages import Response, LCDMsg, LCDReq, LCDResp, LCDEvent, LCDEventMsg,
 from bellboy.actors.generic import GenericActor
 
 # from bellboy.utils.messages import
 
 self._sdaPin = 2
 self._sclPin = 3
+
 
 class LiquidCrystalActor(GenericActor):
     """
@@ -21,6 +21,7 @@ class LiquidCrystalActor(GenericActor):
     Contains a polling thread which can be run or stopped on message
     request.
     """
+
     def __init__(self):
         super().__init__()
 
@@ -33,29 +34,40 @@ class LiquidCrystalActor(GenericActor):
     # STATE MODIFYING METHODS   #
     # --------------------------#
 
-    def _setup_LCD(self,_sdaPin, sclPin):
+    def _setup_LCD(self, _sdaPin, sclPin):
         """setup LCD paramaters."""
-        self._sdaPin=_sdaPin
-        self._sclPin= sclPin
-        
+        self._sdaPin = sdaPin
+        self._sclPin = sclPin
+
         if self.TEST_MODE:
             gpiozero.Device.pin_factory = MockFactory()
             # TODO should this be "globally" set in the test suites...
             # but then will it even be recognized in other domains...
 
         self._LCD = LiquidCrystal(
-            sdaPin=self._sdaPin, 
+            sdaPin=self._sdaPin,
             sclPin=self._sclPin
 
         )
 
         self.status = LCDResp.SET
+    
+    def displayLoop(self):
+        """running lcd thread. Displays text on screen"""
 
+        self.status = LCDResp.DISPLAY
+
+        while self.threadOn:
+            try:
+            self.log.info(
+                str.format("LCD DISPLAYS <<{}>>", )
+            )
+        self.log.info("stopped lcd thread")
+        self.status = LCDResp.SET
 
     def _clear(self):
         self._sdaPin = 0
         self._sclPin = 0
-
 
         self._LCD.close()
 
@@ -82,8 +94,6 @@ class LiquidCrystalActor(GenericActor):
             self.send(sender, Response.UNAUTHORIZED)
             return
 
-
-
         elif message == LCDReq.CLEAR:
             self._clear()
 
@@ -101,7 +111,7 @@ class LiquidCrystalActor(GenericActor):
 
         if message.type == LCDReq.SETUP:
             self._setup_LCD(
-            _sdaPin=self._sdaPin, 
+                _sdaPin=self._sdaPin,
                 sclPin=self._sclPin
             )
 
@@ -111,10 +121,9 @@ class LiquidCrystalActor(GenericActor):
             sender,
             LCDMsg(
                 type=Response.SUMMARY,
-                sdaPin=self._sdaPin, 
+                sdaPin=self._sdaPin,
                 sclPin=self._sclPin
             ),
         )
-
 
     pass

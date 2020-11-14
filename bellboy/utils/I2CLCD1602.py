@@ -20,21 +20,15 @@ from PCF8574 import PCF8574_GPIO
 from UltrasonicRanging import getSonar
 
 
-trigPin = 16
-echoPin = 18
-MAX_DISTANCE = 220  # define the maximum measuring distance, unit: cm
-timeOut = (
-    MAX_DISTANCE * 60
-)  # calculate timeout according to the maximum measuring distance
-
-# def get_cpu_temp():     # get CPU temperature and store it into file "/sys/class/thermal/thermal_zone0/temp"
-#    tmp = open('/sys/class/thermal/thermal_zone0/temp')
-#    cpu = tmp.read()
-#    tmp.close()
-#    return '{:.2f}'.format( float(cpu)/1000 ) + ' C'
-
-# def get_time_now():     # get system time
-#    return datetime.now().strftime('    %H:%M:%S')
+ #define the maximum measuring distance, unit: cm
+ #calculate timeout according to the maximum measuring distance
+ def get_cpu_temp():     # get CPU temperature and store it into file "/sys/class/thermal/thermal_zone0/temp"
+    tmp = open('/sys/class/thermal/thermal_zone0/temp')
+    cpu = tmp.read()
+    tmp.close()
+    return '{:.2f}'.format( float(cpu)/1000 ) + ' C'
+ def get_time_now():     # get system time
+    return datetime.now().strftime('    %H:%M:%S')
 
 
 def setup():
