@@ -36,7 +36,7 @@ class MicrophoneActor(GenericActor):
 
         self.status = MicResp.LISTENING
         timeout_sec = 30.0
-
+        self.log.info("begun listening.")
         while self.threadOn:
 
             # do the processing
@@ -58,6 +58,12 @@ class MicrophoneActor(GenericActor):
                             )
                     except sr.UnknownValueError:
                         self.log.debug("Google API: unknown speech heard")
+                    
+                    except speech_recognition.RequestError:
+                        pass 
+                        # use sphinx instead
+
+
                 except sr.WaitTimeoutError:
                     self.log.debug(
                         str.format("Nothing was heard for {} seconds", timeout_sec)
