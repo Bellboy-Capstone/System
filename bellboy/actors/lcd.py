@@ -12,7 +12,6 @@ from bellboy.actors.generic import GenericActor
 # from bellboy.utils.messages import
 
 
-
 class LiquidCrystalActor(GenericActor):
     """
     Class for the LCD Display.
@@ -28,6 +27,7 @@ class LiquidCrystalActor(GenericActor):
         # the following are set on setup request
 
         self._LCD = None
+        self._display_string = None
 
     # --------------------------#
     # STATE MODIFYING METHODS   #
@@ -50,14 +50,14 @@ class LiquidCrystalActor(GenericActor):
         )
 
         self.status = LCDResp.SET
-    
+
     def displayLoop(self):
         """running lcd thread. Displays text on screen"""
 
         self.status = LCDResp.DISPLAY
 
         while self.threadOn:
-            try:
+            lcd.message(self._display_string)
             self.log.info(
                 str.format("LCD DISPLAYS <<{}>>", )
             )
@@ -74,9 +74,12 @@ class LiquidCrystalActor(GenericActor):
         self.log.debug("cleared LCD")
         self.status = Response.READY
 
+
+
     # --------------------------#
     # MESSAGE HANDLING METHODS  #
     # --------------------------#
+    #updateDisplay(text: str, duration: int)
 
     def receiveMsg_LCDReq(self, message, sender):
         """responding to simple LCD requests."""
@@ -97,9 +100,10 @@ class LiquidCrystalActor(GenericActor):
             self._clear()
 
     def receiveMsg_LCDMsg(self, message: LCDMsg, sender):
-        self.log.info(
-            str.format("Received message {} from {}", message, self.nameOf(sender))
-        )
+        if message.type == LCDReq.DISPLAY:
+            self.log.info(
+                str.format("Received message {} from {}", message, self.nameOf(sender))
+            )
 
         if sender != self.parent:
             self.log.warning(

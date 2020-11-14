@@ -42,14 +42,18 @@ class BellboyLeadActor(GenericActor):
                 trigPin=23,
                 echoPin=24,
                 maxDepth_cm=200,
-            ),
+            )
+        )
+
+        self.send(
             self.lcd,
             LCDMsg(
-                LCDReq.SETUP,
-                sdaPin = 2,
-                sclPin = 3
-            ),
+               LCDReq.SETUP
+               sdaPin = 2,
+               sclPin = 3
+           )
         )
+
         self.status = Response.STARTED
 
     def stopBellboyLead(self):
@@ -123,11 +127,6 @@ class BellboyLeadActor(GenericActor):
     def receiveMsg_LCDResp(self, sender):
         self.log.info(
             str.format("Received message from" , self.nameOf(sender))
-        )
-
-    def receiveMsg_LCDEventMsg(self, message, sender):
-        self.log.info(
-            str.format("Received message {} from {}", message, self.nameOf(sender))
         )
 
 
