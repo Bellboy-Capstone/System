@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v0.2.0 (2020-11-15)
+### Feature
+* Multiprocess Logging and Shutdown Actors (#22) ([`1c14b67`](https://github.com/Bellboy-Capstone/System/commit/1c14b67254bd1b88600c40a98a3c9b824bf1f61a))
+
+### Documentation
+* Add semantic release info to dev section. ([`f9062cc`](https://github.com/Bellboy-Capstone/System/commit/f9062ccd6f6fef93aa93f81baab9d2de644cc805))
+
 ## v0.1.1 (2020-11-06)
 ### Fix
 * Change semver target branch to 'master' ([`3b1743a`](https://github.com/Bellboy-Capstone/System/commit/3b1743aba0b41e6172e6f868a9eee458a410af4a))
