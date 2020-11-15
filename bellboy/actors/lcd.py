@@ -5,7 +5,8 @@ import gpiozero
 from gpiozero import DigitalOutputDevice
 from gpiozero.pins.mock import MockFactory
 from actors.generic import GenericActor
-from utils.messages import Response, LCDMsg, LCDReq, LCDResp, LCDEvent, LCDEventMsg,
+from utils import I2CLCD1602
+from utils.messages import Response, LCDMsg, LCDReq, LCDResp, LCDEvent, LCDEventMsg
 from bellboy.actors.generic import GenericActor
 
 # from bellboy.utils.messages import
@@ -59,9 +60,10 @@ class LiquidCrystalActor(GenericActor):
 
         while self.threadOn:
             try:
-            self.log.info(
-                str.format("LCD DISPLAYS <<{}>>", )
-            )
+                lcd_message = str(lcd.message())
+                self.log.info(
+                    str.format("LCD DISPLAYS <<{}>>", lcd_message)
+             )
         self.log.info("stopped lcd thread")
         self.status = LCDResp.SET
 
