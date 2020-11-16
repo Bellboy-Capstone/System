@@ -79,7 +79,8 @@ class LiquidCrystalActor(GenericActor):
     # --------------------------#
     # MESSAGE HANDLING METHODS  #
     # --------------------------#
-    #updateDisplay(text: str, duration: int)
+    def updateDisplay(self, text: str, duration: int):
+        pass
 
     def receiveMsg_LCDReq(self, message, sender):
         """responding to simple LCD requests."""

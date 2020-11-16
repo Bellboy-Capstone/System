@@ -110,9 +110,8 @@ class LCDResp(Enum):
 
 
 class LCDMsg:
-    def __init__(self, msgType, LCDNumber=None, displayText=str, displayDuration=int):
+    def __init__(self, msgType, displayText=str, displayDuration=int):
         self.msgType = msgType
-        self.LCDNumber = LCDNumber
 
     def __str__(self):
         return self.msgType.name
