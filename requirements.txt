@@ -7,3 +7,4 @@ Pykka==2.0.2
 pytest==6.1.2
 RPi.GPIO==0.7.0
 thespian==3.10.1
+websockets==8.1

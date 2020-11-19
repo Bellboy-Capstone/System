@@ -42,3 +42,9 @@ class CommsActor(GenericActor):
     def receiveMsg_SummaryReq(self, message, sender):
         """sends a summary of the actor."""
         self.send(sender, CommsResp.SUCCESS)
+
+    def summary(self):
+        pass
+
+    def teardown(self):
+        pass

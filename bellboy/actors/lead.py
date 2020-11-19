@@ -1,6 +1,7 @@
 from actors.comms import CommsActor
 from actors.elevator import buttonHovered
 from actors.generic import GenericActor
+from actors.realtime import RealtimeCommsActor
 from actors.ultrasonic import UltrasonicActor
 from thespian.actors import ActorAddress
 from utils.messages import (
@@ -35,6 +36,9 @@ class BellboyLeadActor(GenericActor):
             UltrasonicActor, globalName="ultrasonic"
         )
         self.comms_actor = self.createActor(CommsActor, globalName="comms")
+        self.realtime_actor = self.createActor(
+            RealtimeCommsActor, globalName="realtime"
+        )
 
         # request to setup sensor
         """
@@ -45,6 +49,7 @@ class BellboyLeadActor(GenericActor):
         """
         # request to setup communications
         self.send(self.comms_actor, CommsReq.AUTHENTICATE)
+        self.send(self.realtime_actor, Request.START)
 
         self.status = Response.STARTED
 
