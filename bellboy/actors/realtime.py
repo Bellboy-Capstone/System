@@ -1,10 +1,12 @@
+from time import sleep
+
 import gevent
 import websocket
 from actors.generic import GenericActor
 from utils.messages import CommsReq, CommsResp, Request, Response
 
 
-socket_url = "wss://bellboy-realtime.herokuapp.com"
+url = "bellboy-realtime.herokuapp.com"
 
 
 class RealtimeCommsActor(GenericActor):
@@ -37,7 +39,11 @@ class RealtimeCommsActor(GenericActor):
     # --------------------------#
 
     def _setup_websocket(self):
-        self.log.info("Starting WebSocket connection to %s", socket_url)
+        req = requests.get(f"https://{url}")
+        if req.status_code != 200:
+            raise Exception("Enpoint is not up.")
+
+        self.log.info("Starting WebSocket connection to %s", f"wss://{socket_url}")
         self._websocket = websocket.WebSocketApp(
             socket_url,
             on_message=self.on_message,
@@ -46,7 +52,12 @@ class RealtimeCommsActor(GenericActor):
         )
         self._websocket.on_open = self.on_open
         self._websocket.daemon = True
-        self._thread = gevent.spawn(self._websocket.run_forever)
+        self._thread = self._websocket.run_forever()
+        self._websocket.send("HAHAHAHAHA!!!")
+        # self._thread = gevent.spawn(self._run_websocket)
+
+    def _run_websocket():
+        self._websocket.run_forever()
 
     def authenticate(self):
         pass
@@ -86,8 +97,8 @@ class RealtimeCommsActor(GenericActor):
         pass
 
     def teardown(self):
+        self._websocket.send("HAHAHAHAHA!!!")
         self.log.info("Closing WebSocket connection to %s", socket_url)
         self._websocket.close()
-        gevent.join(self._thread)
         self.log.info("Closed WebSocket.")
         print("Teardown for realtime comms done.")

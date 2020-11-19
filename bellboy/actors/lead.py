@@ -36,9 +36,9 @@ class BellboyLeadActor(GenericActor):
             UltrasonicActor, globalName="ultrasonic"
         )
         self.comms_actor = self.createActor(CommsActor, globalName="comms")
-        self.realtime_actor = self.createActor(
-            RealtimeCommsActor, globalName="realtime"
-        )
+        # self.realtime_actor = self.createActor(
+        #     RealtimeCommsActor, globalName="realtime"
+        # )
 
         # request to setup sensor
         """
@@ -49,7 +49,7 @@ class BellboyLeadActor(GenericActor):
         """
         # request to setup communications
         self.send(self.comms_actor, CommsReq.AUTHENTICATE)
-        self.send(self.realtime_actor, Request.START)
+        # self.send(self.realtime_actor, Request.START)
 
         self.status = Response.STARTED
 
