@@ -1,9 +1,8 @@
-from thespian.actors import ActorAddress
-
 from actors.comms import CommsActor
 from actors.elevator import buttonHovered
 from actors.generic import GenericActor
 from actors.ultrasonic import UltrasonicActor
+from thespian.actors import ActorAddress
 from utils.messages import (
     CommsReq,
     CommsResp,
@@ -26,8 +25,7 @@ class BellboyLeadActor(GenericActor):
         """
         Starts bellboy lead actor services.
 
-        Configures global RPI Board. Spawns and sets up child actors
-        (ultrasonic sensor).
+        Spawns and sets up child actors
         """
         self.log.info("Starting bellboy services.")
 
@@ -42,12 +40,7 @@ class BellboyLeadActor(GenericActor):
         """
         self.send(
             self.ultrasonic_sensor,
-            SensorMsg(
-                SensorReq.SETUP,
-                trigPin=23,
-                echoPin=24,
-                maxDepth_cm=200,
-            ),
+            SensorMsg(SensorReq.SETUP, trigPin=23, echoPin=24, maxDepth_cm=200),
         )
         """
         # request to setup communications
@@ -76,14 +69,6 @@ class BellboyLeadActor(GenericActor):
         elif message is Request.STOP:
             self.stopBellboyLead()
 
-        elif message is Request.STATUS:
-            self.log.debug(str.format("Status check - {}", Response.ALIVE.name))
-
-        else:
-            msg = "Unhandled Request Enum value sent."
-            self.log.error(msg)
-            raise Exception(msg)
-
         self.send(sender, self.status)
 
     def receiveMsg_SensorResp(self, message, sender):
@@ -99,9 +84,7 @@ class BellboyLeadActor(GenericActor):
                 self.send(
                     sender,
                     SensorMsg(
-                        SensorReq.POLL,
-                        pollPeriod_ms=100,
-                        triggerFunc=buttonHovered,
+                        SensorReq.POLL, pollPeriod_ms=100, triggerFunc=buttonHovered
                     ),
                 )
 
@@ -132,7 +115,10 @@ class BellboyLeadActor(GenericActor):
             self.log.debug("received 3 events, turning off sensor.")
             self.send(self.ultrasonic_sensor, SensorReq.STOP)
 
-    def receiveMsg_SummaryReq(self, message, sender):
-        """sends a summary of the actor."""
+    def summary(self):
+        """Returns a summary of the actor."""
+        return self.status
         # TODO flesh this out...
-        self.send(sender, self.status)
+
+    def teardown(self):
+        pass

@@ -40,6 +40,19 @@ Send any response messages in the message handling methods only.\
 Change Actor's status in the private methods Only.\
 It will be neat and make testing much easier!
 
+### Submitting Work
+
+When adding new features, please use the semantic commit labels so versioning is accurate:
+
+- **feat**: A new feature
+- **fix**: A bug fix
+- **docs**: Documentation only changes
+- **style**: Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc)
+- **refactor**: A code change that neither fixes a bug nor adds a feature
+- **perf**: A code change that improves performance
+- **test**: Adding missing or correcting existing tests
+- **chore**: Changes to the build process or auxiliary tools and libraries such as documentation generation
+
 ## Off-Target Testing
 
 ```sh

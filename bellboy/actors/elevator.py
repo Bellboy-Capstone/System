@@ -4,12 +4,13 @@ class for the elevator and button related stuff.
 in actors for now.. could move
 """
 
-from collections import deque
+import logging
 
-from actors import log
+from collections import deque
 from utils.messages import SensorEvent, SensorEventMsg
 
 
+log = logging.getLogger("elevator")
 # simple "buttons", only have a position (depth) value and a radius.. all in cm
 BTN1_POS = 8.5
 BTN2_POS = 16

@@ -1,8 +1,8 @@
+import logging
+import os
 from abc import ABC, abstractmethod
 
 from thespian.actors import ActorAddress, ActorTypeDispatcher
-
-from actors import log
 from utils.messages import Init, Response, StatusReq, SummaryReq, TestMode
 
 
@@ -68,11 +68,17 @@ class GenericActor(ActorTypeDispatcher, ABC):
         self._nameAddress(sender, message.senderName)
 
         if self.globalName is None:
-            log.warning("unnamed actor created!")
-            self.log = log.getChild(str(self.myAddress))
-        else:
-            self.log = log.getChild(self.globalName)
-            self.log.info(str.format("{} created by {}", self.globalName, sender))
+            self.globalName = str(self.myAddress)
+
+        self.log = logging.getLogger(self.globalName)
+        self.log.info(
+            str.format(
+                "{} created by {}, pid={}",
+                self.globalName,
+                self.nameOf(sender),
+                os.getpid(),
+            )
+        )
 
         self.status = Response.READY
         self.send(sender, self.status)
@@ -86,24 +92,30 @@ class GenericActor(ActorTypeDispatcher, ABC):
         """Sends a status update to sender."""
         self.send(sender, self.status)
 
-    def receiveMsg_WakeupMessage(self, message: dict, sender: ActorAddress):
-        """On wakeup request."""
-        self.send(sender, Response.AWAKE)
+    def receiveMsg_SummaryReq(self, message: SummaryReq, sender):
+        """Sends a summary of the actor to the sender."""
+        self.send(sender, self.summary())
+
+    def receiveMsg_ActorExitRequest(self, msg, sender):
+        """This is last msg processed before the Actor is shutdown."""
+        self.log.debug("Received shutdown message!")
+        self.teardown()
 
     @abstractmethod
-    def receiveMsg_SummaryReq(self, message: SummaryReq, sender):
+    def teardown(self):
         """
-        sends a summary of the actor to the sender.
+        Actor's teardown sequence, called before shutdown.
 
-        to be defined in child classes.
+        (i.e. close threads, disconnect from services, etc)
         """
         pass
 
+    @abstractmethod
+    def summary(self):
+        """
+        Returns a summary of the actor.
 
-# NOTE:
-# If d actor isnt created by a bellboy actor, u must send an Init msg to it explicitly in order to use bellboy logs.
-# This should only matter for the lead actor and during testing,
-# cus all actors are sposed to be created thru bellboy lead anyways.
-# Reason is bc the actors are running in independent processes, they dont share globals, i.e. the logger.
-# Everything is communicated thru messaging.
-# tldr the init msg holds the addressbook and log configs together
+        The summary can be an object of any type described in the messages module.
+        :rtype: object
+        """
+        pass
