@@ -23,6 +23,7 @@ class CommsActor(GenericActor):
             self.log.debug(f"Heartbeat endpoint returned {req.json()}")
         else:
             self.log.error("Services are not up.")
+            raise Exception("Services are down?")
 
         if self._authenticated is False and self._identifier is None:
             self.log.info("Authenticating with Services, getting new ID.")

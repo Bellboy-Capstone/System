@@ -1,6 +1,6 @@
 from time import sleep
 
-import gevent
+import requests
 import websocket
 from actors.generic import GenericActor
 from utils.messages import CommsReq, CommsResp, Request, Response
@@ -43,21 +43,11 @@ class RealtimeCommsActor(GenericActor):
         if req.status_code != 200:
             raise Exception("Enpoint is not up.")
 
-        self.log.info("Starting WebSocket connection to %s", f"wss://{socket_url}")
-        self._websocket = websocket.WebSocketApp(
-            socket_url,
-            on_message=self.on_message,
-            on_error=self.on_error,
-            on_close=self.on_close,
-        )
-        self._websocket.on_open = self.on_open
-        self._websocket.daemon = True
-        self._thread = self._websocket.run_forever()
-        self._websocket.send("HAHAHAHAHA!!!")
-        # self._thread = gevent.spawn(self._run_websocket)
-
-    def _run_websocket():
-        self._websocket.run_forever()
+        self.log.info("Starting WebSocket connection to %s", f"wss://{url}")
+        self._websocket = websocket.create_connection(f"wss://{url}")
+        sleep(1)
+        self.log.info("Saying hello")
+        self._websocket.send("Hello!!!")
 
     def authenticate(self):
         pass
@@ -97,8 +87,8 @@ class RealtimeCommsActor(GenericActor):
         pass
 
     def teardown(self):
-        self._websocket.send("HAHAHAHAHA!!!")
-        self.log.info("Closing WebSocket connection to %s", socket_url)
+        self._websocket.send("Closing.")
+        self.log.info("Closing WebSocket connection to %s", url)
         self._websocket.close()
         self.log.info("Closed WebSocket.")
         print("Teardown for realtime comms done.")
