@@ -1,6 +1,4 @@
-import asyncio
-import time
-
+import gevent
 import websocket
 from actors.generic import GenericActor
 from utils.messages import CommsReq, CommsResp, Request, Response
@@ -14,6 +12,8 @@ class RealtimeCommsActor(GenericActor):
 
     _identifier = None
     _websocket = None
+    _started = False
+    _thread = None
 
     def on_message(self):
         self.log.info("on_message")
@@ -46,7 +46,7 @@ class RealtimeCommsActor(GenericActor):
         )
         self._websocket.on_open = self.on_open
         self._websocket.daemon = True
-        self._websocket.run_forever()
+        self._thread = gevent.spawn(self._websocket.run_forever)
 
     def authenticate(self):
         pass
@@ -88,5 +88,6 @@ class RealtimeCommsActor(GenericActor):
     def teardown(self):
         self.log.info("Closing WebSocket connection to %s", socket_url)
         self._websocket.close()
+        gevent.join(self._thread)
         self.log.info("Closed WebSocket.")
         print("Teardown for realtime comms done.")
