@@ -102,7 +102,7 @@ class SensorEventMsg:
 
 
 class LCDReq(Enum):
-    SETUP, DISPLAY = range(2)
+    SETUP, DISPLAY, CLEAR = range(3)
 
 
 class LCDResp(Enum):
@@ -110,9 +110,10 @@ class LCDResp(Enum):
 
 
 class LCDMsg:
-    def __init__(self, msgType, LCDNumber=None, displayText=str, displayDuration=int):
+    def __init__(self, msgType, displayText=None, displayDuration=0.0):
         self.msgType = msgType
-        self.LCDNumber = LCDNumber
+        self.displayText = displayText
+        self.displayDuration = displayDuration
 
     def __str__(self):
         return self.msgType.name

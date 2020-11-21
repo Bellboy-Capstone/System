@@ -1,9 +1,8 @@
-import time
+from time import sleep, strftime
 from threading import Thread
 
-import gpiozero
-from gpiozero import DigitalOutputDevice
-from gpiozero.pins.mock import MockFactory
+from utils.LCD_code.Adafruit_LCD1602 import Adafruit_CharLCD
+from utils.LCD_code.PCF8574 import PCF8574_GPIO
 from actors.generic import GenericActor
 from utils.messages import Response, LCDMsg, LCDReq, LCDResp, LCDEvent, LCDEventMsg,
 from bellboy.actors.generic import GenericActor
@@ -26,60 +25,48 @@ class LiquidCrystalActor(GenericActor):
         # define private attributes
         # the following are set on setup request
 
-        self._LCD = None
-        self._display_string = None
+        self.lcd = None
+        self.defualtString = 'Bellboy LCD'
 
     # --------------------------#
     # STATE MODIFYING METHODS   #
     # --------------------------#
 
-    def _setup_LCD(self, _sdaPin, sclPin):
+    def _setup_LCD(self):
         """setup LCD paramaters."""
-        self._sdaPin = sdaPin
-        self._sclPin = sclPin
+        PCF8574_address = 0x27  # I2C address of the PCF8574 chip.
+        PCF8574A_address = 0x3F  # I2C address of the PCF8574A chip.
 
-        if self.TEST_MODE:
-            gpiozero.Device.pin_factory = MockFactory()
-            # TODO should this be "globally" set in the test suites...
-            # but then will it even be recognized in other domains...
+        # Create PCF8574 GPIO adapter.
+        try:
+            mcp = PCF8574_GPIO(PCF8574_address)
+        except:
+            try:
+                mcp = PCF8574_GPIO(PCF8574A_address)
+            except:
+                print('I2C Address Error !')
+                exit(1)
 
-        self._LCD = LiquidCrystal(
-            sdaPin=self._sdaPin,
-            sclPin=self._sclPin
-
-        )
+        self.lcd = Adafruit_CharLCD(pin_rs=0, pin_e=2, pins_db=[4, 5, 6, 7], GPIO=mcp)
 
         self.status = LCDResp.SET
 
-    def displayLoop(self):
+    def displayText(self, text, duration):
         """running lcd thread. Displays text on screen"""
-
-        self.status = LCDResp.DISPLAY
-
-        while self.threadOn:
-            lcd.message(self._display_string)
-            self.log.info(
-                str.format("LCD DISPLAYS <<{}>>", )
-            )
-        self.log.info("stopped lcd thread")
-        self.status = LCDResp.SET
+        self.lcd.message(text)
+        sleep(duration)
+        self.lcd.message(default)
 
     def _clear(self):
-        self._sdaPin = 0
-        self._sclPin = 0
+        self.lcd.clear()
 
-        self._LCD.close()
-
-        self._buffer.clear()
         self.log.debug("cleared LCD")
         self.status = Response.READY
-
-
 
     # --------------------------#
     # MESSAGE HANDLING METHODS  #
     # --------------------------#
-    #updateDisplay(text: str, duration: int)
+    # updateDisplay(text: str, duration: int)
 
     def receiveMsg_LCDReq(self, message, sender):
         """responding to simple LCD requests."""
@@ -96,15 +83,12 @@ class LiquidCrystalActor(GenericActor):
             self.send(sender, Response.UNAUTHORIZED)
             return
 
-        elif message == LCDReq.CLEAR:
+        if message == LCDReq.SETUP:
             self._clear()
 
-    def receiveMsg_LCDMsg(self, message: LCDMsg, sender):
-        if message.type == LCDReq.DISPLAY:
-            self.log.info(
-                str.format("Received message {} from {}", message, self.nameOf(sender))
-            )
+        if message == LCDReq.DISPLAY
 
+    def receiveMsg_LCDMsg(self, message: LCDMsg, sender):
         if sender != self.parent:
             self.log.warning(
                 str.format("Received {} req from unauthorized sender!", message.type)
@@ -112,21 +96,8 @@ class LiquidCrystalActor(GenericActor):
             self.send(sender, Response.UNAUTHORIZED)
             return
 
-        if message.type == LCDReq.SETUP:
-            self._setup_LCD(
-                _sdaPin=self._sdaPin,
-                sclPin=self._sclPin
-            )
+        if message.msgType == LCDReq.SETUP:
+            self._setup_LCD()
 
-    def receiveMsg_SummaryReq(self, message, sender):
-        """sends a summary of the actor."""
-        self.send(
-            sender,
-            LCDMsg(
-                type=Response.SUMMARY,
-                sdaPin=self._sdaPin,
-                sclPin=self._sclPin
-            ),
-        )
-
-    pass
+        if message.msgType == LCDReq.DISPLAY:
+            self.displayText(message.displayText, message.displayDuration)
