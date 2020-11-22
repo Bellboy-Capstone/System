@@ -42,7 +42,7 @@ class LcdActor(GenericActor):
         self.lcd = Adafruit_CharLCD(pin_rs=0, pin_e=2, pins_db=[4, 5, 6, 7], GPIO=mcp)
         mcp.output(3, 1)     # turn on LCD backlight
         self.lcd.begin(16, 2)     # set number of LCD lines and columns
-        self.lcd.autoscroll()
+
         self.displayText("System Starting...", 5)
         self.status = LcdResp.SET
 
@@ -61,27 +61,29 @@ class LcdActor(GenericActor):
         self.status = Response.READY
 
     def printText(self, text):
-        lines = chop_string(text)
+        lines = self.chop_string(text)
+        self.log.info(len(lines[0]))
+        self.log.info(len(lines[1]))
+        self.log.info(lines)
         if lines[0] and len(lines[0]) <= 16:
             self.printLine(lines[0], 0)
 
         if lines[1] and len(lines[1]) <= 16:
             self.printLine(lines[1], 1)
 
-        elif lines[1] and len(lines[1]) > 16:
-            # here we would scroll line 1
-            self.printLine(lines[1][:15], 1)
-
+  #      elif lines[1] and len(lines[1]) > 16:
+   #         # here we would scroll line 1
+    #        self.printLine(lines[1][:15], 1)
 
     def printLine(self, text, lineNum):
         """
         Prints one text to the top or bottom line of the lcd.
-        """        
+        """
         if (len(text) > 16):
-            self.log.warning("<"+text+ "> TOO LONG FOR LCD!")
+            self.log.warning("<"+text + "> TOO LONG FOR LCD!")
             return
 
-        if lineNum != 0 and lineNum != 1 :
+        if lineNum != 0 and lineNum != 1:
             self.log.warning("line number must be 0 or 1")
             return
 
@@ -95,7 +97,7 @@ class LcdActor(GenericActor):
         Divides sentence into 2 pieces, the first fits in 16 charcaters, the second is the leftover. 
         Already centered if in range of 16 charcaters .
         """
-        words = text.split() # split text by whitespace
+        words = text.split()  # split text by whitespace
         builder = None
         finalStrings = []
         firstLine = None
@@ -106,15 +108,17 @@ class LcdActor(GenericActor):
                 continue
 
             if firstLine is None and len(builder) + len(word) + 1 > 16:
-                firstLine = builder.center(16, " ")
+
+                firstLine = builder.center(16)
+
                 builder = word
                 continue
 
             builder += " " + word
 
         if len(builder) < 16:
-            builder = builder.center(16, " ")
-        
+            builder = builder.center(16)
+
         return [firstLine, builder]
     # --------------------------#
     # MESSAGE HANDLING METHODS  #
