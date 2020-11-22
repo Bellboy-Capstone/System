@@ -1,42 +1,32 @@
-from time import sleep, strftime
-from threading import Thread
+from time import sleep
 
-from utils.LCD_code.Adafruit_LCD1602 import Adafruit_CharLCD
-from utils.LCD_code.PCF8574 import PCF8574_GPIO
+from utils.lcd.Adafruit_LCD1602 import Adafruit_CharLCD
+from utils.lcd.PCF8574 import PCF8574_GPIO
+
 from actors.generic import GenericActor
-from utils.messages import Response, LCDMsg, LCDReq, LCDResp, LCDEvent, LCDEventMsg,
-from bellboy.actors.generic import GenericActor
+from utils.messages import Response, LcdMsg, LcdReq, LcdResp
 
 
-# from bellboy.utils.messages import
+PCF8574_address = 0x27  # I2C address of the PCF8574 chip.
+PCF8574A_address = 0x3F  # I2C address of the PCF8574A chip.
 
 
 class LiquidCrystalActor(GenericActor):
     """
     Class for the LCD Display.
-
-    Contains a polling thread which can be run or stopped on message
-    request.
     """
 
     def __init__(self):
         super().__init__()
-
-        # define private attributes
-        # the following are set on setup request
-
         self.lcd = None
-        self.defualtString = 'Bellboy LCD'
+        self.default_text = "Default Text"
 
     # --------------------------#
     # STATE MODIFYING METHODS   #
     # --------------------------#
 
-    def _setup_LCD(self):
-        """setup LCD paramaters."""
-        PCF8574_address = 0x27  # I2C address of the PCF8574 chip.
-        PCF8574A_address = 0x3F  # I2C address of the PCF8574A chip.
-
+    def setup(self):
+        """setup LCD."""
         # Create PCF8574 GPIO adapter.
         try:
             mcp = PCF8574_GPIO(PCF8574_address)
@@ -44,20 +34,20 @@ class LiquidCrystalActor(GenericActor):
             try:
                 mcp = PCF8574_GPIO(PCF8574A_address)
             except:
-                print('I2C Address Error !')
-                exit(1)
+                self.log.warning("MCP creation failed!")
+                return
 
         self.lcd = Adafruit_CharLCD(pin_rs=0, pin_e=2, pins_db=[4, 5, 6, 7], GPIO=mcp)
-
-        self.status = LCDResp.SET
+        self.displayText("LCD is ready...", 1)
+        self.status = LcdResp.SET
 
     def displayText(self, text, duration):
-        """running lcd thread. Displays text on screen"""
+        """Displays text on screen"""
         self.lcd.message(text)
         sleep(duration)
-        self.lcd.message(default)
+        self.lcd.message(self.default_text)
 
-    def _clear(self):
+    def clear(self):
         self.lcd.clear()
 
         self.log.debug("cleared LCD")
@@ -68,36 +58,32 @@ class LiquidCrystalActor(GenericActor):
     # --------------------------#
 
 
-    def receiveMsg_LCDReq(self, message, sender):
-        """responding to simple LCD requests."""
+    def receiveMsg_LcdReq(self, message, sender):
+        self.log.info(str.format("Received message {} from {}", message, self.nameOf(sender)))
 
-        self.log.info(
-            str.format("Received message {} from {}", message, self.nameOf(sender))
-        )
-
-        # ignore unauthorized requests
+        # authorize
         if sender != self.parent:
-            self.log.warning(
-                str.format("Received {} req from unauthorized sender!", message)
-            )
+            self.log.warning(str.format("Received {} req from unauthorized sender!", message))
             self.send(sender, Response.UNAUTHORIZED)
             return
 
-        if message == LCDReq.SETUP:
-            self._clear()
+        # handle cases
+        if message == LcdReq.CLEAR:
+            self.clear()
 
-        if message == LCDReq.DISPLAY
+    def receiveMsg_LcdMsg(self, message: LcdMsg, sender):
+        self.log.info(str.format("Received message {} from {}", message, self.nameOf(sender)))
 
-    def receiveMsg_LCDMsg(self, message: LCDMsg, sender):
+        # authorize
         if sender != self.parent:
-            self.log.warning(
-                str.format("Received {} req from unauthorized sender!", message.type)
-            )
+            self.log.warning(str.format("Received {} req from unauthorized sender!", message.type))
             self.send(sender, Response.UNAUTHORIZED)
             return
 
-        if message.msgType == LCDReq.SETUP:
-            self._setup_LCD()
+        # handle cases
+        if message.msgType == LcdReq.SETUP:
+            self.setup()
+            self.send(sender, self.status)
 
-        if message.msgType == LCDReq.DISPLAY:
+        if message.msgType == LcdReq.DISPLAY:
             self.displayText(message.displayText, message.displayDuration)

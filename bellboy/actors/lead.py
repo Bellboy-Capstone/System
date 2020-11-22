@@ -2,8 +2,8 @@ from actors.elevator import buttonHovered
 from actors.generic import GenericActor
 from actors.ultrasonic import UltrasonicActor
 from thespian.actors import ActorAddress
-from actors.lcd import LiquidCrystalActor
-from utils.messages import Request, Response, SensorMsg, SensorReq, SensorResp
+from actors.lcd import LcdActor
+from utils.messages import Request, Response, SensorMsg, SensorReq, SensorResp, LcdMsg, LcdReq, LcdResp
 
 
 class BellboyLeadActor(GenericActor):
@@ -24,34 +24,15 @@ class BellboyLeadActor(GenericActor):
 
         # spawn actors
         self.log.info("Starting all dependent actors...")
-        self.ultrasonic_sensor = self.createActor(
-            UltrasonicActor, globalName="ultrasonic"
-        )
-
-        self.log.info("Starting all dependent actors...")
-        self.lcd = self.createActor(
-            LiquidCrystal, globalName="lcd"
-        )
+        self.ultrasonic_sensor = self.createActor(UltrasonicActor, globalName="ultrasonic")
+        self.lcd = self.createActor(LcdActor, globalName="lcd")
         
-        # request to setup sensor
-        self.send(
-            self.ultrasonic_sensor,
-            SensorMsg(
-                SensorReq.SETUP,
-                trigPin=23,
-                echoPin=24,
-                maxDepth_cm=200,
-            )
-        )
-
-        self.send(
-            self.lcd,
-            LCDMsg(
-               LCDReq.SETUP
-               sdaPin = 2,
-               sclPin = 3
-           )
-        )
+        # setup actors, handle their responses
+        sensor_setup_msg = SensorMsg(SensorReq.SETUP, trigPin=23, echoPin=24, maxDepth_cm=200)
+        lcd_setup_msg = LcdMsg(LcdReq.SETUP)
+        
+        self.send(self.ultrasonic_sensor, sensor_setup_msg)
+        self.send(self.lcd, lcd_setup_msg)
 
         self.status = Response.STARTED
 
@@ -60,8 +41,8 @@ class BellboyLeadActor(GenericActor):
         self.status = Response.DONE
         self.send(self.ultrasonic_sensor, SensorReq.STOP)
         self.send(self.ultrasonic_sensor, SensorReq.CLEAR)
-        self.send(self.lcd, SensorReq.STOP)
-        self.send(self.lcd, SensorReq.CLEAR)
+    
+
     # --------------------------#
     # MESSAGE HANDLING METHODS  #
     # --------------------------#
