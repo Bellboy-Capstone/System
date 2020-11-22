@@ -11,7 +11,7 @@ PCF8574_address = 0x27  # I2C address of the PCF8574 chip.
 PCF8574A_address = 0x3F  # I2C address of the PCF8574A chip.
 
 
-class LiquidCrystalActor(GenericActor):
+class LcdActor(GenericActor):
     """
     Class for the LCD Display.
     """
