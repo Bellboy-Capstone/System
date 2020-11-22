@@ -11,7 +11,7 @@ class BellboyLeadActor(GenericActor):
         """define Bellboy's private variables."""
         super().__init__()
         self.ultrasonic_sensor = None
-        self.lcd= None
+        self.lcd = None
         self.event_count = 0
 
     def startBellboyLead(self):
@@ -24,14 +24,14 @@ class BellboyLeadActor(GenericActor):
 
         # spawn actors
         self.log.info("Starting all dependent actors...")
-        self.ultrasonic_sensor = self.createActor(UltrasonicActor, globalName="ultrasonic")
+       # self.ultrasonic_sensor = self.createActor(UltrasonicActor, globalName="ultrasonic")
         self.lcd = self.createActor(LcdActor, globalName="lcd")
-        
+
         # setup actors, handle their responses
         sensor_setup_msg = SensorMsg(SensorReq.SETUP, trigPin=23, echoPin=24, maxDepth_cm=200)
-        lcd_setup_msg = LcdMsg(LcdReq.SETUP)
-        
-        self.send(self.ultrasonic_sensor, sensor_setup_msg)
+        lcd_setup_msg = LcdMsg(LcdReq.SETUP, defaultText="Welcome to" '\n' "Bellboy")
+
+        #self.send(self.ultrasonic_sensor, sensor_setup_msg)
         self.send(self.lcd, lcd_setup_msg)
 
         self.status = Response.STARTED
@@ -41,11 +41,11 @@ class BellboyLeadActor(GenericActor):
         self.status = Response.DONE
         self.send(self.ultrasonic_sensor, SensorReq.STOP)
         self.send(self.ultrasonic_sensor, SensorReq.CLEAR)
-    
 
     # --------------------------#
     # MESSAGE HANDLING METHODS  #
     # --------------------------#
+
     def receiveMsg_Request(self, message: Request, sender: ActorAddress):
         """handles messages of type Request enum."""
         self.log.debug(

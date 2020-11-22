@@ -25,6 +25,8 @@ class TestMode:
     pass
 
 # generic parent class for detailed messages
+
+
 class DetailedMsg:
     pass
 
@@ -109,14 +111,16 @@ class LcdReq(Enum):
 
 
 class LcdResp(Enum):
-    SET, DISPLAYING = range(2)
+    SET, DISPLAYING, SPILLING, CENTERING = range(4)
 
 
 class LcdMsg(DetailedMsg):
-    def __init__(self, msgType, displayText=None, displayDuration=0.0):
+    def __init__(self, msgType, defaultText=None, displayText=None, displayDuration=0.0, overFlow=None):
         self.msgType = msgType
+        self.defaultText = defaultText
         self.displayText = displayText
         self.displayDuration = displayDuration
+        self.overFlow = overFlow
 
     def __str__(self):
         return self.msgType.name
