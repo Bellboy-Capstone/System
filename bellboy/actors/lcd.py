@@ -47,15 +47,12 @@ class LcdActor(GenericActor):
         self.status = LcdResp.SET
 
     def displayText(self, text, duration):
-        """Displays text on screen"""
-       # if self.displayText.len() => 15(
+        """Displays text on screen for duration of time"""
 
-        #)
-        self.lcd.setCursor(0, 0)  # set cursor position
-        self.lcd.message(text)
+        self.printText(text)
         sleep(duration)
         self.clear()
-        self.lcd.message(self.default_text)
+        self.printText(self.default_text)
 
     def clear(self):
         self.lcd.clear()
@@ -63,6 +60,62 @@ class LcdActor(GenericActor):
         self.log.debug("cleared LCD")
         self.status = Response.READY
 
+    def printText(self, text):
+        lines = chop_string(text)
+        if lines[0] and len(lines[0]) <= 16:
+            self.printLine(lines[0], 0)
+
+        if lines[1] and len(lines[1]) <= 16:
+            self.printLine(lines[1], 1)
+
+        elif lines[1] and len(lines[1]) > 16:
+            # here we would scroll line 1
+            self.printLine(lines[1][:15], 1)
+
+
+    def printLine(self, text, lineNum):
+        """
+        Prints one text to the top or bottom line of the lcd.
+        """        
+        if (len(text) > 16):
+            self.log.warning("<"+text+ "> TOO LONG FOR LCD!")
+            return
+
+        if lineNum != 0 and lineNum != 1 :
+            self.log.warning("line number must be 0 or 1")
+            return
+
+        self.lcd.setCursor(0, lineNum)
+        self.lcd.message("                ")
+        self.lcd.setCursor(0, lineNum)
+        self.lcd.message(text)
+
+    def chop_string(self, text):
+        """"
+        Divides sentence into 2 pieces, the first fits in 16 charcaters, the second is the leftover. 
+        Already centered if in range of 16 charcaters .
+        """
+        words = text.split() # split text by whitespace
+        builder = None
+        finalStrings = []
+        firstLine = None
+
+        for word in words:
+            if builder is None:
+                builder = word
+                continue
+
+            if firstLine is None and len(builder) + len(word) + 1 > 16:
+                firstLine = builder.center(16, " ")
+                builder = word
+                continue
+
+            builder += " " + word
+
+        if len(builder) < 16:
+            builder = builder.center(16, " ")
+        
+        return [firstLine, builder]
     # --------------------------#
     # MESSAGE HANDLING METHODS  #
     # --------------------------#
