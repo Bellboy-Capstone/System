@@ -47,10 +47,12 @@ class LcdActor(GenericActor):
         self.status = LcdResp.SET
 
     def displayText(self, text, duration):
-        """Displays text on screen for duration of time"""
+        """Displays text on screen for duration of time, then returns to defualt message"""
 
-        self.printText(text)
-        sleep(duration)
+        scrolled = self.printText(text, duration, scroll=True)
+        if not scrolled:
+            sleep(duration)
+
         self.clear()
         self.printText(self.default_text)
 
@@ -60,7 +62,11 @@ class LcdActor(GenericActor):
         self.log.debug("cleared LCD")
         self.status = Response.READY
 
-    def printText(self, text):
+    def printText(self, text, duration, scroll=False):
+
+        """ Prints text to the LCD. If scroll = true, Scrolls the text for duration if the text is too long.
+        Returns whether True if text was scrolled"""
+
         lines = chop_string(text)
         if lines[0] and len(lines[0]) <= 16:
             self.printLine(lines[0], 0)
@@ -68,9 +74,32 @@ class LcdActor(GenericActor):
         if lines[1] and len(lines[1]) <= 16:
             self.printLine(lines[1], 1)
 
-        elif lines[1] and len(lines[1]) > 16:
-            # here we would scroll line 1
-            self.printLine(lines[1][:15], 1)
+        if lines[1] and len(lines[1]) > 16:
+            if scroll:
+                # scroll line 1
+                self.scrollText(text, duration)
+                return True
+            else:
+                # cut the line short
+                self.printLine(lines[1][0:15], 1)
+                return False
+
+        return False
+
+    def scrollText(self, text, duration, speed = 0.1):
+        """ scrolls text for the duration """
+        
+        if (len(text) < 15):
+            self.log.warning("text must be at least 15 characters to scroll!")
+            return 
+
+        rotatedText = text + " "
+        iterations = duration / speed
+        while iterations > 0 :
+            self.printLine(rotatedText[0:15])
+            sleep(speed)
+            rotatedText = rotatedText[1:len(rotatedText)] + rotatedText[0]
+            iterations -= 1
 
 
     def printLine(self, text, lineNum):
