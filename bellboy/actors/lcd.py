@@ -43,7 +43,7 @@ class LcdActor(GenericActor):
         mcp.output(3, 1)     # turn on LCD backlight
         self.lcd.begin(16, 2)     # set number of LCD lines and columns
 
-        self.displayText("System Starting...", 2.5)
+        self.displayText("System Starting...", 2)
         self.status = LcdResp.SET
 
 

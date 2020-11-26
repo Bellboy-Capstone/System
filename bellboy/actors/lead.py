@@ -38,7 +38,7 @@ class BellboyLeadActor(GenericActor):
         self.status = Response.STARTED
 
         sleep(2)
-        message = LcdMsg(LcdReq.DISPLAY, displayText="Hello this is a message, which floor do you want to go to?", displayDuration=2)
+        message = LcdMsg(LcdReq.DISPLAY, displayText="Hello this is a message, which floor do you want to go to???", displayDuration=2)
         self.send(self.lcd, message)
 
 
