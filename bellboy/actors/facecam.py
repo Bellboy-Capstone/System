@@ -40,6 +40,66 @@ class CameraActor(GenericActor):
         """
         self.camIx = camNumber
         self.status = CamResp.SET
+    
+    def start_streaming(self):
+        if self.status != CamResp.SET:
+            self.log.warning("Cam not setup!")
+            return
+
+        if self.status == CamResp.STREAMING:
+            self.log.info("Alreay streaming!")
+            return
+
+        self.threadOn = True
+      #  self.recording_thread = Thread(target=self.streaming_loop)
+        self.recording_thread.start()
+
+    def stop_streaming(self):
+        if not self.threadOn:
+            self.log.info("Not streaming")
+            return
+
+        self.log.debug("Terminating listener thread")
+        self.threadOn = False
+
+    # MSG HANDLING
+    def receiveMsg_CamMsg(self, msg, sender):
+        self.log.info(
+            str.format("Received message {} from {}", msg, self.nameOf(sender))
+        )
+        if msg.msgType == CamReq.SETUP:
+            self.setupCamrophone(msg.CamNumber)
+
+            if self.status != CamResp.SET:
+                self.send(sender, Response.FAIL)
+
+            else:
+                self.send(sender, self.status)
+
+    def receiveMsg_CamReq(self, msg, sender):
+        self.log.info(
+            str.format("Received message {} from {}", msg.name, self.nameOf(sender))
+        )
+        if msg == CamReq.GET_CAM_LIST:
+            self.send(
+                sender, CamMsg(msgType=CamResp.CAM_LIST, CamList=CamList())
+            )
+        elif msg == CamReq.START_STREAMING:
+            self.start_streaming()
+
+        elif msg == CamReq.STOP_STREAMING:
+            self.stop_streaming()
 
 
-pass
+    def teardown(self):
+        """
+        Actor's teardown sequence, called before shutdown. (i.e. close threads, disconnect from services, etc)
+        """
+        self.clear()
+
+    def summary(self):
+        """
+        Returns a summary of the actor. The summary can be any detailed msg described in the messages module.
+        :rtype: object
+        """
+        pass
