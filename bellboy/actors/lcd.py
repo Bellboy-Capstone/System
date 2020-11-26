@@ -110,7 +110,7 @@ class LcdActor(GenericActor):
         while iterations > 0:
             self.printLine(rotatedText[0:15], lineNum)
             sleep(speed)
-            rotatedText = rotatedText[1 : len(rotatedText)] + rotatedText[0] # NoQA
+            rotatedText = rotatedText[1 : len(rotatedText)] + rotatedText[0] # noqa
             iterations -= 1
             self.log.info(iterations)
 
