@@ -25,14 +25,14 @@ class BellboyLeadActor(GenericActor):
 
         # spawn actors
         self.log.info("Starting all dependent actors...")
-       # self.ultrasonic_sensor = self.createActor(UltrasonicActor, globalName="ultrasonic")
+        self.ultrasonic_sensor = self.createActor(UltrasonicActor, globalName="ultrasonic")
         self.lcd = self.createActor(LcdActor, globalName="lcd")
 
         # setup actors, handle their responses
         sensor_setup_msg = SensorMsg(SensorReq.SETUP, trigPin=23, echoPin=24, maxDepth_cm=200)
         lcd_setup_msg = LcdMsg(LcdReq.SETUP, defaultText="Welcome to" '\n' "Bellboy")
 
-        #self.send(self.ultrasonic_sensor, sensor_setup_msg)
+        self.send(self.ultrasonic_sensor, sensor_setup_msg)
         self.send(self.lcd, lcd_setup_msg)
 
         self.status = Response.STARTED
