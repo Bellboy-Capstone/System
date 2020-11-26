@@ -1,7 +1,7 @@
 from time import sleep
 
 from utils.lcd.Adafruit_LCD1602 import Adafruit_CharLCD
-from utils.lcd.PCF8574 import PCF8574_GPIO
+
 
 from actors.generic import GenericActor
 from utils.messages import Response, LcdMsg, LcdReq, LcdResp
@@ -28,6 +28,14 @@ class LcdActor(GenericActor):
     def setup(self, default_text):
         """setup LCD."""
         # Create PCF8574 GPIO adapter.
+
+        try:
+            from utils.lcd.PCF8574 import PCF8574_GPIO
+        except Exception:
+            self.log.info("putting into test mode, import failed")
+            self.TEST_MODE = True
+            return
+
         try:
             mcp = PCF8574_GPIO(PCF8574_address)
         except Exception:
@@ -48,6 +56,11 @@ class LcdActor(GenericActor):
 
     def displayText(self, text, duration):
         """Displays text on screen for duration of time, then returns to defualt message"""
+
+        if self.TEST_MODE:
+            self.log.info("Mock LCD DISPLAY: " + text)
+            self.sleep(duration)
+            return
 
         scrolled = self.printText(text, duration, scroll=True)
         if not scrolled:
@@ -97,7 +110,7 @@ class LcdActor(GenericActor):
         while iterations > 0:
             self.printLine(rotatedText[0:15], lineNum)
             sleep(speed)
-            rotatedText = rotatedText[1: len(rotatedText)] + rotatedText[0]
+            rotatedText = rotatedText[1 : len(rotatedText)] + rotatedText[0]
             iterations -= 1
             self.log.info(iterations)
 
