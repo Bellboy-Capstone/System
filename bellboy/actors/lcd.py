@@ -31,6 +31,7 @@ class LcdActor(GenericActor):
         try:
             mcp = PCF8574_GPIO(PCF8574_address)
         except:
+            self.log.debug("first adress invalid, trying second...")
             try:
                 mcp = PCF8574_GPIO(PCF8574A_address)
             except:
@@ -125,7 +126,6 @@ class LcdActor(GenericActor):
         """
         words = text.split()  # split text by whitespace
         builder = None
-        finalStrings = []
         firstLine = None
 
         for word in words:

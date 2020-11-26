@@ -4,7 +4,7 @@ from actors.generic import GenericActor
 from actors.ultrasonic import UltrasonicActor
 from thespian.actors import ActorAddress
 from actors.lcd import LcdActor
-from utils.messages import Request, Response, SensorMsg, SensorReq, SensorResp, LcdMsg, LcdReq, LcdResp
+from utils.messages import Request, Response, SensorMsg, SensorReq, SensorResp, LcdMsg, LcdReq
 
 
 class BellboyLeadActor(GenericActor):
@@ -39,7 +39,7 @@ class BellboyLeadActor(GenericActor):
 
         sleep(2)
         message = LcdMsg(
-            LcdReq.DISPLAY, displayText="Hello this is a message, which floor do you want to go to???", displayDuration=2)
+            LcdReq.DISPLAY, displayText="Hello this is a message, which floor you go to?", displayDuration=2)
         self.send(self.lcd, message)
 
     def stopBellboyLead(self):
