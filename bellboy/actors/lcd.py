@@ -43,8 +43,11 @@ class LcdActor(GenericActor):
         mcp.output(3, 1)     # turn on LCD backlight
         self.lcd.begin(16, 2)     # set number of LCD lines and columns
 
-        self.displayText("System Starting...", 5)
+        self.displayText("System Starting...", 2.5)
         self.status = LcdResp.SET
+
+
+
 
     def displayText(self, text, duration):
         """Displays text on screen for duration of time, then returns to defualt message"""
@@ -54,7 +57,7 @@ class LcdActor(GenericActor):
             sleep(duration)
 
         self.clear()
-        self.printText(self.default_text)
+        self.printText(self.default_text, 1)
 
     def clear(self):
         self.lcd.clear()
@@ -67,7 +70,7 @@ class LcdActor(GenericActor):
         """ Prints text to the LCD. If scroll = true, Scrolls the text for duration if the text is too long.
         Returns whether True if text was scrolled"""
 
-        lines = chop_string(text)
+        lines = self.chop_string(text)
         if lines[0] and len(lines[0]) <= 16:
             self.printLine(lines[0], 0)
 
@@ -77,7 +80,7 @@ class LcdActor(GenericActor):
         if lines[1] and len(lines[1]) > 16:
             if scroll:
                 # scroll line 1
-                self.scrollText(text, duration)
+                self.scrollText(lines[1], 1, duration)
                 return True
             else:
                 # cut the line short
@@ -86,7 +89,7 @@ class LcdActor(GenericActor):
 
         return False
 
-    def scrollText(self, text, duration, speed = 0.1):
+    def scrollText(self, text, lineNum, duration, speed = 0.1):
         """ scrolls text for the duration """
         
         if (len(text) < 15):
@@ -96,10 +99,11 @@ class LcdActor(GenericActor):
         rotatedText = text + " "
         iterations = duration / speed
         while iterations > 0 :
-            self.printLine(rotatedText[0:15])
+            self.printLine(rotatedText[0:15], lineNum)
             sleep(speed)
             rotatedText = rotatedText[1:len(rotatedText)] + rotatedText[0]
             iterations -= 1
+            self.log.info(iterations)
 
 
     def printLine(self, text, lineNum):
@@ -121,7 +125,7 @@ class LcdActor(GenericActor):
 
     def chop_string(self, text):
         """"
-        Divides sentence into 2 pieces, the first fits in 16 charcaters, the second is the leftover. 
+        Divides sentence into 2 pieces, the first fits in 16 charcaters, the second is the leftover.
         Already centered if in range of 16 charcaters .
         """
         words = text.split()  # split text by whitespace
@@ -179,7 +183,7 @@ class LcdActor(GenericActor):
             self.send(sender, self.status)
 
         if message.msgType == LcdReq.DISPLAY:
-            self.displayText(message.displayText, message.displayDuration, message.overFlow)
+            self.displayText(message.displayText, message.displayDuration)
 
     def teardown(self):
         """

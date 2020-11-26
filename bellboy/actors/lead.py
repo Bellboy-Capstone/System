@@ -1,3 +1,4 @@
+from time import sleep
 from actors.elevator import buttonHovered
 from actors.generic import GenericActor
 from actors.ultrasonic import UltrasonicActor
@@ -35,6 +36,11 @@ class BellboyLeadActor(GenericActor):
         self.send(self.lcd, lcd_setup_msg)
 
         self.status = Response.STARTED
+
+        sleep(2)
+        message = LcdMsg(LcdReq.DISPLAY, displayText="Hello this is a message, which floor do you want to go to?", displayDuration=2)
+        self.send(self.lcd, message)
+
 
     def stopBellboyLead(self):
         self.log.info("Stopping all child actors...")
