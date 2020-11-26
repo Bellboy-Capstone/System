@@ -46,9 +46,6 @@ class LcdActor(GenericActor):
         self.displayText("System Starting...", 2)
         self.status = LcdResp.SET
 
-
-
-
     def displayText(self, text, duration):
         """Displays text on screen for duration of time, then returns to defualt message"""
 
@@ -66,7 +63,6 @@ class LcdActor(GenericActor):
         self.status = Response.READY
 
     def printText(self, text, duration, scroll=False):
-
         """ Prints text to the LCD. If scroll = true, Scrolls the text for duration if the text is too long.
         Returns whether True if text was scrolled"""
 
@@ -89,22 +85,21 @@ class LcdActor(GenericActor):
 
         return False
 
-    def scrollText(self, text, lineNum, duration, speed = 0.1):
+    def scrollText(self, text, lineNum, duration, speed=0.1):
         """ scrolls text for the duration """
-        
+
         if (len(text) < 15):
             self.log.warning("text must be at least 15 characters to scroll!")
-            return 
+            return
 
         rotatedText = text + " "
         iterations = duration / speed
-        while iterations > 0 :
+        while iterations > 0:
             self.printLine(rotatedText[0:15], lineNum)
             sleep(speed)
             rotatedText = rotatedText[1:len(rotatedText)] + rotatedText[0]
             iterations -= 1
             self.log.info(iterations)
-
 
     def printLine(self, text, lineNum):
         """
