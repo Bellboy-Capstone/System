@@ -40,8 +40,8 @@ class LcdActor(GenericActor):
         self.default_text = default_text
 
         self.lcd = Adafruit_CharLCD(pin_rs=0, pin_e=2, pins_db=[4, 5, 6, 7], GPIO=mcp)
-        mcp.output(3, 1)     # turn on LCD backlight
-        self.lcd.begin(16, 2)     # set number of LCD lines and columns
+        mcp.output(3, 1)  # turn on LCD backlight
+        self.lcd.begin(16, 2)  # set number of LCD lines and columns
 
         self.displayText("System Starting...", 2)
         self.status = LcdResp.SET
@@ -63,7 +63,7 @@ class LcdActor(GenericActor):
         self.status = Response.READY
 
     def printText(self, text, duration, scroll=False):
-        """ Prints text to the LCD. If scroll = true, Scrolls the text for duration if the text is too long.
+        """Prints text to the LCD. If scroll = true, Scrolls the text for duration if the text is too long.
         Returns whether True if text was scrolled"""
 
         lines = self.chop_string(text)
@@ -88,7 +88,7 @@ class LcdActor(GenericActor):
     def scrollText(self, text, lineNum, duration, speed=0.1):
         """ scrolls text for the duration """
 
-        if (len(text) < 15):
+        if len(text) < 15:
             self.log.warning("text must be at least 15 characters to scroll!")
             return
 
@@ -97,7 +97,7 @@ class LcdActor(GenericActor):
         while iterations > 0:
             self.printLine(rotatedText[0:15], lineNum)
             sleep(speed)
-            rotatedText = rotatedText[1:len(rotatedText)] + rotatedText[0]
+            rotatedText = rotatedText[1 : len(rotatedText)] + rotatedText[0]
             iterations -= 1
             self.log.info(iterations)
 
@@ -105,8 +105,8 @@ class LcdActor(GenericActor):
         """
         Prints one text to the top or bottom line of the lcd.
         """
-        if (len(text) > 16):
-            self.log.warning("<"+text + "> TOO LONG FOR LCD!")
+        if len(text) > 16:
+            self.log.warning("<" + text + "> TOO LONG FOR LCD!")
             return
 
         if lineNum != 0 and lineNum != 1:
@@ -119,7 +119,7 @@ class LcdActor(GenericActor):
         self.lcd.message(text)
 
     def chop_string(self, text):
-        """"
+        """ "
         Divides sentence into 2 pieces, the first fits in 16 charcaters, the second is the leftover.
         Already centered if in range of 16 charcaters .
         """
@@ -145,16 +145,21 @@ class LcdActor(GenericActor):
             builder = builder.center(16)
 
         return [firstLine, builder]
+
     # --------------------------#
     # MESSAGE HANDLING METHODS  #
     # --------------------------#
 
     def receiveMsg_LcdReq(self, message, sender):
-        self.log.info(str.format("Received message {} from {}", message, self.nameOf(sender)))
+        self.log.info(
+            str.format("Received message {} from {}", message, self.nameOf(sender))
+        )
 
         # authorize
         if sender != self.parent:
-            self.log.warning(str.format("Received {} req from unauthorized sender!", message))
+            self.log.warning(
+                str.format("Received {} req from unauthorized sender!", message)
+            )
             self.send(sender, Response.UNAUTHORIZED)
             return
 
@@ -163,11 +168,15 @@ class LcdActor(GenericActor):
             self.clear()
 
     def receiveMsg_LcdMsg(self, message: LcdMsg, sender):
-        self.log.info(str.format("Received message {} from {}", message, self.nameOf(sender)))
+        self.log.info(
+            str.format("Received message {} from {}", message, self.nameOf(sender))
+        )
 
         # authorize
         if sender != self.parent:
-            self.log.warning(str.format("Received {} req from unauthorized sender!", message.type))
+            self.log.warning(
+                str.format("Received {} req from unauthorized sender!", message.type)
+            )
             self.send(sender, Response.UNAUTHORIZED)
             return
 

@@ -4,7 +4,15 @@ from actors.generic import GenericActor
 from actors.ultrasonic import UltrasonicActor
 from thespian.actors import ActorAddress
 from actors.lcd import LcdActor
-from utils.messages import Request, Response, SensorMsg, SensorReq, SensorResp, LcdMsg, LcdReq
+from utils.messages import (
+    Request,
+    Response,
+    SensorMsg,
+    SensorReq,
+    SensorResp,
+    LcdMsg,
+    LcdReq,
+)
 
 
 class BellboyLeadActor(GenericActor):
@@ -25,12 +33,16 @@ class BellboyLeadActor(GenericActor):
 
         # spawn actors
         self.log.info("Starting all dependent actors...")
-        self.ultrasonic_sensor = self.createActor(UltrasonicActor, globalName="ultrasonic")
+        self.ultrasonic_sensor = self.createActor(
+            UltrasonicActor, globalName="ultrasonic"
+        )
         self.lcd = self.createActor(LcdActor, globalName="lcd")
 
         # setup actors, handle their responses
-        sensor_setup_msg = SensorMsg(SensorReq.SETUP, trigPin=23, echoPin=24, maxDepth_cm=200)
-        lcd_setup_msg = LcdMsg(LcdReq.SETUP, defaultText="Welcome to" '\n' "Bellboy")
+        sensor_setup_msg = SensorMsg(
+            SensorReq.SETUP, trigPin=23, echoPin=24, maxDepth_cm=200
+        )
+        lcd_setup_msg = LcdMsg(LcdReq.SETUP, defaultText="Welcome to" "\n" "Bellboy")
 
         self.send(self.ultrasonic_sensor, sensor_setup_msg)
         self.send(self.lcd, lcd_setup_msg)
@@ -39,7 +51,10 @@ class BellboyLeadActor(GenericActor):
 
         sleep(2)
         message = LcdMsg(
-            LcdReq.DISPLAY, displayText="Hello this is a message, which floor you go to?", displayDuration=2)
+            LcdReq.DISPLAY,
+            displayText="Hello this is a message, which floor you go to?",
+            displayDuration=2,
+        )
         self.send(self.lcd, message)
 
     def stopBellboyLead(self):

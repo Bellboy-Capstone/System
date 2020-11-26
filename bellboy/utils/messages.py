@@ -24,6 +24,7 @@ class SummaryReq:
 class TestMode:
     pass
 
+
 # generic parent class for detailed messages
 
 
@@ -115,7 +116,14 @@ class LcdResp(Enum):
 
 
 class LcdMsg(DetailedMsg):
-    def __init__(self, msgType, defaultText=None, displayText=None, displayDuration=0.0, overFlow=None):
+    def __init__(
+        self,
+        msgType,
+        defaultText=None,
+        displayText=None,
+        displayDuration=0.0,
+        overFlow=None,
+    ):
         self.msgType = msgType
         self.defaultText = defaultText
         self.displayText = displayText
