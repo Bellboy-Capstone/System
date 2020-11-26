@@ -30,11 +30,10 @@ class LcdActor(GenericActor):
         # Create PCF8574 GPIO adapter.
         try:
             mcp = PCF8574_GPIO(PCF8574_address)
-        except:
-            self.log.debug("first adress invalid, trying second...")
+        except Exception:
             try:
                 mcp = PCF8574_GPIO(PCF8574A_address)
-            except:
+            except Exception:
                 self.log.warning("MCP creation failed!")
                 return
 
