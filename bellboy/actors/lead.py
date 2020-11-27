@@ -1,4 +1,3 @@
-from time import sleep
 from actors.elevator import buttonHovered
 from actors.generic import GenericActor
 from actors.ultrasonic import UltrasonicActor
