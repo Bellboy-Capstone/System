@@ -128,7 +128,6 @@ class LcdMsg(DetailedMsg):
         self.defaultText = defaultText
         self.displayText = displayText
         self.displayDuration = displayDuration
-        self.overFlow = overFlow
 
     def __str__(self):
         return self.msgType.name
