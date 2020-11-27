@@ -45,7 +45,7 @@ class BellboyLeadActor(GenericActor):
             SensorMsg(SensorReq.SETUP, trigPin=23, echoPin=24, maxDepth_cm=200),
         )
 
-        self.send(self.microphone, MicMsg(MicReq.SETUP))
+        self.send(self.microphone, MicMsg(MicReq.SETUP, micNumber=0))
 
         self.status = Response.STARTED
 

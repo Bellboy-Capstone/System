@@ -127,4 +127,4 @@ class MicrophoneActor(GenericActor):
         return self.status
 
     def teardown(self):
-        stop_listening()
+        self.stop_listening()
