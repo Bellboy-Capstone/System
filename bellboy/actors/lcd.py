@@ -27,7 +27,6 @@ class LcdActor(GenericActor):
 
     def setup(self, default_text):
         """setup LCD."""
-        # Create PCF8574 GPIO adapter.
 
         try:
             from utils.lcd.PCF8574 import PCF8574_GPIO
@@ -36,6 +35,7 @@ class LcdActor(GenericActor):
             self.TEST_MODE = True
             return
 
+        # Create PCF8574 GPIO adapter.
         try:
             mcp = PCF8574_GPIO(PCF8574_address)
         except Exception:
@@ -55,7 +55,7 @@ class LcdActor(GenericActor):
         self.status = LcdResp.SET
 
     def displayText(self, text, duration):
-        """Displays text on screen for duration of time, then returns to defualt message"""
+        """Displays text on screen for duration of time, then returns to default message"""
 
         if self.TEST_MODE:
             self.log.info("Mock LCD DISPLAY: " + text)
@@ -77,7 +77,7 @@ class LcdActor(GenericActor):
 
     def printText(self, text, duration, scroll=False):
         """Prints text to the LCD. If scroll = true, Scrolls the text for duration if the text is too long.
-        Returns whether True if text was scrolled"""
+        Returns True if text was scrolled"""
 
         lines = self.chop_string(text)
         if lines[0] and len(lines[0]) <= 16:

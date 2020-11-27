@@ -42,14 +42,13 @@ class BellboyLeadActor(GenericActor):
         sensor_setup_msg = SensorMsg(
             SensorReq.SETUP, trigPin=23, echoPin=24, maxDepth_cm=200
         )
-        lcd_setup_msg = LcdMsg(LcdReq.SETUP, defaultText="Welcome to" "\n" "Bellboy")
+        lcd_setup_msg = LcdMsg(LcdReq.SETUP, defaultText="Welcome to Bellboy")
 
         self.send(self.ultrasonic_sensor, sensor_setup_msg)
         self.send(self.lcd, lcd_setup_msg)
 
         self.status = Response.STARTED
 
-        sleep(2)
         message = LcdMsg(
             LcdReq.DISPLAY,
             displayText="Hello this is a message, which floor you go to?",

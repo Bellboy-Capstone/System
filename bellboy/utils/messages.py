@@ -112,7 +112,7 @@ class LcdReq(Enum):
 
 
 class LcdResp(Enum):
-    SET, DISPLAYING, SPILLING, CENTERING = range(4)
+    SET, DISPLAYING = range(2)
 
 
 class LcdMsg(DetailedMsg):
