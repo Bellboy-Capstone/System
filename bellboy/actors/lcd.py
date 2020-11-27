@@ -59,7 +59,7 @@ class LcdActor(GenericActor):
 
         if self.TEST_MODE:
             self.log.info("Mock LCD DISPLAY: " + text)
-            self.sleep(duration)
+            sleep(duration)
             return
 
         scrolled = self.printText(text, duration, scroll=True)
