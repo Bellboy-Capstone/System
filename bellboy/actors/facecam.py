@@ -11,6 +11,7 @@ from utils.openCV.FacialRecognition.03_face_recognition import
 
 
 camera = PiCamera()
+cam = cv2.VideoCapture(-1)
 
 class CameraActor(GenericActor):
     """
@@ -47,8 +48,24 @@ class CameraActor(GenericActor):
         self.status = CamResp.START_STREAMING
         self.log.info("started streaming...")
         while self.threadOn:
-            #run facial recognition code, dont know how to import tho
-            pass
+            #show hand cam
+            with picamera.PiCamera(resolution='640x480', framerate=60) as camera:
+            output = StreamingOutput()
+            #Uncomment the next line to change your Pi's Camera rotation (in degrees)
+            #camera.rotation = 90
+            camera.start_recording(output, format='mjpeg')
+            try:
+                address = ('', 8000)
+                server = StreamingServer(address, StreamingHandler)
+                server.serve_forever()
+            finally:
+                camera.stop_recording()
+                           
+            if self.camIx == 1:
+            #recognizeFace() run facial recognition code, dont know how to import tho 
+            str.format("Camera saw <<{}>>", recognized_audio)
+            else:
+
         pass
 
 
@@ -74,13 +91,25 @@ class CameraActor(GenericActor):
         self.log.debug("Terminating listener thread")
         self.threadOn = False
 
+    def clear(self, camNumber):
+        if camNumber == 1:
+            self.cam.release()
+            self.cv2.destroyAllWindows()
+
+            self.log.debug("Shutdown Facecam")
+        else:
+            self.camera.stop_recording()
+            self.log.debug("Shutdown Handcam")
+        
+        self.status = Response.READY
+
     # MSG HANDLING
     def receiveMsg_CamMsg(self, msg, sender):
         self.log.info(
             str.format("Received message {} from {}", msg, self.nameOf(sender))
         )
         if msg.msgType == CamReq.SETUP:
-            self.setupCamrophone(msg.CamNumber)
+            self.setupCam(msg.CamNumber)
 
             if self.status != CamResp.SET:
                 self.send(sender, Response.FAIL)
