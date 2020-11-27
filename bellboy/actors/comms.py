@@ -69,12 +69,17 @@ class CommsActor(GenericActor):
     # MESSAGE HANDLING METHODS  #
     # --------------------------#
 
+    def receiveMsg_str(self, message, sender):
+        """Sends a string as a message to Django Services."""
+        if self._authenticated is False or self._identifier is None:
+            self.log.error("Please authenticate before attempting to use this actor.")
+        else:
+            self.log.debug("Got string %s to send as log.", message)
+
     def receiveMsg_CommsReq(self, message, sender):
         """responding to simple sensor requests."""
 
-        self.log.info(
-            str.format("Received message {} from {}", message, self.nameOf(sender))
-        )
+        self.log.info("Received message %s from %s", message, self.nameOf(sender))
 
         # ignore unauthorized requests
         if sender != self.parent:

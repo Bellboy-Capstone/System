@@ -52,6 +52,10 @@ class BellboyLeadActor(GenericActor):
         self.send(self.realtime_actor, Request.START)
 
         self.status = Response.STARTED
+        self.send(self.realtime_actor, "Let's GOOOOOO!")
+        self.send(self.realtime_actor, "Let's GOOOOOO!")
+        self.send(self.realtime_actor, "Let's GOOOOOO!")
+        self.send(self.realtime_actor, "Let's GOOOOOO!")
 
     def stopBellboyLead(self):
         self.log.info("Stopping all child actors...")

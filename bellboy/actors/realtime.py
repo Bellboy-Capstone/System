@@ -1,3 +1,4 @@
+import ssl
 from time import sleep
 
 import requests
@@ -39,22 +40,48 @@ class RealtimeCommsActor(GenericActor):
     # --------------------------#
 
     def _setup_websocket(self):
-        req = requests.get(f"https://{url}")
+
+        # Confirm that Heroku is up.
+        req = requests.get(f"https://{url}/")
         if req.status_code != 200:
             raise Exception("Enpoint is not up.")
+        else:
+            self.log.info("WebSocket endpoint at %s is up.", f"https://{url}")
 
-        self.log.info("Starting WebSocket connection to %s", f"wss://{url}")
-        self._websocket = websocket.create_connection(f"wss://{url}")
+        #
+        self.log.info("Starting WebSocket connection to %s", f"ws://{url}")
+        self._websocket = websocket.create_connection(
+            f"wss://{url}",
+            sslopt={"cert_reqs": ssl.CERT_NONE},
+            options={"enable_multithread": False},
+        )
         sleep(1)
-        self.log.info("Saying hello")
-        self._websocket.send("Hello!!!")
+        self.log.info("Authenticating with the WebSocket service...")
 
-    def authenticate(self):
-        pass
+        # Call out until registered.
+        response = ""
+        while not response.startswith("REGISTERED"):
+            response = ""
+            self._websocket.send("BELLBOY")
+            self.log.info("Getting data from Realtime Services...")
+            response = self._websocket.recv()
+            self.log.info("Got data from Realtime Services: %s", response)
+            sleep(1)
+
+        # Announce successful setup:
+        self.log.info("Realtime Services are ready to go!")
 
     # --------------------------#
     # MESSAGE HANDLING METHODS  #
     # --------------------------#
+
+    def receiveMsg_str(self, message, sender):
+        """Sends a string as a message to NodeJS Services."""
+        if self._websocket is None:
+            self.log.error("Please authenticate before attempting to use this actor.")
+        else:
+            self.log.debug("Sending string %s to realtime logging service.", message)
+            self._websocket.send(message)
 
     def receiveMsg_RealtimeCommsReq(self, message, sender):
         """responding to simple sensor requests."""
