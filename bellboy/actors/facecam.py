@@ -1,15 +1,12 @@
 import time
 from threading import Thread
 
-import gpiozero
 from picamera import PiCamera
-from gpiozero.pins.mock import MockFactory
 from actors.generic import GenericActor
 from collections import deque
-#from utils.messages import
+from utils.messages import CamReq, CamResp, CamMsg, Response
 from bellboy.actors.generic import GenericActor
 
-# from bellboy.utils.messages import
 
 camera = PiCamera()
 
