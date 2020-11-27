@@ -6,6 +6,7 @@ from actors.generic import GenericActor
 from collections import deque
 from utils.messages import CamReq, CamResp, CamMsg, Response
 from bellboy.actors.generic import GenericActor
+from utils.openCV.FacialRecognition.03_face_recognition import
 
 
 camera = PiCamera()
@@ -38,6 +39,19 @@ class CameraActor(GenericActor):
         self.camIx = camNumber
         self.status = CamResp.SET
     
+
+    def streaming_loop(self):
+        """to run the camera's thread, looks for faces"""
+
+        self.status = CamResp.START_STREAMING
+        self.log.info("started streaming...")
+        while self.threadOn:
+            #run facial recognition code, dont know how to import tho
+            pass
+        pass
+
+
+
     def start_streaming(self):
         if self.status != CamResp.SET:
             self.log.warning("Cam not setup!")
