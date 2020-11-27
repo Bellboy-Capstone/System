@@ -12,13 +12,6 @@ Developed by Marcelo Rovai - MJRoBot.org @ 21Feb18
 import os
 import cv2
 import numpy as np
-<<<<<<< HEAD
-=======
-import os 
-import faceFucns 
-
-
->>>>>>> 372584cf1e11cd5f7bf8e6e2476305cb78dcb8b5
 recognizer = cv2.face.LBPHFaceRecognizer_create()
 recognizer.read('trainer/trainer.yml')
 cascadePath = "haarcascade_frontalface_default.xml"
@@ -35,12 +28,6 @@ floorNum = 0
 names = ['none', 'Marcelo', 'Peter', 'Dan', 'Yusra', 'Elma', 'Ryan', 'shriya', 'Nevin', 'Sein']
 floors = ['G', 2, 4, 6, 17, 18, 42, 63, 2, 9]
 
-<<<<<<< HEAD
-=======
-names = ['none', 'Marcelo', 'Peter', 'Dan', 'Yusra', 'Elma', 'Ryan', 'shriya', 'Nevin', 'Sein']
-floors = ['G', 2, 4, 6, 17, 18, 42, 63, 2, 9]
-
->>>>>>> 372584cf1e11cd5f7bf8e6e2476305cb78dcb8b5
 # Initialize and start realtime video capture
 
 cam = cv2.VideoCapture(-1)
