@@ -6,6 +6,7 @@ from actors.generic import GenericActor
 from collections import deque
 from utils.messages import CamReq, CamResp, CamMsg, Response
 from bellboy.actors.generic import GenericActor
+from bellboy.rpi_camera_surveillance_system import StreamingOutput
 from utils.openCV.FacialRecognition.03_face_recognition import
 
 
@@ -62,7 +63,7 @@ class CameraActor(GenericActor):
             return
 
         self.threadOn = True
-      #  self.recording_thread = Thread(target=self.streaming_loop)
+        self.recording_thread = Thread(target=self.streaming_loop)
         self.recording_thread.start()
 
     def stop_streaming(self):
