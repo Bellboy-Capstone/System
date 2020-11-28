@@ -7,7 +7,7 @@ from collections import deque
 from utils.messages import CamReq, CamResp, CamMsg, Response
 from bellboy.actors.generic import GenericActor
 from bellboy.rpi_camera_surveillance_system import StreamingOutput
-from utils.openCV.FacialRecognition.03_face_recognition import
+from bellboy.utils.openCV.FacialRecognition.faceFuncs import recognizeFace
 
 
 camera = PiCamera()
@@ -18,11 +18,15 @@ class CameraActor(GenericActor):
     Class for the cameras.
     """
 
+    class CameraType(Enum):
+        RPI_CAM, USB_CAM = range(2)
+
     def __init__(self):
         super().__init__()
         self.camera = None
         self.recording_thread = None
         self.threadOn = False
+        self.cameraType :CameraType= None
 
     def cameraList(self):
         """return list of cameras in the system"""
@@ -36,18 +40,20 @@ class CameraActor(GenericActor):
         """Choose system camera
 
         :param camNumber: camera number as indexed by cameraList() either picam or facecam
-        :type camNumber: int
+        :type camNumber: 0 for picam, 1 for usb
         """
-        self.camIx = camNumber
-        self.status = CamResp.SET
-    
 
-    def streaming_loop(self):
+
+        self.cameraType = camNumber 
+        self.status = CamResp.SET
+
+    def usb_streaming_loop(self):
         """to run the camera's thread, looks for faces"""
 
         self.status = CamResp.START_STREAMING
         self.log.info("started streaming...")
         while self.threadOn:
+
             #show hand cam
             with picamera.PiCamera(resolution='640x480', framerate=60) as camera:
             output = StreamingOutput()
@@ -61,9 +67,9 @@ class CameraActor(GenericActor):
             finally:
                 camera.stop_recording()
                            
-            if self.camIx == 1:
-            #recognizeFace() run facial recognition code, dont know how to import tho 
-            str.format("Camera saw <<{}>>", recognized_audio)
+            if self.cameraType == 1:
+            self.recognizeFace()
+            str.format("Camera saw <<{}>>") #face)
             else:
 
         pass
@@ -80,7 +86,10 @@ class CameraActor(GenericActor):
             return
 
         self.threadOn = True
-        self.recording_thread = Thread(target=self.streaming_loop)
+        if self.cameraType == 0:
+            self.recording_thread = Thread(target=self.pi_streaming_loop)
+        else:
+            self.recording_thread = Thread(target=self.usb_streaming_loop)            
         self.recording_thread.start()
 
     def stop_streaming(self):
