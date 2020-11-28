@@ -1,10 +1,17 @@
-from thespian.actors import ActorAddress
-
 from actors.elevator import buttonHovered
 from actors.generic import GenericActor
 from actors.ultrasonic import UltrasonicActor
-from actors.lcd import LiquidCrystalActor
-from utils.messages import Request, Response, SensorMsg, SensorReq, SensorResp
+from thespian.actors import ActorAddress
+from actors.lcd import LcdActor
+from utils.messages import (
+    Request,
+    Response,
+    SensorMsg,
+    SensorReq,
+    SensorResp,
+    LcdMsg,
+    LcdReq,
+)
 
 
 class BellboyLeadActor(GenericActor):
@@ -12,15 +19,14 @@ class BellboyLeadActor(GenericActor):
         """define Bellboy's private variables."""
         super().__init__()
         self.ultrasonic_sensor = None
-        self.lcd= None
+        self.lcd = None
         self.event_count = 0
 
     def startBellboyLead(self):
         """
         Starts bellboy lead actor services.
 
-        Configures global RPI Board. Spawns and sets up child actors
-        (ultrasonic sensor).
+        Spawns and sets up child actors
         """
         self.log.info("Starting bellboy services.")
 
@@ -29,29 +35,25 @@ class BellboyLeadActor(GenericActor):
         self.ultrasonic_sensor = self.createActor(
             UltrasonicActor, globalName="ultrasonic"
         )
+        self.lcd = self.createActor(LcdActor, globalName="lcd")
 
-        self.log.info("Starting all dependent actors...")
-        self.lcd = self.createActor(
-            LiquidCrystal, globalName="lcd"
+        # setup actors, handle their responses
+        sensor_setup_msg = SensorMsg(
+            SensorReq.SETUP, trigPin=23, echoPin=24, maxDepth_cm=200
         )
-        
-        # request to setup sensor
-        self.send(
-            self.ultrasonic_sensor,
-            SensorMsg(
-                SensorReq.SETUP,
-                trigPin=23,
-                echoPin=24,
-                maxDepth_cm=200,
-            ),
-            self.lcd,
-            LCDMsg(
-                LCDReq.SETUP,
-                sdaPin = 2,
-                sclPin = 3
-            ),
-        )
+        lcd_setup_msg = LcdMsg(LcdReq.SETUP, defaultText="Welcome to Bellboy")
+
+        self.send(self.ultrasonic_sensor, sensor_setup_msg)
+        self.send(self.lcd, lcd_setup_msg)
+
         self.status = Response.STARTED
+
+        message = LcdMsg(
+            LcdReq.DISPLAY,
+            displayText="Hello this is a message, which floor you go to?",
+            displayDuration=2,
+        )
+        self.send(self.lcd, message)
 
     def stopBellboyLead(self):
         self.log.info("Stopping all child actors...")
@@ -63,6 +65,7 @@ class BellboyLeadActor(GenericActor):
     # --------------------------#
     # MESSAGE HANDLING METHODS  #
     # --------------------------#
+
     def receiveMsg_Request(self, message: Request, sender: ActorAddress):
         """handles messages of type Request enum."""
         self.log.debug(
@@ -74,14 +77,6 @@ class BellboyLeadActor(GenericActor):
 
         elif message is Request.STOP:
             self.stopBellboyLead()
-
-        elif message is Request.STATUS:
-            self.log.debug(str.format("Status check - {}", Response.ALIVE.name))
-
-        else:
-            msg = "Unhandled Request Enum value sent."
-            self.log.error(msg)
-            raise Exception(msg)
 
         self.send(sender, self.status)
 
@@ -98,9 +93,7 @@ class BellboyLeadActor(GenericActor):
                 self.send(
                     sender,
                     SensorMsg(
-                        SensorReq.POLL,
-                        pollPeriod_ms=100,
-                        triggerFunc=buttonHovered,
+                        SensorReq.POLL, pollPeriod_ms=100, triggerFunc=buttonHovered
                     ),
                 )
 
@@ -123,19 +116,10 @@ class BellboyLeadActor(GenericActor):
             self.log.debug("received 3 events, turning off sensor.")
             self.send(self.ultrasonic_sensor, SensorReq.STOP)
 
-    def receiveMsg_LCDResp(self, sender):
-        self.log.info(
-            str.format("Received message from" , self.nameOf(sender))
-        )
-
-    def receiveMsg_LCDEventMsg(self, message, sender):
-        self.log.info(
-            str.format("Received message {} from {}", message, self.nameOf(sender))
-        )
-
-
-
-    def receiveMsg_SummaryReq(self, message, sender):
-        """sends a summary of the actor."""
+    def summary(self):
+        """Returns a summary of the actor."""
+        return self.status
         # TODO flesh this out...
-        self.send(sender, self.status)
+
+    def teardown(self):
+        pass

@@ -25,9 +25,16 @@ class TestMode:
     pass
 
 
+# generic parent class for detailed messages
+
+
+class DetailedMsg:
+    pass
+
+
 # general requests
 class Request(Enum):
-    START, STOP, STATUS, CLEAR = range(4)
+    START, STOP, CLEAR = range(3)
 
 
 # general responses
@@ -61,8 +68,7 @@ class SensorResp(Enum):
 
 
 # for req/resp with more info
-# TODO consolidate sensor req/resp msgs into one claass cuz theyre redundant
-class SensorMsg:
+class SensorMsg(DetailedMsg):
     def __init__(
         self,
         type,
@@ -89,7 +95,7 @@ class SensorEvent(Enum):
 
 
 # for event with more info
-class SensorEventMsg:
+class SensorEventMsg(DetailedMsg):
     def __init__(self, eventType, eventData):
         self.eventType = eventType
         self.eventData = eventData
@@ -98,55 +104,29 @@ class SensorEventMsg:
         return self.eventType.name
 
 
-"""LCD messages"""
-
-
-class LCDReq(Enum):
-    SETUP, DISPLAY= range(2)
-
-
-class LCDResp(Enum):
-    SET, DISPLAYING= range(2)
-
-
-class LCDMsg:
-    def __init__(self, msgType, LCDNumber=None):
-        self.msgType = msgType
-        self.LCDNumber = LCDNumber
-
-    def __str__(self):
-        return self.msgType.name
-
-
-class LCDEvent(Enum):
-    FLOOR_CHOSEN = range(1)
-
-
-class LCDEventMsg:
-    def __init__(self, eventType: LCDEvent, floorChoice=0):
-        self.eventType = eventType
-        self.floorChoice = floorChoice
-
-    def __str__(self):
-        return self.eventType.name
-
 """Cam messages"""
+
+
 class CamReq(Enum):
     SETUP, GET_CAM_LIST, START_STREAMING, STOP_STREAMING = range(4)
 
+
 class CamResp(Enum):
-    SET, STREAMING, CAM_LIST= range(3)
+    SET, STREAMING, CAM_LIST = range(3)
+
 
 class CamMsg:
     def __init__(self, msgType, cameraNumber=None):
         self.msgType = msgType
-        self.cameraNumber = cameraNumber 
-    
+        self.cameraNumber = cameraNumber
+
     def __str__(self):
         return self.msgType.name
 
+
 class CamEvent(Enum):
     FLOOR_CHOSEN, FACE_DETECED = range(2)
+
 
 class CamEventMsg:
     def __init__(self, eventType: CamEvent, floorChoice=0, faceDetected=None):
@@ -156,3 +136,32 @@ class CamEventMsg:
 
     def __str__(self):
         return self.eventType.name
+
+
+"""Lcd messages"""
+
+
+class LcdReq(Enum):
+    SETUP, DISPLAY, CLEAR = range(3)
+
+
+class LcdResp(Enum):
+    SET, DISPLAYING = range(2)
+
+
+class LcdMsg(DetailedMsg):
+    def __init__(
+        self,
+        msgType,
+        defaultText=None,
+        displayText=None,
+        displayDuration=0.0,
+        overFlow=None,
+    ):
+        self.msgType = msgType
+        self.defaultText = defaultText
+        self.displayText = displayText
+        self.displayDuration = displayDuration
+
+    def __str__(self):
+        return self.msgType.name
