@@ -132,10 +132,10 @@ class CameraType(Enum):
 
 
 class CamEventMsg:
-    def __init__(self, eventType: CamEvent, floorChoice=0, faceDetected=None):
+    def __init__(self, eventType: CamEvent, face = None, faceId = 0):
         self.eventType = eventType
-        self.floorChoice = floorChoice
-        self.faceDetected = faceDetected
+        self.face = face
+        self.faceId = faceId
 
     def __str__(self):
         return self.eventType.name

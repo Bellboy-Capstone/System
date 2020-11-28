@@ -4,9 +4,9 @@ from threading import Thread
 from actors.generic import GenericActor
 from collections import deque
 from picamera import PiCamera
-from utils.camera.facial.faceFuncs import recognizeFace
+from utils.camera.facial.FacialRecognition.faceFuncs import recognizeFace
 from utils.camera.rpi_camera_surveillance_system import StreamingOutput
-from utils.messages import CameraType, CamMsg, CamReq, CamResp, Response
+from utils.messages import CameraType, CamMsg, CamReq, CamResp, Response, CamEventMsg
 
 
 class FacecamActor(GenericActor):
@@ -71,6 +71,20 @@ class FacecamActor(GenericActor):
         while self.threadOn:
             self.log.debug("inside loop ..")
             time.sleep(5)
+
+            #             #show hand cam
+            # with picamera.PiCamera(resolution='640x480', framerate=60) as camera:
+            # output = StreamingOutput()
+            # #Uncomment the next line to change your Pi's Camera rotation (in degrees)
+            # #camera.rotation = 90
+            # camera.start_recording(output, format='mjpeg')
+            # try:
+            #     address = ('', 8000)
+            #     server = StreamingServer(address, StreamingHandler)
+            #     server.serve_forever()
+            # finally:
+            #     camera.stop_recording()
+                           
         
         self.log.info("Loop terminated.")
         self.status = CamResp.SET
@@ -79,33 +93,28 @@ class FacecamActor(GenericActor):
         """
         Streaming thread for USB cameras.
         The thread:
-            - Looks for faces
-            - (...etc...)
-            
+            - Looks for face
+            - if face is found:
+                - if face doesnt exist, recognize them to our database
+                - send presence event 
         """
 
         self.status = CamResp.STREAMING
         self.log.info("Start streaming loop...")
         
         while self.threadOn:
-            #show hand cam
-            with picamera.PiCamera(resolution='640x480', framerate=60) as camera:
-            output = StreamingOutput()
-            #Uncomment the next line to change your Pi's Camera rotation (in degrees)
-            #camera.rotation = 90
-            camera.start_recording(output, format='mjpeg')
+            
+            # look for a face, with timeout of course
             try:
-                address = ('', 8000)
-                server = StreamingServer(address, StreamingHandler)
-                server.serve_forever()
-            finally:
-                camera.stop_recording()
-                           
-            if self.cameraType == 1:
-            self.recognizeFace()
-            str.format("Camera saw <<{}>>") #face)
-            else:
+                face = wait_for_face(timeout = 60)
+                if face not in saved_faces:
+                    associate(saved_faces.nextId, face) # save face and associate it to the next available id
+                event_msg = CamEventMsg(eventType = CamEvent.FACE_DETECTED, face = face, faceId = getFaceId(face))
+                self.send(self.parent, event_msg)
 
+            except TimeoutError:
+                self.log.debug("No one detected.")
+            
         self.log.info("Streaming terminated.")
         self.status = CamResp.SET
 
