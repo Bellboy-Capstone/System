@@ -25,6 +25,13 @@ class TestMode:
     pass
 
 
+# generic parent class for detailed messages
+
+
+class DetailedMsg:
+    pass
+
+
 # general requests
 class Request(Enum):
     START, STOP, CLEAR = range(3)
@@ -61,8 +68,7 @@ class SensorResp(Enum):
 
 
 # for req/resp with more info
-# TODO consolidate sensor req/resp msgs into one claass cuz theyre redundant
-class SensorMsg:
+class SensorMsg(DetailedMsg):
     def __init__(
         self,
         type,
@@ -89,10 +95,39 @@ class SensorEvent(Enum):
 
 
 # for event with more info
-class SensorEventMsg:
+class SensorEventMsg(DetailedMsg):
     def __init__(self, eventType, eventData):
         self.eventType = eventType
         self.eventData = eventData
 
     def __str__(self):
         return self.eventType.name
+
+
+"""Lcd messages"""
+
+
+class LcdReq(Enum):
+    SETUP, DISPLAY, CLEAR = range(3)
+
+
+class LcdResp(Enum):
+    SET, DISPLAYING = range(2)
+
+
+class LcdMsg(DetailedMsg):
+    def __init__(
+        self,
+        msgType,
+        defaultText=None,
+        displayText=None,
+        displayDuration=0.0,
+        overFlow=None,
+    ):
+        self.msgType = msgType
+        self.defaultText = defaultText
+        self.displayText = displayText
+        self.displayDuration = displayDuration
+
+    def __str__(self):
+        return self.msgType.name
