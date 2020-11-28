@@ -127,6 +127,9 @@ class CamMsg:
 class CamEvent(Enum):
     FLOOR_CHOSEN, FACE_DETECED = range(2)
 
+class CameraType(Enum):
+    RPI_CAM, USB_CAM = range(2)
+
 
 class CamEventMsg:
     def __init__(self, eventType: CamEvent, floorChoice=0, faceDetected=None):
