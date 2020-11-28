@@ -104,6 +104,7 @@ class FacecamActor(GenericActor):
         
         while self.threadOn:
             
+            # pseudo code
             # look for a face, with timeout of course
             try:
                 face = wait_for_face(timeout = 60)
