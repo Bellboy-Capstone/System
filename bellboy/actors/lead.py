@@ -1,12 +1,15 @@
 from actors.comms import CommsActor
 from actors.elevator import buttonHovered
 from actors.generic import GenericActor
+from actors.lcd import LcdActor
 from actors.realtime import RealtimeCommsActor
 from actors.ultrasonic import UltrasonicActor
 from thespian.actors import ActorAddress
 from utils.messages import (
     CommsReq,
     CommsResp,
+    LcdMsg,
+    LcdReq,
     Request,
     Response,
     SensorMsg,
@@ -20,6 +23,7 @@ class BellboyLeadActor(GenericActor):
         """define Bellboy's private variables."""
         super().__init__()
         self.ultrasonic_sensor = None
+        self.lcd = None
         self.event_count = 0
 
     def startBellboyLead(self):
@@ -40,22 +44,29 @@ class BellboyLeadActor(GenericActor):
             RealtimeCommsActor, globalName="realtime"
         )
 
-        # request to setup sensor
-        """
-        self.send(
-            self.ultrasonic_sensor,
-            SensorMsg(SensorReq.SETUP, trigPin=23, echoPin=24, maxDepth_cm=200),
-        )
-        """
-        # request to setup communications
+        # requests to setup actors
         self.send(self.comms_actor, CommsReq.AUTHENTICATE)
         self.send(self.realtime_actor, Request.START)
+        self.lcd = self.createActor(LcdActor, globalName="lcd")
+
+        # setup actors, handle their responses
+        sensor_setup_msg = SensorMsg(
+            SensorReq.SETUP, trigPin=23, echoPin=24, maxDepth_cm=200
+        )
+        lcd_setup_msg = LcdMsg(LcdReq.SETUP, defaultText="Welcome to Bellboy")
+
+        self.send(self.ultrasonic_sensor, sensor_setup_msg)
+        self.send(self.lcd, lcd_setup_msg)
 
         self.status = Response.STARTED
-        self.send(self.realtime_actor, "Let's GOOOOOO!")
-        self.send(self.realtime_actor, "Let's GOOOOOO!")
-        self.send(self.realtime_actor, "Let's GOOOOOO!")
-        self.send(self.realtime_actor, "Let's GOOOOOO!")
+        self.send(self.realtime_actor, "A Bellboy woke up!")
+
+        message = LcdMsg(
+            LcdReq.DISPLAY,
+            displayText="Hello this is a message, which floor would you like to go to?  ",
+            displayDuration=3,
+        )
+        self.send(self.lcd, message)
 
     def stopBellboyLead(self):
         self.log.info("Stopping all child actors...")
@@ -66,6 +77,7 @@ class BellboyLeadActor(GenericActor):
     # --------------------------#
     # MESSAGE HANDLING METHODS  #
     # --------------------------#
+
     def receiveMsg_Request(self, message: Request, sender: ActorAddress):
         """handles messages of type Request enum."""
         self.log.debug(
@@ -108,9 +120,6 @@ class BellboyLeadActor(GenericActor):
     def receiveMsg_SensorEventMsg(self, message, sender):
         self.event_count += 1
         self.log.info(
-            str.format("Received message {} from {}", message, self.nameOf(sender))
-        )
-        self.log.info(
             str.format(
                 "#{}: {} event from {} - {}",
                 self.event_count,
@@ -119,10 +128,22 @@ class BellboyLeadActor(GenericActor):
                 message.eventData,
             )
         )
+        message = LcdMsg(
+            LcdReq.DISPLAY,
+            displayText=f"Requested Floor #{str(message.eventData)[6]}",
+            displayDuration=3,
+        )
+        self.send(self.lcd, message)
 
-        if self.event_count == 3:
-            self.log.debug("received 3 events, turning off sensor.")
+        if self.event_count == 10:
+            self.log.debug("received 10 events, turning off sensor.")
             self.send(self.ultrasonic_sensor, SensorReq.STOP)
+            message = LcdMsg(
+                LcdReq.DISPLAY,
+                displayText="ULTRA DISABLED",
+                displayDuration=1,
+            )
+            self.send(self.lcd, message)
 
     def summary(self):
         """Returns a summary of the actor."""

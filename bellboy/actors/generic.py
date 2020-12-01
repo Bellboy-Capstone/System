@@ -3,7 +3,7 @@ import os
 from abc import ABC, abstractmethod
 
 from thespian.actors import ActorAddress, ActorTypeDispatcher
-from utils.messages import Init, Response, StatusReq, SummaryReq, TestMode
+from utils.messages import DetailedMsg, Init, Response, StatusReq, SummaryReq, TestMode
 
 
 class GenericActor(ActorTypeDispatcher, ABC):
@@ -111,11 +111,12 @@ class GenericActor(ActorTypeDispatcher, ABC):
         pass
 
     @abstractmethod
-    def summary(self):
+    def summary(self) -> DetailedMsg:
         """
         Returns a summary of the actor.
 
         The summary can be an object of any type described in the messages module.
+
         :rtype: object
         """
         pass
