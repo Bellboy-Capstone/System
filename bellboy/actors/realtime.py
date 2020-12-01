@@ -1,3 +1,5 @@
+import os
+import pickle
 import ssl
 from time import sleep
 
@@ -7,7 +9,8 @@ from actors.generic import GenericActor
 from utils.messages import CommsReq, CommsResp, Request, Response
 
 
-url = "bellboy-realtime.herokuapp.com"
+url = "websocket-bellboy.herokuapp.com"
+credential_path = "bellboy-credentials.obj"
 
 
 class RealtimeCommsActor(GenericActor):
@@ -17,6 +20,7 @@ class RealtimeCommsActor(GenericActor):
     _websocket = None
     _started = False
     _thread = None
+    _identifier = None
 
     def on_message(self):
         self.log.info("on_message")
@@ -71,6 +75,19 @@ class RealtimeCommsActor(GenericActor):
         # Announce successful setup:
         self.log.info("Realtime Services are ready to go!")
 
+        # Get the ID saved by comms actor if the file is present
+        if self._identifier is None:
+            # Unpickle the auth file if it is present:
+            if (
+                os.path.exists(credential_path)
+                and os.path.isfile(credential_path)
+                and os.path.getsize(credential_path) > 0
+            ):
+                self.log.info("Found credential file, unpickling...")
+                auth_file = open(credential_path, "rb")
+                self._identifier = str(pickle.load(auth_file))
+                auth_file.close()
+
     # --------------------------#
     # MESSAGE HANDLING METHODS  #
     # --------------------------#
@@ -81,7 +98,10 @@ class RealtimeCommsActor(GenericActor):
             self.log.error("Please authenticate before attempting to use this actor.")
         else:
             self.log.debug("Sending string %s to realtime logging service.", message)
-            self._websocket.send(message)
+            if self._identifier:
+                self._websocket.send(f"BB{self._identifier}: {message}")
+            else:
+                self._websocket.send(message)
 
     def receiveMsg_RealtimeCommsReq(self, message, sender):
         """responding to simple sensor requests."""

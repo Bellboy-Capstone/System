@@ -76,6 +76,13 @@ class CommsActor(GenericActor):
         else:
             self.log.debug("Got string %s to send as log.", message)
 
+    def receiveMsg_dict(self, message, sender):
+        """Sends a string as a message to Django Services."""
+        if self._authenticated is False or self._identifier is None:
+            self.log.error("Please authenticate before attempting to use this actor.")
+        else:
+            self.log.debug("Got string %s to send as log.", message)
+
     def receiveMsg_CommsReq(self, message, sender):
         """responding to simple sensor requests."""
 

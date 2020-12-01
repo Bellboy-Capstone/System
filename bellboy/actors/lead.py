@@ -118,7 +118,6 @@ class BellboyLeadActor(GenericActor):
             self.log.info("Hooray! Comms work.")
 
     def receiveMsg_SensorEventMsg(self, message, sender):
-        self.event_count += 1
         self.log.info(
             str.format(
                 "#{}: {} event from {} - {}",
@@ -128,22 +127,20 @@ class BellboyLeadActor(GenericActor):
                 message.eventData,
             )
         )
+
+        # Form a message based on the SensorEventMsg
+        sensor_message_str = f"Requested Floor #{str(message.eventData)[6]}"
+
+        # Show the message on the LCD
         message = LcdMsg(
             LcdReq.DISPLAY,
-            displayText=f"Requested Floor #{str(message.eventData)[6]}",
+            displayText=sensor_message_str,
             displayDuration=3,
         )
         self.send(self.lcd, message)
 
-        if self.event_count == 10:
-            self.log.debug("received 10 events, turning off sensor.")
-            self.send(self.ultrasonic_sensor, SensorReq.STOP)
-            message = LcdMsg(
-                LcdReq.DISPLAY,
-                displayText="ULTRA DISABLED",
-                displayDuration=1,
-            )
-            self.send(self.lcd, message)
+        # Send the message to Realtime WebLogs
+        self.send(self.realtime_actor, sensor_message_str)
 
     def summary(self):
         """Returns a summary of the actor."""
