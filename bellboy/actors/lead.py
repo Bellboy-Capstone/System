@@ -1,16 +1,16 @@
 from actors.elevator import buttonHovered
 from actors.generic import GenericActor
+from actors.lcd import LcdActor
 from actors.ultrasonic import UltrasonicActor
 from thespian.actors import ActorAddress
-from actors.lcd import LcdActor
 from utils.messages import (
+    LcdMsg,
+    LcdReq,
     Request,
     Response,
     SensorMsg,
     SensorReq,
     SensorResp,
-    LcdMsg,
-    LcdReq,
 )
 
 
@@ -50,8 +50,8 @@ class BellboyLeadActor(GenericActor):
 
         message = LcdMsg(
             LcdReq.DISPLAY,
-            displayText="Hello this is a message, which floor you go to?",
-            displayDuration=2,
+            displayText="Hello this is a message, which floor would you like to go to?  ",
+            displayDuration=3,
         )
         self.send(self.lcd, message)
 
@@ -99,9 +99,6 @@ class BellboyLeadActor(GenericActor):
     def receiveMsg_SensorEventMsg(self, message, sender):
         self.event_count += 1
         self.log.info(
-            str.format("Received message {} from {}", message, self.nameOf(sender))
-        )
-        self.log.info(
             str.format(
                 "#{}: {} event from {} - {}",
                 self.event_count,
@@ -110,10 +107,22 @@ class BellboyLeadActor(GenericActor):
                 message.eventData,
             )
         )
+        message = LcdMsg(
+            LcdReq.DISPLAY,
+            displayText=f"Requested Floor #{str(message.eventData)[6]}",
+            displayDuration=3,
+        )
+        self.send(self.lcd, message)
 
-        if self.event_count == 3:
-            self.log.debug("received 3 events, turning off sensor.")
+        if self.event_count == 10:
+            self.log.debug("received 10 events, turning off sensor.")
             self.send(self.ultrasonic_sensor, SensorReq.STOP)
+            message = LcdMsg(
+                LcdReq.DISPLAY,
+                displayText="ULTRA DISABLED",
+                displayDuration=1,
+            )
+            self.send(self.lcd, message)
 
     def summary(self):
         """Returns a summary of the actor."""
