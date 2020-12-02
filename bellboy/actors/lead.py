@@ -59,7 +59,7 @@ class BellboyLeadActor(GenericActor):
         self.send(self.lcd, lcd_setup_msg)
 
         self.status = Response.STARTED
-        self.send(self.realtime_actor, "A Bellboy woke up!")
+        self.send(self.realtime_actor, "Ready to serve clients.")
         self.send(self.comms_actor, {"event": "power", "state": "on"})
 
         message = LcdMsg(
@@ -71,6 +71,7 @@ class BellboyLeadActor(GenericActor):
 
     def stopBellboyLead(self):
         self.log.info("Stopping all child actors...")
+        self.send(self.realtime_actor, "Stopping.")
         self.status = Response.DONE
         self.send(self.ultrasonic_sensor, SensorReq.STOP)
         self.send(self.ultrasonic_sensor, SensorReq.CLEAR)
