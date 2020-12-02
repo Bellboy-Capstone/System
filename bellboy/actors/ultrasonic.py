@@ -125,11 +125,6 @@ class UltrasonicActor(GenericActor):
         self.log.debug("Stopping the UltraSonic detection loop...")
         self._terminate_thread = True
 
-    def receiveMsg_ActorExitRequest(self, msg, sender):
-        self.stop = True
-        self._stop_polling()
-        self.log.debug("Stopped Ultrasonic thread")
-
     def _clear(self):
         self._trigPin = 0
         self._echoPin = 0

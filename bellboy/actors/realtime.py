@@ -6,7 +6,7 @@ from time import sleep
 import requests
 import websocket
 from actors.generic import GenericActor
-from utils.messages import CommsReq, CommsResp, Request, Response
+from utils.messages import CommsReq, Request, Response
 
 
 url = "websocket-bellboy.herokuapp.com"
@@ -125,17 +125,11 @@ class RealtimeCommsActor(GenericActor):
             self.log.info("STARTing WebSocket...")
             self._setup_websocket()
 
-    def receiveMsg_SummaryReq(self, message, sender):
-        """sends a summary of the actor."""
-        self.send(sender, CommsResp.SUCCESS)
-
     def summary(self):
-        self.log.info("Summary of realtime actor requested.")
         pass
 
     def teardown(self):
         self._websocket.send("Closing.")
-        self.log.info("Closing WebSocket connection to %s", url)
+        self.log.debug("Closing WebSocket connection to %s", url)
         self._websocket.close()
         self.log.info("Closed WebSocket.")
-        print("Teardown for realtime comms done.")

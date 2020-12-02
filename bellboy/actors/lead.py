@@ -7,7 +7,6 @@ from actors.ultrasonic import UltrasonicActor
 from thespian.actors import ActorAddress
 from utils.messages import (
     CommsReq,
-    CommsResp,
     LcdMsg,
     LcdReq,
     Request,
@@ -43,11 +42,11 @@ class BellboyLeadActor(GenericActor):
         self.realtime_actor = self.createActor(
             RealtimeCommsActor, globalName="realtime"
         )
+        self.lcd = self.createActor(LcdActor, globalName="lcd")
 
         # requests to setup actors
         self.send(self.comms_actor, CommsReq.AUTHENTICATE)
         self.send(self.realtime_actor, Request.START)
-        self.lcd = self.createActor(LcdActor, globalName="lcd")
 
         # setup actors, handle their responses
         sensor_setup_msg = SensorMsg(
@@ -110,14 +109,6 @@ class BellboyLeadActor(GenericActor):
                         SensorReq.POLL, pollPeriod_ms=100, triggerFunc=buttonHovered
                     ),
                 )
-
-    def receiveMsg_CommsResp(self, message, sender):
-        self.log.info(
-            str.format("Received message {} from {}", message, self.nameOf(sender))
-        )
-
-        if message == CommsResp.SUCCESS:
-            self.log.info("Hooray! Comms work.")
 
     def receiveMsg_SensorEventMsg(self, message, sender):
         self.log.info(

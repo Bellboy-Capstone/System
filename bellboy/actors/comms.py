@@ -4,7 +4,7 @@ import pickle
 
 import requests
 from actors.generic import GenericActor
-from utils.messages import CommsReq, CommsResp, Response
+from utils.messages import CommsReq, Response
 
 
 endpoint = "https://bellboy-services.herokuapp.com"
@@ -114,10 +114,6 @@ class CommsActor(GenericActor):
 
         elif message == CommsReq.AUTHENTICATE:
             self.authenticate()
-
-    def receiveMsg_SummaryReq(self, message, sender):
-        """sends a summary of the actor."""
-        self.send(sender, CommsResp.SUCCESS)
 
     def summary(self):
         pass
