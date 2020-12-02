@@ -1,3 +1,4 @@
+import json
 import os
 import pickle
 
@@ -69,19 +70,35 @@ class CommsActor(GenericActor):
     # MESSAGE HANDLING METHODS  #
     # --------------------------#
 
+    def post_message_to_backend(self, data: dict):
+        """Sends a dictionary to the status updates endpoint."""
+        self.log.debug("POSTing message to backend.")
+
+        # Make the POST request:
+        response = requests.post(
+            f"{endpoint}/bellboy/status-updates/",
+            {"bellboy": self._identifier, "body": data},
+        )
+
+        self.log.debug(
+            "Response %s: %s %s", response.status_code, response, response.content
+        )
+
     def receiveMsg_str(self, message, sender):
         """Sends a string as a message to Django Services."""
         if self._authenticated is False or self._identifier is None:
             self.log.error("Please authenticate before attempting to use this actor.")
         else:
             self.log.debug("Got string %s to send as log.", message)
+            self.post_message_to_backend({"message": message})
 
     def receiveMsg_dict(self, message, sender):
-        """Sends a string as a message to Django Services."""
+        """Sends a dictionary as a message to Django Services."""
         if self._authenticated is False or self._identifier is None:
             self.log.error("Please authenticate before attempting to use this actor.")
         else:
             self.log.debug("Got string %s to send as log.", message)
+            self.post_message_to_backend(json.dumps(message))
 
     def receiveMsg_CommsReq(self, message, sender):
         """responding to simple sensor requests."""

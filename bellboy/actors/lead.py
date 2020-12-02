@@ -60,6 +60,7 @@ class BellboyLeadActor(GenericActor):
 
         self.status = Response.STARTED
         self.send(self.realtime_actor, "A Bellboy woke up!")
+        self.send(self.comms_actor, {"event": "power", "state": "on"})
 
         message = LcdMsg(
             LcdReq.DISPLAY,
@@ -132,15 +133,24 @@ class BellboyLeadActor(GenericActor):
         sensor_message_str = f"Requested Floor #{str(message.eventData)[6]}"
 
         # Show the message on the LCD
-        message = LcdMsg(
+        lcd_message = LcdMsg(
             LcdReq.DISPLAY,
             displayText=sensor_message_str,
             displayDuration=3,
         )
-        self.send(self.lcd, message)
+        self.send(self.lcd, lcd_message)
 
         # Send the message to Realtime WebLogs
         self.send(self.realtime_actor, sensor_message_str)
+
+        self.send(
+            self.comms_actor,
+            {
+                "event": "detection",
+                "method": "hand",
+                "floor": str(message.eventData)[6],
+            },
+        )
 
     def summary(self):
         """Returns a summary of the actor."""
