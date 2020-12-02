@@ -3,7 +3,7 @@ import os
 from abc import ABC, abstractmethod
 
 from thespian.actors import ActorAddress, ActorTypeDispatcher
-from utils.messages import Init, Response, StatusReq, SummaryReq, TestMode, DetailedMsg
+from utils.messages import DetailedMsg, Init, Response, StatusReq, SummaryReq, TestMode
 
 
 class GenericActor(ActorTypeDispatcher, ABC):
@@ -93,9 +93,7 @@ class GenericActor(ActorTypeDispatcher, ABC):
         self.send(sender, self.status)
 
     def receiveMsg_SummaryReq(self, message: SummaryReq, sender):
-        """
-        Sends a summary of the actor to the sender.
-        """
+        """Sends a summary of the actor to the sender."""
         self.send(sender, self.summary())
 
     def receiveMsg_ActorExitRequest(self, msg, sender):
@@ -106,14 +104,19 @@ class GenericActor(ActorTypeDispatcher, ABC):
     @abstractmethod
     def teardown(self):
         """
-        Actor's teardown sequence, called before shutdown. (i.e. close threads, disconnect from services, etc)
+        Actor's teardown sequence, called before shutdown.
+
+        (i.e. close threads, disconnect from services, etc)
         """
         pass
 
     @abstractmethod
     def summary(self) -> DetailedMsg:
         """
-        Returns a summary of the actor. The summary can be any detailed msg described in the messages module.
+        Returns a summary of the actor.
+
+        The summary can be an object of any type described in the messages module.
+
         :rtype: object
         """
         pass

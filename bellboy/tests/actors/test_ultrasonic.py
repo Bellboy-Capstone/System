@@ -1,7 +1,7 @@
+import time
+
 from actors.elevator import buttonHovered
 from actors.ultrasonic import UltrasonicActor
-
-import time
 from tests import ActorSystem, logcfg
 from utils.messages import (
     Init,

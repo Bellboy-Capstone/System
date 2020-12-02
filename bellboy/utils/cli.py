@@ -1,17 +1,17 @@
-"""
-Bellboy command line argument processing goes here.
-"""
+"""Bellboy command line argument processing goes here."""
 
 import logging
 import logging.config
 import os
 from argparse import ArgumentParser
 
+
 log_filename = "bellboy.log"
 
 
 def get_bellboy_configs():
-    """Retrieve bellboy configuration information from command line arguments.
+    """
+    Retrieve bellboy configuration information from command line arguments.
 
     :return: configs
     :rtype: dict

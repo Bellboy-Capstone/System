@@ -104,6 +104,19 @@ class SensorEventMsg(DetailedMsg):
         return self.eventType.name
 
 
+""" Communication related messages. """
+
+
+# comms requests
+class CommsReq(Enum):
+    AUTHENTICATE, HEARTBEAT, RESET = range(3)
+
+
+# comms responses
+class CommsResp(Enum):
+    SUCCESS, FAILURE = range(2)
+
+
 """Lcd messages"""
 
 

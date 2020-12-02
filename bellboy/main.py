@@ -39,8 +39,9 @@ def main():
 
     except KeyboardInterrupt:
         log.error("The bellboy system was interrupted by the keyboard, exiting...")
-    finally:
-        system.shutdown()
+
+    system.shutdown()
+    log.info("Actor system down. Stopping main thread. Bye!")
 
 
 if __name__ == "__main__":

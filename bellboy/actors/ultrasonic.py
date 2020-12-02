@@ -206,7 +206,7 @@ class UltrasonicActor(GenericActor):
     # ----------#
 
     def teardown(self):
-        """ Sensor teardown, ensures polling thread is dead"""
+        """Sensor teardown, ensures polling thread is dead."""
         self._stop_polling()
 
     def summary(self):
