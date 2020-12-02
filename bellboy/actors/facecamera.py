@@ -28,7 +28,19 @@ class FaceCamera:
         pass
 
     def demo(self):
+        """
+        Demo of realtime facial recognition.
+        Looks for faces. Unknown faces get saved. Kinda slow. 
+        Ideas for improvement:
+            - parallelism w GPU
+            - seperate thread to do the encodings on new faces (?)
+            - use a dict to store encoding -> faceId, so multiple encodings of the same person can be stored
+            - periodically cleanup data by grouping encodings that r too similar
+            - limit search to the single most centralized face instead of looking for all faces
+            - use a diff face recog library (DeepFace, OpenCV...etc)
+        """        
 
+        # load face encodings from pickle file if exists
         try:
             with open(faces_pickle_file, "rb") as f:
                 known_encodings = pickle.load(f)
@@ -36,13 +48,17 @@ class FaceCamera:
             known_encodings = []
             print("no pickle file exists :o")
 
+        # create the cascade classifier (not needed if face detection done thru FR package)
         cascPath = cascadePath = (
             os.path.dirname(cv2.__file__) + "/data/haarcascade_frontalface_default.xml"
         )
         faceCascade = cv2.CascadeClassifier(cascPath)
+
+        # catching ctrl+c
         try:
             video_capture = cv2.VideoCapture(0)
             process_this_frame = False
+            
             while True:
 
                 # Capture frame-by-frame
