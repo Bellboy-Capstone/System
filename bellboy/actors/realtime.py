@@ -19,6 +19,7 @@ class RealtimeCommsActor(GenericActor):
 
     _identifier = None
     _websocket = None
+    _retries = 0
     _started = False
     _thread = None
     _identifier = None
@@ -95,6 +96,7 @@ class RealtimeCommsActor(GenericActor):
 
     def _logmsg(self, message):
         """Sends a log message to the realtime services."""
+        self.log.debug("Sending log message %s", message)
         try:
             if self._identifier:
                 logmsg = f"BB{self._identifier}: {message}"
@@ -102,19 +104,27 @@ class RealtimeCommsActor(GenericActor):
             else:
                 self._websocket.send(message)
 
+            self.log.debug("Successfully sent message to realtime services.")
+            self._retries = 0
+
         # If the pipe is broken, we need to reconnect.
         except Exception:
-            self.log.error("Socket crashed! Reconnecting...")
+            self.log.error("Socket crashed! Reconnecting, attempt %s", self._retries)
             self._websocket = None
             self._setup_websocket()
             self._logmsg(message)
+            self._retires = self._retries + 1
+            if self._retires > 10:
+                self.log.error("Socket is closing a lot, restarting actor.")
+                self._websocket = None
+                raise Exception("Kill me, I've fallen and I can't get up.")
 
     # --------------------------#
     # MESSAGE HANDLING METHODS  #
     # --------------------------#
 
     def receiveMsg_WakeupMessage(self, message, sender):
-        self.log.debug("Staying awake...")
+        self.log.debug("Staying awake, sending heartbeat message.")
         self._logmsg("Heartbeat.")
         self.wakeupAfter(timedelta(seconds=5))
 

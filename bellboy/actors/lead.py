@@ -63,7 +63,7 @@ class BellboyLeadActor(GenericActor):
 
         message = LcdMsg(
             LcdReq.DISPLAY,
-            displayText="Hello this is a message, which floor would you like to go to?  ",
+            displayText="Hello this is a message, which floor would you like to go to?            ",
             displayDuration=4,
         )
         self.send(self.lcd, message)
@@ -128,7 +128,7 @@ class BellboyLeadActor(GenericActor):
         lcd_message = LcdMsg(
             LcdReq.DISPLAY,
             displayText=sensor_message_str,
-            displayDuration=4,
+            displayDuration=1,
         )
         self.send(self.lcd, lcd_message)
 
