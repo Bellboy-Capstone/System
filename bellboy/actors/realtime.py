@@ -94,11 +94,18 @@ class RealtimeCommsActor(GenericActor):
             self.wakeupAfter(timedelta(seconds=5))
 
     def _logmsg(self, message):
-        logmsg = f"BB{self._identifier}: {message}"
+        """Sends a log message to the realtime services."""
         try:
-            self._websocket.send(logmsg)
+            if self._identifier:
+                logmsg = f"BB{self._identifier}: {message}"
+                self._websocket.send(logmsg)
+            else:
+                self._websocket.send(message)
+
+        # If the pipe is broken, we need to reconnect.
         except Exception:
-            self.log.debug("Socket crashed! Reconnecting...")
+            self.log.error("Socket crashed! Reconnecting...")
+            self._websocket = None
             self._setup_websocket()
             self._logmsg(message)
 
@@ -117,10 +124,7 @@ class RealtimeCommsActor(GenericActor):
             self.log.error("Please authenticate before attempting to use this actor.")
         else:
             self.log.debug("Sending string %s to realtime logging service.", message)
-            if self._identifier:
-                self._websocket.send(f"BB{self._identifier}: {message}")
-            else:
-                self._websocket.send(message)
+            self._logmsg(message)
 
     def receiveMsg_RealtimeCommsReq(self, message, sender):
         """responding to simple sensor requests."""
@@ -148,7 +152,7 @@ class RealtimeCommsActor(GenericActor):
         pass
 
     def teardown(self):
-        self._websocket.send("Closing.")
+        self._logmsg("Goodbye!")
         self.log.debug("Closing WebSocket connection to %s", url)
         self._websocket.close()
         self.log.info("Closed WebSocket.")
