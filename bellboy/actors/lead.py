@@ -155,7 +155,7 @@ class BellboyLeadActor(GenericActor):
         lcd_message = LcdMsg(
             LcdReq.DISPLAY,
             displayText=sensor_message_str,
-            displayDuration=3,
+            displayDuration=1,
         )
         self.send(self.lcd, lcd_message)
 

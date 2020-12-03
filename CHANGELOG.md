@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.3.1 (2020-12-03)
+### Fix
+* Websocket reconnect patch (#29) ([`32e52ab`](https://github.com/Bellboy-Capstone/System/commit/32e52abf42e7524f7326a65891a23205c56fa9be))
+
 ## v0.3.0 (2020-12-02)
 ### Feature
 * Server Communication Actor (#21) ([`bc17fbe`](https://github.com/Bellboy-Capstone/System/commit/bc17fbeff3d313274610daced6bee08c96d38383))
