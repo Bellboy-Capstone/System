@@ -1,6 +1,7 @@
 from actors.elevator import buttonHovered
 from actors.generic import GenericActor
 from actors.ultrasonic import UltrasonicActor
+from actors.facecam import FacecamActor
 from thespian.actors import ActorAddress
 from actors.lcd import LcdActor
 from utils.messages import (
@@ -11,7 +12,11 @@ from utils.messages import (
     SensorResp,
     LcdMsg,
     LcdReq,
+    CamReq
 )
+
+import time
+from time import sleep
 
 
 class BellboyLeadActor(GenericActor):
@@ -30,31 +35,36 @@ class BellboyLeadActor(GenericActor):
         """
         self.log.info("Starting bellboy services.")
 
-        # spawn actors
-        self.log.info("Starting all dependent actors...")
-        self.ultrasonic_sensor = self.createActor(
-            UltrasonicActor, globalName="ultrasonic"
-        )
-        self.lcd = self.createActor(LcdActor, globalName="lcd")
+        # # spawn actors
+        # self.log.info("Starting all dependent actors...")
+        # self.ultrasonic_sensor = self.createActor(
+        #     UltrasonicActor, globalName="ultrasonic"
+        # )
+        # self.lcd = self.createActor(LcdActor, globalName="lcd")
 
-        # setup actors, handle their responses
-        sensor_setup_msg = SensorMsg(
-            SensorReq.SETUP, trigPin=23, echoPin=24, maxDepth_cm=200
-        )
-        lcd_setup_msg = LcdMsg(LcdReq.SETUP, defaultText="Welcome to Bellboy")
+        # # setup actors, handle their responses
+        # sensor_setup_msg = SensorMsg(
+        #     SensorReq.SETUP, trigPin=23, echoPin=24, maxDepth_cm=200
+        # )
+        # lcd_setup_msg = LcdMsg(LcdReq.SETUP, defaultText="Welcome to Bellboy")
 
-        self.send(self.ultrasonic_sensor, sensor_setup_msg)
-        self.send(self.lcd, lcd_setup_msg)
+        # self.send(self.ultrasonic_sensor, sensor_setup_msg)
+        # self.send(self.lcd, lcd_setup_msg)
 
-        self.status = Response.STARTED
+        # self.status = Response.STARTED
 
-        message = LcdMsg(
-            LcdReq.DISPLAY,
-            displayText="Hello this is a message, which floor you go to?",
-            displayDuration=2,
-        )
-        self.send(self.lcd, message)
+        # message = LcdMsg(
+        #     LcdReq.DISPLAY,
+        #     displayText="Hello this is a message, which floor you go to?",
+        #     displayDuration=2,
+        # )
+        # self.send(self.lcd, message)
 
+        self.facecam = self.createActor(FacecamActor, globalName="facecam")
+        self.send(self.facecam, CamReq.SETUP)
+        self.send(self.facecam, CamReq.START_STREAM)
+        sleep(15)
+        self.send(self.facecam, CamReq.STOP_STREAM)
     def stopBellboyLead(self):
         self.log.info("Stopping all child actors...")
         self.status = Response.DONE

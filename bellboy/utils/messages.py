@@ -108,7 +108,7 @@ class SensorEventMsg(DetailedMsg):
 
 
 class CamReq(Enum):
-    SETUP, GET_CAM_LIST, START_STREAMING, STOP_STREAMING = range(4)
+    SETUP, GET_CAM_LIST, START_STREAM, STOP_STREAM = range(4)
 
 
 class CamResp(Enum):
