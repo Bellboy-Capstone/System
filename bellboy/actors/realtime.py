@@ -1,6 +1,7 @@
 import os
 import pickle
 import ssl
+from datetime import timedelta
 from time import sleep
 
 import requests
@@ -88,9 +89,27 @@ class RealtimeCommsActor(GenericActor):
                 self._identifier = str(pickle.load(auth_file))
                 auth_file.close()
 
+        if not self._started:
+            self._started = True
+            self.wakeupAfter(timedelta(seconds=5))
+
+    def _logmsg(self, message):
+        logmsg = f"BB{self._identifier}: {message}"
+        try:
+            self._websocket.send(logmsg)
+        except Exception:
+            self.log.debug("Socket crashed! Reconnecting...")
+            self._setup_websocket()
+            self._logmsg(message)
+
     # --------------------------#
     # MESSAGE HANDLING METHODS  #
     # --------------------------#
+
+    def receiveMsg_WakeupMessage(self, message, sender):
+        self.log.debug("Staying awake...")
+        self._logmsg("Heartbeat.")
+        self.wakeupAfter(timedelta(seconds=5))
 
     def receiveMsg_str(self, message, sender):
         """Sends a string as a message to NodeJS Services."""
