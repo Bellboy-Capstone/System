@@ -1,6 +1,7 @@
 import os
 import pickle
 import ssl
+from datetime import timedelta
 from time import sleep
 
 import requests
@@ -18,6 +19,7 @@ class RealtimeCommsActor(GenericActor):
 
     _identifier = None
     _websocket = None
+    _retries = 0
     _started = False
     _thread = None
     _identifier = None
@@ -88,9 +90,43 @@ class RealtimeCommsActor(GenericActor):
                 self._identifier = str(pickle.load(auth_file))
                 auth_file.close()
 
+        if not self._started:
+            self._started = True
+            self.wakeupAfter(timedelta(seconds=5))
+
+    def _logmsg(self, message):
+        """Sends a log message to the realtime services."""
+        self.log.debug("Sending log message %s", message)
+        try:
+            if self._identifier:
+                logmsg = f"BB{self._identifier}: {message}"
+                self._websocket.send(logmsg)
+            else:
+                self._websocket.send(message)
+
+            self.log.debug("Successfully sent message to realtime services.")
+            self._retries = 0
+
+        # If the pipe is broken, we need to reconnect.
+        except Exception:
+            self.log.error("Socket crashed! Reconnecting, attempt %s", self._retries)
+            self._websocket = None
+            self._setup_websocket()
+            self._logmsg(message)
+            self._retires = self._retries + 1
+            if self._retires > 10:
+                self.log.error("Socket is closing a lot, restarting actor.")
+                self._websocket = None
+                raise Exception("Kill me, I've fallen and I can't get up.")
+
     # --------------------------#
     # MESSAGE HANDLING METHODS  #
     # --------------------------#
+
+    def receiveMsg_WakeupMessage(self, message, sender):
+        self.log.debug("Staying awake, sending heartbeat message.")
+        self._logmsg("Heartbeat.")
+        self.wakeupAfter(timedelta(seconds=5))
 
     def receiveMsg_str(self, message, sender):
         """Sends a string as a message to NodeJS Services."""
@@ -98,10 +134,7 @@ class RealtimeCommsActor(GenericActor):
             self.log.error("Please authenticate before attempting to use this actor.")
         else:
             self.log.debug("Sending string %s to realtime logging service.", message)
-            if self._identifier:
-                self._websocket.send(f"BB{self._identifier}: {message}")
-            else:
-                self._websocket.send(message)
+            self._logmsg(message)
 
     def receiveMsg_RealtimeCommsReq(self, message, sender):
         """responding to simple sensor requests."""
@@ -129,7 +162,7 @@ class RealtimeCommsActor(GenericActor):
         pass
 
     def teardown(self):
-        self._websocket.send("Closing.")
+        self._logmsg("Goodbye!")
         self.log.debug("Closing WebSocket connection to %s", url)
         self._websocket.close()
         self.log.info("Closed WebSocket.")

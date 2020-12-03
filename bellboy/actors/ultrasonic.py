@@ -1,4 +1,5 @@
 import time
+from datetime import datetime
 from threading import Thread
 
 import gpiozero
@@ -35,6 +36,8 @@ class UltrasonicActor(GenericActor):
         self._echoPin = 0
         self._max_depth_cm = 0.0
         self._sensor = None
+        self._detection_timeout_seconds = 3
+        self._last_detection_time = datetime.now()
 
         # the following are set on poll request
         self._eventFunc = None
@@ -92,8 +95,21 @@ class UltrasonicActor(GenericActor):
 
                 # check for event, if occurred send msg to subscriber
                 event = self._eventFunc(self._buffer)
+                now = datetime.now()
+                timegap = now.timestamp() - self._last_detection_time.timestamp()
+
                 if event:
-                    self.send(self.parent, event)
+                    # Make sure at least <timeout seconds> have passed between activations.
+                    if timegap > self._detection_timeout_seconds:
+                        self.log.debug(
+                            "Enough time has elapsed between activations, sending."
+                        )
+                        self._last_detection_time = now
+                        self.send(self.parent, event)
+                    else:
+                        self.log.debug(
+                            "Sensor cooldown period in effect, timegap: %s", timegap
+                        )
 
             # sleep till next period, o next mltiple of period
             dt_msec = (time.time() - t0) * MS_PER_SEC
