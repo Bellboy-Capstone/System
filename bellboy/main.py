@@ -23,25 +23,24 @@ def main():
     # lead actor
     bellboy = system.createActor(BellboyLeadActor, globalName="bellboy_lead")
     status = system.ask(bellboy, Init())
-
-    if status != Response.READY:
-        log.error("ruh roh")
-
     try:
         # tell bellboy to start his work
         system.tell(bellboy, Request.START)
 
         # Run this while loop for the duration of the program.
-        while True:
-            sleep(10)
+        while input("Enter 'q' to end Bellboy, any other key to send heartbeat.\n") != 'q':
             log.debug("Sending Heartbeat request to lead actor.")
             system.ask(bellboy, StatusReq())
+            system.ask(bellboy, StatusReq())
+
+        system.ask(bellboy, Request.STOP)
 
     except KeyboardInterrupt:
         log.error("The bellboy system was interrupted by the keyboard, exiting...")
+    finally:
+        log.info("Shutting down system...")
+        system.shutdown()
 
-    system.shutdown()
-    log.info("Actor system down. Stopping main thread. Bye!")
 
 
 if __name__ == "__main__":

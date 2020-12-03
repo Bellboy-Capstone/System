@@ -1,11 +1,13 @@
 from actors.comms import CommsActor
 from actors.elevator import buttonHovered
+from actors.facecam import FacecamActor
 from actors.generic import GenericActor
 from actors.lcd import LcdActor
 from actors.realtime import RealtimeCommsActor
 from actors.ultrasonic import UltrasonicActor
-from thespian.actors import ActorAddress
+from thespian.actors import ActorAddress, ActorExitRequest
 from utils.messages import (
+    CamReq,
     CommsReq,
     LcdMsg,
     LcdReq,
@@ -32,8 +34,32 @@ class BellboyLeadActor(GenericActor):
         Spawns and sets up child actors
         """
         self.log.info("Starting bellboy services.")
+        self.spawnActors()
 
-        # spawn actors
+        # setup actors
+        # self.setup_sensor()
+        # self.setup_comms()
+        # self.setup_display()
+        self.setup_camera()
+        self.status = Response.STARTED
+
+        # # bellboy is ready, start running things n whatnot
+        # self.send(self.realtime_actor, "Ready to serve clients.")
+        # self.send(self.comms_actor, {"event": "power", "state": "on"})
+        # self.display("Hello this is a message, which floor would you like to go to?  ", 3)
+        self.send(self.facecam, CamReq.START_STREAM)
+
+    def stopBellboyLead(self):
+        self.log.info("Stopping all child actors...")
+
+        # doing this bc on windows system.shutdown on ctrl+C is bugging...
+        for actor in self.children:
+            self.send(actor, ActorExitRequest())
+
+        self.status = Response.DONE
+
+    def spawnActors(self):
+         # spawn actors
         self.log.info("Starting all dependent actors...")
         self.ultrasonic_sensor = self.createActor(
             UltrasonicActor, globalName="ultrasonic"
@@ -43,38 +69,39 @@ class BellboyLeadActor(GenericActor):
             RealtimeCommsActor, globalName="realtime"
         )
         self.lcd = self.createActor(LcdActor, globalName="lcd")
+        self.facecam = self.createActor(FacecamActor, globalName="facecam")
 
-        # requests to setup actors
-        self.send(self.comms_actor, CommsReq.AUTHENTICATE)
-        self.send(self.realtime_actor, Request.START)
+    # setup methods
+    def setup_display(self):
+        lcd_setup_msg = LcdMsg(LcdReq.SETUP, defaultText="Welcome to Bellboy")
+        self.send(self.lcd, lcd_setup_msg)
 
-        # setup actors, handle their responses
+    def setup_mic(self):
+        pass
+
+    def setup_camera(self):
+        self.send(self.facecam, CamReq.SETUP)
+
+    def setup_sensor(self):
         sensor_setup_msg = SensorMsg(
             SensorReq.SETUP, trigPin=23, echoPin=24, maxDepth_cm=200
         )
-        lcd_setup_msg = LcdMsg(LcdReq.SETUP, defaultText="Welcome to Bellboy")
 
         self.send(self.ultrasonic_sensor, sensor_setup_msg)
-        self.send(self.lcd, lcd_setup_msg)
+    
+    def setup_comms(self):
+        self.send(self.comms_actor, CommsReq.AUTHENTICATE)
+        self.send(self.realtime_actor, Request.START)
 
-        self.status = Response.STARTED
-        self.send(self.realtime_actor, "Ready to serve clients.")
-        self.send(self.comms_actor, {"event": "power", "state": "on"})
-
+    # utility methods
+    def display(self, text, duration):
+        """ Send msg to our display to show text for duration of time."""
         message = LcdMsg(
             LcdReq.DISPLAY,
-            displayText="Hello this is a message, which floor would you like to go to?  ",
-            displayDuration=3,
+            displayText=text,
+            displayDuration=duration,
         )
         self.send(self.lcd, message)
-
-    def stopBellboyLead(self):
-        self.log.info("Stopping all child actors...")
-        self.send(self.realtime_actor, "Stopping.")
-        self.status = Response.DONE
-        self.send(self.ultrasonic_sensor, SensorReq.STOP)
-        self.send(self.ultrasonic_sensor, SensorReq.CLEAR)
-
     # --------------------------#
     # MESSAGE HANDLING METHODS  #
     # --------------------------#
