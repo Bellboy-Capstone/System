@@ -29,11 +29,8 @@ def main():
 
         # Run this while loop for the duration of the program.
         while input("Enter 'q' to end Bellboy, any other key to send heartbeat.\n") != 'q':
-            log.debug("Sending Heartbeat request to lead actor.")
+            log.debug("Sending status request to lead actor.")
             system.ask(bellboy, StatusReq())
-            system.ask(bellboy, StatusReq())
-
-        system.ask(bellboy, Request.STOP)
 
     except KeyboardInterrupt:
         log.error("The bellboy system was interrupted by the keyboard, exiting...")
