@@ -1,5 +1,4 @@
 import json
-import os
 import pickle
 import ssl
 from datetime import timedelta
@@ -8,7 +7,7 @@ from time import sleep
 import requests
 import websocket
 from actors.generic import GenericActor
-from utils.messages import CommsReq, CommsResp, PostableMsg, Response
+from utils.messages import CommsReq, PostableMsg, Response
 
 
 endpoint = "https://bellboy-services.herokuapp.com"

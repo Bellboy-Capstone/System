@@ -21,7 +21,7 @@ def main():
 
     # lead actor
     bellboy = system.createActor(BellboyLeadActor, globalName="bellboy_lead")
-    status = system.ask(bellboy, Init())
+    system.tell(bellboy, Init())
     try:
         # tell bellboy to start his work
         system.tell(bellboy, Request.START)
