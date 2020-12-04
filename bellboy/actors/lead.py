@@ -1,7 +1,6 @@
 # from actors.comms import CommsActor
 from actors.comms import WebCommsActor
 from actors.elevator import buttonHovered
-from actors.facecam import FacecamActor
 from actors.generic import GenericActor
 from actors.lcd import LcdActor
 from actors.ultrasonic import UltrasonicActor
