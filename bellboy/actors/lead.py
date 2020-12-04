@@ -37,16 +37,16 @@ class BellboyLeadActor(GenericActor):
         self.spawnActors()
 
         # setup actors
-        # self.setup_sensor()
-        # self.setup_comms()
-        # self.setup_display()
+        self.setup_sensor()
+        self.setup_comms()
+        self.setup_display()
         self.setup_camera()
         self.status = Response.STARTED
 
-        # # bellboy is ready, start running things n whatnot
-        # self.send(self.realtime_actor, "Ready to serve clients.")
-        # self.send(self.comms_actor, {"event": "power", "state": "on"})
-        # self.display("Hello this is a message, which floor would you like to go to?  ", 3)
+        # bellboy is ready, start running things n whatnot
+        self.send(self.realtime_actor, "Ready to serve clients.")
+        self.send(self.comms_actor, {"event": "power", "state": "on"})
+        self.display("Hello this is a message, which floor would you like to go to?  ", 3)
         self.send(self.facecam, CamReq.START_STREAM)
 
     def stopBellboyLead(self):
@@ -136,6 +136,11 @@ class BellboyLeadActor(GenericActor):
                         SensorReq.POLL, pollPeriod_ms=100, triggerFunc=buttonHovered
                     ),
                 )
+
+    def receiveMsg_CamEventMsg(self, msg, sender):
+        self.log.info("Person here")
+        # Send the message to Realtime WebLogs
+        self.send(self.realtime_actor, "Face of ID %d detected"%msg.faceId)
 
     def receiveMsg_SensorEventMsg(self, message, sender):
         self.log.info(

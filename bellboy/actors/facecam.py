@@ -8,7 +8,7 @@ import cv2
 from actors.generic import GenericActor
 # from collections import deque
 # # from picamera import PiCamera
-from utils.messages import CameraType, CamEventMsg, CamMsg, CamReq, CamResp, Response
+from utils.messages import CameraType, CamEventMsg, CamMsg, CamReq, CamResp, Response, CamEvent
 
 
 face_data_dir = "utils/facial/dataset"
@@ -180,9 +180,10 @@ class FacecamActor(GenericActor):
                         self.pics_to_take = NUM_TRAINING_PICS  # trigger training sequence on next run
 
                     else:
-                        self.log.debug(
+                        self.log.info(
                             "Person found: %d" %self.encodings_to_id[faceIx],
                         )
+                        self.send(self.parent, CamEventMsg(eventType=CamEvent, faceId=self.encodings_to_id[faceIx]))
                         # cv2.putText(frame, faceIx, (x1, y1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0))
 
             # draw boxes around the faces
