@@ -1,12 +1,14 @@
 import time
+from datetime import datetime
 from threading import Thread
 
 import gpiozero
-from gpiozero import DistanceSensor
-from gpiozero.pins.mock import MockFactory
 from actors.generic import GenericActor
 from collections import deque
-from utils.messages import Response, SensorReq, SensorResp, SensorMsg
+from gpiozero import DistanceSensor
+from gpiozero.pins.mock import MockFactory
+from utils.messages import Response, SensorMsg, SensorReq, SensorResp
+
 
 # conversion factors
 US_PER_SEC = 1000000.0
@@ -19,7 +21,10 @@ BUFFER_SIZE = 6000
 
 class UltrasonicActor(GenericActor):
     """
-    Class for the ultrasonic sensor. Contains a polling thread which can be run or stopped on message request.
+    Class for the ultrasonic sensor.
+
+    Contains a polling thread which can be run or stopped on message
+    request.
     """
 
     def __init__(self):
@@ -31,6 +36,8 @@ class UltrasonicActor(GenericActor):
         self._echoPin = 0
         self._max_depth_cm = 0.0
         self._sensor = None
+        self._detection_timeout_seconds = 3
+        self._last_detection_time = datetime.now()
 
         # the following are set on poll request
         self._eventFunc = None
@@ -46,10 +53,17 @@ class UltrasonicActor(GenericActor):
     # --------------------------#
 
     def _setup_sensor(self, trigPin, echoPin, max_depth_cm):
-        """setup sensor paramaters"""
+        """setup sensor paramaters."""
         self._trigPin = trigPin
         self._echoPin = echoPin
         self._max_depth_cm = max_depth_cm
+
+        if not self.TEST_MODE:
+            try:
+                import RPi  # noqa
+            except ImportError:
+                self.log.warning("Not on RPI - Offtarget mode on")
+                self.TEST_MODE = True
 
         if self.TEST_MODE:
             gpiozero.Device.pin_factory = MockFactory()
@@ -65,26 +79,40 @@ class UltrasonicActor(GenericActor):
     def _sensor_loop(self):
         """
         sensor loop, every period it:
+
             - stores a depth reading, and
             - analyzes recent readings to test for an event
         until thread terminate flag is raised.
         """
         self.status = SensorResp.POLLING
         self._buffer.clear()
-
+        self.log.info("starting sensor loop")
         while not self._terminate_thread:
+
             t0 = time.time()
-            self._buffer.appendleft(self._sensor.distance * 100.0)
+            if not self.TEST_MODE:
+                self._buffer.appendleft(self._sensor.distance * 100.0)
 
-            # check for event, if occurred send msg to subscriber
-            event = self._eventFunc(self._buffer)
-            if event:
-                self.send(self.parent, event)
+                # check for event, if occurred send msg to subscriber
+                event = self._eventFunc(self._buffer)
+                now = datetime.now()
+                timegap = now.timestamp() - self._last_detection_time.timestamp()
 
-            # sleep till next period
+                if event:
+                    # Make sure at least <timeout seconds> have passed between activations.
+                    if timegap > self._detection_timeout_seconds:
+                        self.log.debug(
+                            "Enough time has elapsed between activations, sending."
+                        )
+                        self._last_detection_time = now
+                        self.send(self.parent, event)
+                    else:
+                        self.log.debug(
+                            "Sensor cooldown period in effect, timegap: %s", timegap
+                        )
+
+            # sleep till next period, o next mltiple of period
             dt_msec = (time.time() - t0) * MS_PER_SEC
-            # wait till next period if time took too long.
-
             if dt_msec > self._poll_period:
                 self.log.warning(
                     str.format(
@@ -99,12 +127,9 @@ class UltrasonicActor(GenericActor):
         self.status = SensorResp.SET
 
     def _begin_polling(self):
-        """
-        Begins running the polling thread.
-        """
+        """Begins running the polling thread."""
         self._terminate_thread = False
         self._sensor_thread = Thread(target=self._sensor_loop)
-        self.log.info("starting sensor's thread")
         self._sensor_thread.start()
         self.status = SensorResp.POLLING
 
@@ -115,7 +140,6 @@ class UltrasonicActor(GenericActor):
 
         self.log.debug("Stopping the UltraSonic detection loop...")
         self._terminate_thread = True
-        self.status = SensorResp.SET
 
     def _clear(self):
         self._trigPin = 0
@@ -136,11 +160,11 @@ class UltrasonicActor(GenericActor):
     # --------------------------#
 
     def receiveMsg_SensorReq(self, message, sender):
-        """
-        responding to simple sensor requests
-        """
+        """responding to simple sensor requests."""
 
-        self.log.info(str.format("Received message {} from {}", message, sender))
+        self.log.info(
+            str.format("Received message {} from {}", message, self.nameOf(sender))
+        )
 
         # ignore unauthorized requests
         if sender != self.parent:
@@ -163,7 +187,9 @@ class UltrasonicActor(GenericActor):
             self._clear()
 
     def receiveMsg_SensorMsg(self, message: SensorMsg, sender):
-        self.log.info(str.format("Received message {} from {}", message, sender))
+        self.log.info(
+            str.format("Received message {} from {}", message, self.nameOf(sender))
+        )
 
         if sender != self.parent:
             self.log.warning(
@@ -191,14 +217,19 @@ class UltrasonicActor(GenericActor):
 
         self.send(sender, self.status)
 
-    def receiveMsg_SummaryReq(self, message, sender):
+    # ----------#
+    # OVERRIDES #
+    # ----------#
+
+    def teardown(self):
+        """Sensor teardown, ensures polling thread is dead."""
+        self._stop_polling()
+
+    def summary(self):
         """sends a summary of the actor."""
-        self.send(
-            sender,
-            SensorMsg(
-                type=Response.SUMMARY,
-                trigPin=self._trigPin,
-                echoPin=self._echoPin,
-                maxDepth_cm=self._max_depth_cm,
-            ),
+        return SensorMsg(
+            type=Response.SUMMARY,
+            trigPin=self._trigPin,
+            echoPin=self._echoPin,
+            maxDepth_cm=self._max_depth_cm,
         )

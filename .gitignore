@@ -1,7 +1,12 @@
+# Bellboy
+bellboy-credentials.obj
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
+
+bellboy-credentials.obj
 
 # C extensions
 *.so

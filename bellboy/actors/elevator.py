@@ -1,11 +1,16 @@
-"""class for the elevator and button related stuff. in actors for now.. could move"""
+"""
+class for the elevator and button related stuff.
+
+in actors for now.. could move
+"""
+
+import logging
 
 from collections import deque
-
-from actors import log
 from utils.messages import SensorEvent, SensorEventMsg
 
 
+log = logging.getLogger("elevator")
 # simple "buttons", only have a position (depth) value and a radius.. all in cm
 BTN1_POS = 8.5
 BTN2_POS = 16
@@ -16,8 +21,9 @@ DATA_TO_COUNT = 10  # 10 * 100 ms = 1 sec of data
 
 def buttonHovered(depth_deque: deque):
     """
-    rough implementation of a buttonHovered method. processes data deque.
-    tells us which button was hovered.
+    rough implementation of a buttonHovered method.
+
+    processes data deque. tells us which button was hovered.
     """
 
     log.debug(str.format("data: {}", format_deque(depth_deque)))
