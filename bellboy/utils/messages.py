@@ -144,3 +144,37 @@ class LcdMsg(DetailedMsg):
 
     def __str__(self):
         return self.msgType.name
+
+
+  """ Servo related messages"""
+
+
+# servo requests
+class ServoReq(Enum):
+    SETUP, START, STOP = range(3)
+
+
+# servo responses
+class ServoResp(Enum):
+    SET = range(1)
+
+
+# for req/resp with more info
+class ServoMsg(DetailedMsg):
+    def __init__(
+        self,
+        type,
+        servoPin = 0,
+        servoOffset = 0,
+        servoMin = 0,
+        servoMax = 0
+    ):
+        self.type = type
+        self._servoPin = servoPin
+        self._servoOffset = servoOffset
+        self._servoMin = servoMin
+        self._servoMax = servoMax
+
+    def __str__(self):
+        return self.type.name
+
