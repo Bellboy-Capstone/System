@@ -27,7 +27,7 @@ class LcdActor(GenericActor):
         try:
             from utils.lcd.PCF8574 import PCF8574_GPIO
         except Exception:
-            self.log.info("putting into test mode, import failed")
+            self.log.warning("putting into test mode, import failed")
             self.TEST_MODE = True
             return
 

@@ -1,10 +1,9 @@
 import logging
-from time import sleep
 
 from actors.lead import BellboyLeadActor
 from thespian.actors import ActorSystem
 from utils.cli import get_bellboy_configs
-from utils.messages import Init, Request, Response, StatusReq
+from utils.messages import Init, Request, StatusReq
 
 
 def main():
@@ -22,26 +21,23 @@ def main():
 
     # lead actor
     bellboy = system.createActor(BellboyLeadActor, globalName="bellboy_lead")
-    status = system.ask(bellboy, Init())
-
-    if status != Response.READY:
-        log.error("ruh roh")
-
+    system.tell(bellboy, Init())
     try:
         # tell bellboy to start his work
         system.tell(bellboy, Request.START)
 
         # Run this while loop for the duration of the program.
-        while True:
-            sleep(10)
-            log.debug("Sending Heartbeat request to lead actor.")
+        while (
+            input("Enter 'q' to end Bellboy, any other key to send heartbeat.\n") != "q"
+        ):
+            log.debug("Sending status request to lead actor.")
             system.ask(bellboy, StatusReq())
 
     except KeyboardInterrupt:
         log.error("The bellboy system was interrupted by the keyboard, exiting...")
-
-    system.shutdown()
-    log.info("Actor system down. Stopping main thread. Bye!")
+    finally:
+        log.info("Shutting down system...")
+        system.shutdown()
 
 
 if __name__ == "__main__":
