@@ -171,12 +171,12 @@ class LcdMsg(DetailedMsg):
         return self.msgType.name
 
 
-  """ Servo related messages"""
+"""Servo related messages"""
 
 
 # servo requests
 class ServoReq(Enum):
-    SETUP, PUSHBUTTON = range(2)
+    SETUP, PUSHBUTTON, STOP = range(3)
 
 
 # servo responses

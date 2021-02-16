@@ -113,7 +113,6 @@ class LcdActor(GenericActor):
             sleep(speed)
             rotatedText = rotatedText[1 : len(rotatedText)] + rotatedText[0]  # noqa
             iterations -= 1
-            self.log.info(iterations)
 
     def printLine(self, text, lineNum):
         """Prints one text to the top or bottom line of the lcd."""

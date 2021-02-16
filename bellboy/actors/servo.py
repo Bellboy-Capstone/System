@@ -15,7 +15,7 @@ OFFSE_DUTY = 0.45      #define pulse offset of servo
 SERVO_MAX_DUTY = (2.0+OFFSE_DUTY)/1000     #define pulse duty cycle for maximum angle of servo
 SERVO_MIN_DUTY = (1.0-OFFSE_DUTY)/1000    #define pulse duty cycle for minimum angle of servo
 
-class UltrasonicActor(GenericActor):
+class ServoActor(GenericActor):
     """
     Class for the servo.
     """
@@ -46,18 +46,18 @@ class UltrasonicActor(GenericActor):
 
 
         self.status = ServoResp.SET
+        self.log.info("servo setup")
 
     def _push_button(self):
         """when servo needs to push button"""
 
         self.status = ServoResp.PUSHINGBUTTON
-        self.servo.min() #or max depending how we set it up
-        self.servo.sleep(2.5)
-        self.servo.mid()
+        self._servo.min() #or max depending how we set it up
+        time.sleep(2.5)
+        self._servo.mid()
 
-        self.status = SensorResp.SET
-
-    
+        self.status = ServoResp.SET
+        self.log.info("button pushed")    
 
     def _clear(self):
         self._servo.close()

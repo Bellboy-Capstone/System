@@ -4,6 +4,7 @@ from actors.elevator import buttonHovered
 from actors.generic import GenericActor
 from actors.lcd import LcdActor
 from actors.ultrasonic import UltrasonicActor
+from actors.servo import ServoActor
 from thespian.actors import ActorAddress, ActorExitRequest
 from utils.messages import (
     BellboyMsg,
@@ -16,6 +17,8 @@ from utils.messages import (
     Response,
     SensorMsg,
     SensorReq,
+    ServoReq,
+    ServoResp
 )
 
 
@@ -62,6 +65,10 @@ class BellboyLeadActor(GenericActor):
         lcd_setup_msg = LcdMsg(LcdReq.SETUP, defaultText="Welcome to Bellboy")
         self.send(self.lcd, lcd_setup_msg)
 
+        #servo
+        self.servo = self.createActor(ServoActor, globalName="servo")
+        self.send(self.servo, ServoReq.SETUP)
+
     # utility methods
     def display(self, text, duration=3):
         """ Send msg to our display to show text for duration of time."""
@@ -83,6 +90,9 @@ class BellboyLeadActor(GenericActor):
             self.ultrasonic,
             SensorMsg(SensorReq.POLL, pollPeriod_ms=100, triggerFunc=buttonHovered),
         )
+
+    def push_servo(self):
+        self.send(self.servo, ServoReq.PUSHBUTTON)
 
     # --------------------------#
     # MESSAGE HANDLING METHODS  #
@@ -120,6 +130,11 @@ class BellboyLeadActor(GenericActor):
         self.display(sensor_message_str)
         self.log_realtime(sensor_message_str)
         self.post_to_backend(message)
+
+    def receiveMsg_ServoReq(self, message, sender):
+
+        if message == ServoReq.PUSHBUTTON:
+            self.push_servo()
 
     def summary(self):
         """Returns a summary of the actor."""

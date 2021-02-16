@@ -3,7 +3,7 @@ import logging
 from actors.lead import BellboyLeadActor
 from thespian.actors import ActorSystem
 from utils.cli import get_bellboy_configs
-from utils.messages import Init, Request, StatusReq
+from utils.messages import Init, Request, StatusReq, ServoReq
 
 
 def main():
@@ -27,11 +27,16 @@ def main():
         system.tell(bellboy, Request.START)
 
         # Run this while loop for the duration of the program.
-        while (
-            input("Enter 'q' to end Bellboy, any other key to send heartbeat.\n") != "q"
-        ):
-            log.debug("Sending status request to lead actor.")
-            system.ask(bellboy, StatusReq())
+        while True:
+            choice = input("Enter 'q' to end Bellboy, 's' to send heartbeat, and 'p' to push button.\n")
+            if choice == "p":
+                system.ask(bellboy, ServoReq.PUSHBUTTON)
+            if choice == "q":
+                break
+            if choice == "s":
+                log.debug("Sending status request to lead actor.")
+                system.ask(bellboy, StatusReq())
+
 
     except KeyboardInterrupt:
         log.error("The bellboy system was interrupted by the keyboard, exiting...")
