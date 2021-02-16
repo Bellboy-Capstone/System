@@ -1,19 +1,21 @@
-from actors.comms import CommsActor
+# from actors.comms import CommsActor
+from actors.comms import WebCommsActor
 from actors.elevator import buttonHovered
 from actors.generic import GenericActor
 from actors.lcd import LcdActor
-from actors.realtime import RealtimeCommsActor
 from actors.ultrasonic import UltrasonicActor
-from thespian.actors import ActorAddress
+from thespian.actors import ActorAddress, ActorExitRequest
 from utils.messages import (
+    BellboyMsg,
     CommsReq,
     LcdMsg,
     LcdReq,
+    PostableMsg,
+    RealtimeLog,
     Request,
     Response,
     SensorMsg,
     SensorReq,
-    SensorResp,
 )
 
 
@@ -21,59 +23,66 @@ class BellboyLeadActor(GenericActor):
     def __init__(self):
         """define Bellboy's private variables."""
         super().__init__()
-        self.ultrasonic_sensor = None
-        self.lcd = None
         self.event_count = 0
 
-    def startBellboyLead(self):
+    def start(self):
         """
         Starts bellboy lead actor services.
 
         Spawns and sets up child actors
         """
         self.log.info("Starting bellboy services.")
+        self.spawnActors()
+        self.status = Response.STARTED
 
-        # spawn actors
-        self.log.info("Starting all dependent actors...")
-        self.ultrasonic_sensor = self.createActor(
-            UltrasonicActor, globalName="ultrasonic"
-        )
-        self.comms_actor = self.createActor(CommsActor, globalName="comms")
-        self.realtime_actor = self.createActor(
-            RealtimeCommsActor, globalName="realtime"
-        )
-        self.lcd = self.createActor(LcdActor, globalName="lcd")
+        # bellboy is ready, start running things n whatnot
+        self.post_to_backend(BellboyMsg(event="power", state="on"))
+        self.log_realtime("Ready to serve clients.")
+        self.display("Hello this is a message, which floor would you like to go to?")
+        self.poll_sensor()
 
-        # requests to setup actors
-        self.send(self.comms_actor, CommsReq.AUTHENTICATE)
-        self.send(self.realtime_actor, Request.START)
+    def spawnActors(self):
+        """Create and set-up all child actors."""
+        # creates and sets up actors actors
+        self.log.info("Spawning all dependent actors...")
 
-        # setup actors, handle their responses
+        # comms
+        self.comms_actor = self.createActor(WebCommsActor, globalName="comms")
+        self.send(self.comms_actor, CommsReq.SETUP)
+
+        # sensor
+        self.ultrasonic = self.createActor(UltrasonicActor, globalName="ultrasonic")
         sensor_setup_msg = SensorMsg(
             SensorReq.SETUP, trigPin=23, echoPin=24, maxDepth_cm=200
         )
-        lcd_setup_msg = LcdMsg(LcdReq.SETUP, defaultText="Welcome to Bellboy")
+        self.send(self.ultrasonic, sensor_setup_msg)
 
-        self.send(self.ultrasonic_sensor, sensor_setup_msg)
+        # display
+        self.lcd = self.createActor(LcdActor, globalName="lcd")
+        lcd_setup_msg = LcdMsg(LcdReq.SETUP, defaultText="Welcome to Bellboy")
         self.send(self.lcd, lcd_setup_msg)
 
-        self.status = Response.STARTED
-        self.send(self.realtime_actor, "Ready to serve clients.")
-        self.send(self.comms_actor, {"event": "power", "state": "on"})
-
+    # utility methods
+    def display(self, text, duration=3):
+        """ Send msg to our display to show text for duration of time."""
         message = LcdMsg(
             LcdReq.DISPLAY,
-            displayText="Hello this is a message, which floor would you like to go to?            ",
-            displayDuration=4,
+            displayText=text,
+            displayDuration=duration,
         )
         self.send(self.lcd, message)
 
-    def stopBellboyLead(self):
-        self.log.info("Stopping all child actors...")
-        self.send(self.realtime_actor, "Stopping.")
-        self.status = Response.DONE
-        self.send(self.ultrasonic_sensor, SensorReq.STOP)
-        self.send(self.ultrasonic_sensor, SensorReq.CLEAR)
+    def post_to_backend(self, data: PostableMsg):
+        self.send(self.comms_actor, data)
+
+    def log_realtime(self, text):
+        self.send(self.comms_actor, RealtimeLog(text))
+
+    def poll_sensor(self):
+        self.send(
+            self.ultrasonic,
+            SensorMsg(SensorReq.POLL, pollPeriod_ms=100, triggerFunc=buttonHovered),
+        )
 
     # --------------------------#
     # MESSAGE HANDLING METHODS  #
@@ -86,29 +95,12 @@ class BellboyLeadActor(GenericActor):
         )
 
         if message is Request.START:
-            self.startBellboyLead()
+            self.start()
 
         elif message is Request.STOP:
-            self.stopBellboyLead()
+            self.teardown()
 
         self.send(sender, self.status)
-
-    def receiveMsg_SensorResp(self, message, sender):
-        self.log.info(
-            str.format("Received message {} from {}", message, self.nameOf(sender))
-        )
-
-        # if bellboy is complete, we can ignore any response msgs.
-
-        if message == SensorResp.SET:
-            if sender == self.ultrasonic_sensor:
-                # sensor is setup and ready to go, lets start polling for a hovered button.
-                self.send(
-                    sender,
-                    SensorMsg(
-                        SensorReq.POLL, pollPeriod_ms=100, triggerFunc=buttonHovered
-                    ),
-                )
 
     def receiveMsg_SensorEventMsg(self, message, sender):
         self.log.info(
@@ -124,25 +116,10 @@ class BellboyLeadActor(GenericActor):
         # Form a message based on the SensorEventMsg
         sensor_message_str = f"Requested Floor #{str(message.eventData)[6]}"
 
-        # Show the message on the LCD
-        lcd_message = LcdMsg(
-            LcdReq.DISPLAY,
-            displayText=sensor_message_str,
-            displayDuration=1,
-        )
-        self.send(self.lcd, lcd_message)
-
-        # Send the message to Realtime WebLogs
-        self.send(self.realtime_actor, sensor_message_str)
-
-        self.send(
-            self.comms_actor,
-            {
-                "event": "detection",
-                "method": "hand",
-                "floor": str(message.eventData)[6],
-            },
-        )
+        # Display, log realtime and post to backend
+        self.display(sensor_message_str)
+        self.log_realtime(sensor_message_str)
+        self.post_to_backend(message)
 
     def summary(self):
         """Returns a summary of the actor."""
@@ -150,4 +127,8 @@ class BellboyLeadActor(GenericActor):
         # TODO flesh this out...
 
     def teardown(self):
-        pass
+        self.log.info("Stopping all child actors...")
+        while self.children:
+            self.send(self.children.pop(), ActorExitRequest())
+
+        self.status = Response.DONE

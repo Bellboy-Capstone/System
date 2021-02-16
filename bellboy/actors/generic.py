@@ -19,6 +19,7 @@ class GenericActor(ActorTypeDispatcher, ABC):
         self._address_book = {}
         self.status = Response.NOT_READY
         self.TEST_MODE = False
+        self.children = []
 
     def nameOf(self, address: ActorAddress):
         """
@@ -46,6 +47,7 @@ class GenericActor(ActorTypeDispatcher, ABC):
 
         # update this actor's address book with new child
         self._nameAddress(actor, globalName)
+        self.children.append(actor)
 
         # all initialization msgs unique to bellboy actors get sent now
         self.send(actor, Init(senderName=self.globalName))
@@ -98,7 +100,7 @@ class GenericActor(ActorTypeDispatcher, ABC):
 
     def receiveMsg_ActorExitRequest(self, msg, sender):
         """This is last msg processed before the Actor is shutdown."""
-        self.log.debug("Received shutdown message!")
+        self.log.debug("Received ActorExitRequest message!")
         self.teardown()
 
     @abstractmethod
