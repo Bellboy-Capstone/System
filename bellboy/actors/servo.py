@@ -9,13 +9,13 @@ from actors.generic import GenericActor
 from collections import deque
 from utils.messages import Response, ServoReq, ServoResp, ServoMsg
 
+servoGPIO=18
 
-OFFSE_DUTY = 0.5        #define pulse offset of servo
-SERVO_MIN_DUTY = 2.5+OFFSE_DUTY     #define pulse duty cycle for minimum angle of servo
-SERVO_MAX_DUTY = 12.5+OFFSE_DUTY    #define pulse duty cycle for maximum angle of servo
-servoPin = 12
+OFFSE_DUTY = 0.45      #define pulse offset of servo
+SERVO_MAX_DUTY = (2.0+OFFSE_DUTY)/1000     #define pulse duty cycle for maximum angle of servo
+SERVO_MIN_DUTY = (1.0-OFFSE_DUTY)/1000    #define pulse duty cycle for minimum angle of servo
 
-lass UltrasonicActor(GenericActor):
+class UltrasonicActor(GenericActor):
     """
     Class for the servo.
     """
@@ -25,10 +25,6 @@ lass UltrasonicActor(GenericActor):
 
         # define private attributes
         # the following are set on setup request
-        self._servoPin = 0
-        self._servoOffset = 0
-        self._servoMin = 0
-        self._servoMax = 0
         self._servo = None
 
 
@@ -36,37 +32,36 @@ lass UltrasonicActor(GenericActor):
     # STATE MODIFYING METHODS   #
     # --------------------------#
 
-    def _setup_servo(self, servoPin, servoOffset, servoMin, servoMax):
+    def _setup_servo(self):
         """setup servo paramaters"""
-        self._servoPin = servoPin
-        self._servoOffset = servoOffset
-        self._servoMin = servoMin
-        self._servoMax = servoMax
 
         if self.TEST_MODE:
             gpiozero.Device.pin_factory = MockFactory()
             # TODO should this be "globally" set in the test suites...
             # but then will it even be recognized in other domains...
 
-        self._servo = ServoMotor(
-            pin=self._servoPin, offset=self._servoOffset, min=self._servoMin, max=self._servoMax
-        )
+        self._servo = Servo(
+            servoGPIO,min_pulse_width=SERVO_MIN_DUTY,max_pulse_width=SERVO_MAX_DUTY
+            )
+
 
         self.status = ServoResp.SET
 
+    def _push_button(self):
+        """when servo needs to push button"""
 
+        self.status = ServoResp.PUSHINGBUTTON
+        self.servo.min() #or max depending how we set it up
+        self.servo.sleep(2.5)
+        self.servo.mid()
+
+        self.status = SensorResp.SET
+
+    
 
     def _clear(self):
-        self._servoPin = 0
-        self._servoOffset = 0
-        self._servoMin = 0
-        self._servoMax = 0
-
         self._servo.close()
 
-
-        self._buffer.clear()
-        self.log.debug("cleared servo")
         self.status = Response.READY
 
     # --------------------------#
@@ -91,23 +86,11 @@ lass UltrasonicActor(GenericActor):
         if message == ServoReq.STOP:
             self.clear()
 
-    def receiveMsg_ServoMsg(self, message: ServoMsg, sender):
-        self.log.info(str.format("Received message {} from {}", message, sender))
-
-        if sender != self.parent:
-            self.log.warning(
-                str.format("Received {} req from unauthorized sender!", message.type)
-            )
-            self.send(sender, Response.UNAUTHORIZED)
-            return
-
-        if message.type == ServoReq.SETUP:
-            self._setup_servo(
-                servoPin = message.servoPin,
-                servoOffset = message.servoOffset,
-                servoMin = message.servoMin,
-                servoMax = message.servoMax
-            )
+        if message == ServoReq.PUSHBUTTON:
+            self._push_button()
+        
+        if message == ServoReq.SETUP:
+            self._setup_servo()
 
     def teardown(self):
         """
@@ -125,10 +108,5 @@ lass UltrasonicActor(GenericActor):
         :rtype: object
         """
         return ServoMsg(
-            type = Response.SUMMARY,
-            servoPin = self._servoPin
-            servoOffset = self._servoOffset
-            servoMin = self._servoMin
-            servoMax = self._servoMax
-
+            type = Response.SUMMARY
         )

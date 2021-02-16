@@ -151,12 +151,12 @@ class LcdMsg(DetailedMsg):
 
 # servo requests
 class ServoReq(Enum):
-    SETUP, START, STOP = range(3)
+    SETUP, PUSHBUTTON = range(2)
 
 
 # servo responses
 class ServoResp(Enum):
-    SET = range(1)
+    SET, PUSHINGBUTTON = range(2)
 
 
 # for req/resp with more info
