@@ -103,20 +103,19 @@ class UltrasonicActor(GenericActor):
                     self.send(self.parent, event)
 
                 self.log.debug(str.format("data: {}", format_deque(self._buffer)))
+                
                 # send event if last one not too recent
-                # now = datetime.now()
-                # timegap = now.timestamp() - self._last_detection_time.timestamp()
-                # # if event:
-                # #     # Make sure at least <timeout seconds> have passed between activations.
-                # #     if timegap < self._detection_timeout_seconds:
-                # #         self.log.debug(
-                # #             "Sensor cooldown period in effect, last event occured %s sec ago",
-                # #             timegap,
-                # #         )
-                # #     else:
-                # #         
-
-                # #     self._last_detection_time = now
+                now = datetime.now()
+                timegap = now.timestamp() - self._last_detection_time.timestamp()
+                if event:
+                    # Make sure at least <timeout seconds> have passed between activations.
+                    if timegap < self._detection_timeout_seconds:
+                        self.log.debug(
+                            "Sensor cooldown period in effect, last event occured %s sec ago",
+                            timegap,
+                        )
+                    else:
+                        self._last_detection_time = now
 
             # sleep till next period, or next mltiple of period
             dt_msec = (time.time() - t0) * MS_PER_SEC

@@ -43,7 +43,7 @@ def buttonHovered(depth_deque: deque):
     if btn_chosen == "button1":
         log.debug(str.format("data: {}", format_deque(depth_deque)))
         return SensorEventMsg(
-            eventType=SensorEvent.BUTTON_HOVERED, eventData="button1 was hovered"
+            eventType=SensorEvent.BUTTON_HOVERED, eventData="button1 was hovered", buttonHovered=1
         )
 
     count = 0
@@ -58,7 +58,7 @@ def buttonHovered(depth_deque: deque):
     if btn_chosen == "button2":
         log.debug(str.format("data: {}", format_deque(depth_deque)))
         return SensorEventMsg(
-            eventType=SensorEvent.BUTTON_HOVERED, eventData="button2 was hovered"
+            eventType=SensorEvent.BUTTON_HOVERED, eventData="button2 was hovered", buttonHovered=2
         )
 
     return None

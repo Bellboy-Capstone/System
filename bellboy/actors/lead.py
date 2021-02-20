@@ -68,8 +68,8 @@ class BellboyLeadActor(GenericActor):
 
         #servos
         self.servo = []
-        self.servo[0] = self.createActor(ServoActor, globalName="servo1")
-        self.servo[1] = self.createActor(ServoActor, globalName="servo2")
+        self.servo.append(self.createActor(ServoActor, globalName="servo1"))
+        self.servo.append(self.createActor(ServoActor, globalName="servo2"))
         
         self.send(self.servo[0], ServoMsg(type=ServoReq.SETUP, servoPin=17))
         self.send(self.servo[1], ServoMsg(type=ServoReq.SETUP, servoPin=18))
@@ -130,7 +130,9 @@ class BellboyLeadActor(GenericActor):
         sensor_message_str = f"Requested Floor #{str(message.eventData)[6]}"
 
         # push the servo
-        self.send(servo[message.buttonHovered], ServoReq.PUSHBUTTON)
+        self.log.info("button hovered" + str(message.buttonHovered))
+        self.send(self.servo[message.buttonHovered-1], ServoReq.PUSHBUTTON)
+        
         # Display, log realtime and post to backend
         # self.display(sensor_message_str)
         # self.log_realtime(sensor_message_str)
