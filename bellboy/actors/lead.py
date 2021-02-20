@@ -4,6 +4,7 @@ from actors.elevator import buttonHovered
 from actors.generic import GenericActor
 from actors.lcd import LcdActor
 from actors.ultrasonic import UltrasonicActor
+from actors.microphone import MicActor
 from thespian.actors import ActorAddress, ActorExitRequest
 from utils.messages import (
     BellboyMsg,
@@ -16,6 +17,9 @@ from utils.messages import (
     Response,
     SensorMsg,
     SensorReq,
+    MicReq, 
+    MicResp,
+    MicMsg
 )
 
 
@@ -40,6 +44,7 @@ class BellboyLeadActor(GenericActor):
         self.log_realtime("Ready to serve clients.")
         self.display("Hello this is a message, which floor would you like to go to?")
         self.poll_sensor()
+        self.listen_to_mic()
 
     def spawnActors(self):
         """Create and set-up all child actors."""
@@ -62,6 +67,11 @@ class BellboyLeadActor(GenericActor):
         lcd_setup_msg = LcdMsg(LcdReq.SETUP, defaultText="Welcome to Bellboy")
         self.send(self.lcd, lcd_setup_msg)
 
+        # microphone
+        self.mic = self.createActor(MicActor, globalName="mic")
+        # self.send(self.mic, MicReq.GET_MIC_LIST)
+        self.send(self.mic, MicMsg(msgType=MicReq.SETUP, micNumber=1))
+
     # utility methods
     def display(self, text, duration=3):
         """ Send msg to our display to show text for duration of time."""
@@ -83,6 +93,11 @@ class BellboyLeadActor(GenericActor):
             self.ultrasonic,
             SensorMsg(SensorReq.POLL, pollPeriod_ms=100, triggerFunc=buttonHovered),
         )
+
+    def listen_to_mic(self):
+        """ begins mic listening thread
+        """        
+        self.send(self.mic, MicReq.START_LISTENING)
 
     # --------------------------#
     # MESSAGE HANDLING METHODS  #
@@ -120,6 +135,10 @@ class BellboyLeadActor(GenericActor):
         self.display(sensor_message_str)
         self.log_realtime(sensor_message_str)
         self.post_to_backend(message)
+
+    def receiveMsg_MicMsg(self, msg, sender):
+        if msg.msgType == MicResp.MIC_LIST:
+            self.log.info(msg.micList)
 
     def summary(self):
         """Returns a summary of the actor."""

@@ -5,7 +5,7 @@ from threading import Thread
 from actors.generic import GenericActor
 from utils.messages import MicEvent, MicMsg, MicEventMsg, MicReq, MicResp, Response
 
-class MicrophoneActor(GenericActor):
+class MicActor(GenericActor):
     """
     Class for the voice recognition microphone. nnn
     """
@@ -19,7 +19,7 @@ class MicrophoneActor(GenericActor):
 
     def microphoneList(self):
         """return list of microphones in the system"""
-        return self.sr.Microphone.list_microphone_names()
+        return sr.Microphone.list_microphone_names()
 
     # STATE METHODS
     def setupMicrophone(self, micNumber):
@@ -29,6 +29,7 @@ class MicrophoneActor(GenericActor):
         :type micNumber: int
         """
         self.micIx = micNumber
+        self.log.info("Mic set to <<%s>>", self.microphoneList()[micNumber])
         self.status = MicResp.SET
 
     def listening_loop(self):
@@ -114,7 +115,7 @@ class MicrophoneActor(GenericActor):
         )
         if msg == MicReq.GET_MIC_LIST:
             self.send(
-                sender, MicMsg(msgType=MicResp.MIC_LIST, micList=microphoneList())
+                sender, MicMsg(msgType=MicResp.MIC_LIST, micList=self.microphoneList())
             )
         elif msg == MicReq.START_LISTENING:
             self.start_listening()

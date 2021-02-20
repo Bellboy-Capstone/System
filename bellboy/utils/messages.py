@@ -246,9 +246,10 @@ class MicResp(Enum):
     SET, LISTENING, MIC_LIST= range(3)
 
 class MicMsg:
-    def __init__(self, msgType, micNumber=None):
+    def __init__(self, msgType, micNumber=None, micList=None):
         self.msgType = msgType
         self.micNumber = micNumber 
+        self.micList = micList
     
     def __str__(self):
         return self.msgType.name
