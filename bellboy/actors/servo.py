@@ -9,11 +9,16 @@ from actors.generic import GenericActor
 from collections import deque
 from utils.messages import Response, ServoReq, ServoResp, ServoMsg
 
-servoGPIO=18
+servoGPIO = 18
 
-OFFSE_DUTY = 0.45      #define pulse offset of servo
-SERVO_MAX_DUTY = (2.0+OFFSE_DUTY)/1000     #define pulse duty cycle for maximum angle of servo
-SERVO_MIN_DUTY = (1.0-OFFSE_DUTY)/1000    #define pulse duty cycle for minimum angle of servo
+OFFSE_DUTY = 0.45  # define pulse offset of servo
+SERVO_MAX_DUTY = (
+    2.0 + OFFSE_DUTY
+) / 1000  # define pulse duty cycle for maximum angle of servo
+SERVO_MIN_DUTY = (
+    1.0 - OFFSE_DUTY
+) / 1000  # define pulse duty cycle for minimum angle of servo
+
 
 class ServoActor(GenericActor):
     """
@@ -26,7 +31,6 @@ class ServoActor(GenericActor):
         # define private attributes
         # the following are set on setup request
         self._servo = None
-
 
     # --------------------------#
     # STATE MODIFYING METHODS   #
@@ -41,9 +45,8 @@ class ServoActor(GenericActor):
             # but then will it even be recognized in other domains...
 
         self._servo = Servo(
-            servoGPIO,min_pulse_width=SERVO_MIN_DUTY,max_pulse_width=SERVO_MAX_DUTY
-            )
-
+            servoGPIO, min_pulse_width=SERVO_MIN_DUTY, max_pulse_width=SERVO_MAX_DUTY
+        )
 
         self.status = ServoResp.SET
         self.log.info("servo setup")
@@ -52,12 +55,12 @@ class ServoActor(GenericActor):
         """when servo needs to push button"""
 
         self.status = ServoResp.PUSHINGBUTTON
-        self._servo.min() #or max depending how we set it up
+        self._servo.min()  # or max depending how we set it up
         time.sleep(2.5)
         self._servo.mid()
 
         self.status = ServoResp.SET
-        self.log.info("button pushed")    
+        self.log.info("button pushed")
 
     def _clear(self):
         self._servo.close()
@@ -88,7 +91,7 @@ class ServoActor(GenericActor):
 
         if message == ServoReq.PUSHBUTTON:
             self._push_button()
-        
+
         if message == ServoReq.SETUP:
             self._setup_servo()
 
@@ -107,6 +110,4 @@ class ServoActor(GenericActor):
         The summary can be any detailed msg described in the messages module.
         :rtype: object
         """
-        return ServoMsg(
-            type = Response.SUMMARY
-        )
+        return ServoMsg(type=Response.SUMMARY)

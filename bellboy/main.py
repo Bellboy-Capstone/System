@@ -28,7 +28,9 @@ def main():
 
         # Run this while loop for the duration of the program.
         while True:
-            choice = input("Enter 'q' to end Bellboy, 's' to send heartbeat, and 'p' to push button.\n")
+            choice = input(
+                "Enter 'q' to end Bellboy, 's' to send heartbeat, and 'p' to push button.\n"
+            )
             if choice == "p":
                 system.ask(bellboy, ServoReq.PUSHBUTTON)
             if choice == "q":
@@ -36,7 +38,6 @@ def main():
             if choice == "s":
                 log.debug("Sending status request to lead actor.")
                 system.ask(bellboy, StatusReq())
-
 
     except KeyboardInterrupt:
         log.error("The bellboy system was interrupted by the keyboard, exiting...")

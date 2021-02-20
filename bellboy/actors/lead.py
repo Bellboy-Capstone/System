@@ -18,7 +18,7 @@ from utils.messages import (
     SensorMsg,
     SensorReq,
     ServoReq,
-    ServoResp
+    ServoResp,
 )
 
 
@@ -65,7 +65,7 @@ class BellboyLeadActor(GenericActor):
         lcd_setup_msg = LcdMsg(LcdReq.SETUP, defaultText="Welcome to Bellboy")
         self.send(self.lcd, lcd_setup_msg)
 
-        #servo
+        # servo
         self.servo = self.createActor(ServoActor, globalName="servo")
         self.send(self.servo, ServoReq.SETUP)
 

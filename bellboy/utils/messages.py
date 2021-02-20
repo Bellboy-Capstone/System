@@ -186,14 +186,7 @@ class ServoResp(Enum):
 
 # for req/resp with more info
 class ServoMsg(DetailedMsg):
-    def __init__(
-        self,
-        type,
-        servoPin = 0,
-        servoOffset = 0,
-        servoMin = 0,
-        servoMax = 0
-    ):
+    def __init__(self, type, servoPin=0, servoOffset=0, servoMin=0, servoMax=0):
         self.type = type
         self._servoPin = servoPin
         self._servoOffset = servoOffset
@@ -202,6 +195,7 @@ class ServoMsg(DetailedMsg):
 
     def __str__(self):
         return self.type.name
+
 
 """Cam messages"""
 

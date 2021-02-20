@@ -42,7 +42,7 @@ class WebCommsActor(GenericActor):
         file_content = None
         with open(credential_path, "rb") as auth_file:
             self.log.info("Found credential file, unpickling...")
-            if(not auth_file):
+            if not auth_file:
                 return False
 
             try:
@@ -50,7 +50,9 @@ class WebCommsActor(GenericActor):
                 file_content = str(pickle_data)
                 self._identifier = file_content
             except EOFError:
-                self.log.error("An error occured while loading the pickled credentials.")
+                self.log.error(
+                    "An error occured while loading the pickled credentials."
+                )
 
         if not file_content:
             # If no creds present, we need to fetch credentials from Services.
