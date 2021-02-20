@@ -3,6 +3,7 @@ import pickle
 import ssl
 from datetime import timedelta
 from time import sleep
+import os
 
 import requests
 import websocket
@@ -40,6 +41,8 @@ class WebCommsActor(GenericActor):
 
         # Get credentials
         file_content = None
+        if not os.path.exists(credential_path):
+            os.mknod(credential_path)
         with open(credential_path, "rb") as auth_file:
             self.log.info("Found credential file, unpickling...")
             file_content = str(pickle.load(auth_file))

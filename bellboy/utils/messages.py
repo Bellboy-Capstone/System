@@ -112,9 +112,10 @@ class SensorEvent(Enum):
 
 # for event with more info
 class SensorEventMsg(PostableMsg):
-    def __init__(self, eventType, eventData):
+    def __init__(self, eventType, eventData, buttonHovered):
         self.eventType = eventType
         self.eventData = eventData
+        self.buttonHovered = buttonHovered
 
     def __str__(self):
         return self.eventType.name
@@ -195,10 +196,10 @@ class ServoMsg(DetailedMsg):
         servoMax = 0
     ):
         self.type = type
-        self._servoPin = servoPin
-        self._servoOffset = servoOffset
-        self._servoMin = servoMin
-        self._servoMax = servoMax
+        self.servoPin = servoPin
+        self.servoOffset = servoOffset
+        self.servoMin = servoMin
+        self.servoMax = servoMax
 
     def __str__(self):
         return self.type.name

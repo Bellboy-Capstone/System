@@ -9,7 +9,7 @@ from actors.generic import GenericActor
 from collections import deque
 from utils.messages import Response, ServoReq, ServoResp, ServoMsg
 
-servoGPIO=18
+# servoGPIO=18
 
 OFFSE_DUTY = 0.45      #define pulse offset of servo
 SERVO_MAX_DUTY = (2.0+OFFSE_DUTY)/1000     #define pulse duty cycle for maximum angle of servo
@@ -32,7 +32,7 @@ class ServoActor(GenericActor):
     # STATE MODIFYING METHODS   #
     # --------------------------#
 
-    def _setup_servo(self):
+    def _setup_servo(self, servo_pin):
         """setup servo paramaters"""
 
         if self.TEST_MODE:
@@ -41,7 +41,7 @@ class ServoActor(GenericActor):
             # but then will it even be recognized in other domains...
 
         self._servo = Servo(
-            servoGPIO,min_pulse_width=SERVO_MIN_DUTY,max_pulse_width=SERVO_MAX_DUTY
+            servo_pin,min_pulse_width=SERVO_MIN_DUTY,max_pulse_width=SERVO_MAX_DUTY
             )
 
 
@@ -89,8 +89,11 @@ class ServoActor(GenericActor):
         if message == ServoReq.PUSHBUTTON:
             self._push_button()
         
-        if message == ServoReq.SETUP:
-            self._setup_servo()
+    
+    def receiveMsg_ServoMsg(self, message, sender):
+        if message.msgType == ServoReq.SETUP:
+            self._setup_servo(message.servoPin)
+
 
     def teardown(self):
         """

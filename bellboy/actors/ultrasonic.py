@@ -2,6 +2,8 @@ import time
 from datetime import datetime
 from threading import Thread
 
+
+from actors.elevator import format_deque
 import gpiozero
 from actors.generic import GenericActor
 from collections import deque
@@ -66,6 +68,7 @@ class UltrasonicActor(GenericActor):
                 self.TEST_MODE = True
 
         if self.TEST_MODE:
+            self.log.debug("Sensor in test mode")
             gpiozero.Device.pin_factory = MockFactory()
             # TODO should this be "globally" set in the test suites...
             # but then will it even be recognized in other domains...
@@ -73,6 +76,8 @@ class UltrasonicActor(GenericActor):
         self._sensor = DistanceSensor(
             echo=self._echoPin, trigger=self._trigPin, max_distance=max_depth_cm / 100.0
         )
+
+        self.log.debug("Sensor in setup")
 
         self.status = SensorResp.SET
 
@@ -88,28 +93,30 @@ class UltrasonicActor(GenericActor):
         self._buffer.clear()
         self.log.info("starting sensor loop")
         while not self._terminate_thread:
-
             t0 = time.time()
             if not self.TEST_MODE:
                 self._buffer.appendleft(self._sensor.distance * 100.0)
 
                 # check for event
                 event = self._eventFunc(self._buffer)
-
-                # send event if last one not too recent
-                now = datetime.now()
-                timegap = now.timestamp() - self._last_detection_time.timestamp()
                 if event:
-                    # Make sure at least <timeout seconds> have passed between activations.
-                    if timegap < self._detection_timeout_seconds:
-                        self.log.debug(
-                            "Sensor cooldown period in effect, last event occured %s sec ago",
-                            timegap,
-                        )
-                    else:
-                        self.send(self.parent, event)
+                    self.send(self.parent, event)
 
-                    self._last_detection_time = now
+                self.log.debug(str.format("data: {}", format_deque(self._buffer)))
+                # send event if last one not too recent
+                # now = datetime.now()
+                # timegap = now.timestamp() - self._last_detection_time.timestamp()
+                # # if event:
+                # #     # Make sure at least <timeout seconds> have passed between activations.
+                # #     if timegap < self._detection_timeout_seconds:
+                # #         self.log.debug(
+                # #             "Sensor cooldown period in effect, last event occured %s sec ago",
+                # #             timegap,
+                # #         )
+                # #     else:
+                # #         
+
+                # #     self._last_detection_time = now
 
             # sleep till next period, or next mltiple of period
             dt_msec = (time.time() - t0) * MS_PER_SEC

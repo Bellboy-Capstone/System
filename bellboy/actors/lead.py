@@ -18,7 +18,8 @@ from utils.messages import (
     SensorMsg,
     SensorReq,
     ServoReq,
-    ServoResp
+    ServoResp,
+    ServoMsg
 )
 
 
@@ -39,9 +40,9 @@ class BellboyLeadActor(GenericActor):
         self.status = Response.STARTED
 
         # bellboy is ready, start running things n whatnot
-        self.post_to_backend(BellboyMsg(event="power", state="on"))
-        self.log_realtime("Ready to serve clients.")
-        self.display("Hello this is a message, which floor would you like to go to?")
+        # self.post_to_backend(BellboyMsg(event="power", state="on"))
+        # self.log_realtime("Ready to serve clients.")
+        # self.display("Hello this is a message, which floor would you like to go to?")
         self.poll_sensor()
 
     def spawnActors(self):
@@ -50,8 +51,8 @@ class BellboyLeadActor(GenericActor):
         self.log.info("Spawning all dependent actors...")
 
         # comms
-        self.comms_actor = self.createActor(WebCommsActor, globalName="comms")
-        self.send(self.comms_actor, CommsReq.SETUP)
+        # self.comms_actor = self.createActor(WebCommsActor, globalName="comms")
+        # self.send(self.comms_actor, CommsReq.SETUP)
 
         # sensor
         self.ultrasonic = self.createActor(UltrasonicActor, globalName="ultrasonic")
@@ -60,10 +61,10 @@ class BellboyLeadActor(GenericActor):
         )
         self.send(self.ultrasonic, sensor_setup_msg)
 
-        # display
-        self.lcd = self.createActor(LcdActor, globalName="lcd")
-        lcd_setup_msg = LcdMsg(LcdReq.SETUP, defaultText="Welcome to Bellboy")
-        self.send(self.lcd, lcd_setup_msg)
+        # # display
+        # self.lcd = self.createActor(LcdActor, globalName="lcd")
+        # lcd_setup_msg = LcdMsg(LcdReq.SETUP, defaultText="Welcome to Bellboy")
+        # self.send(self.lcd, lcd_setup_msg)
 
         #servo
         self.servo = self.createActor(ServoActor, globalName="servo")
@@ -126,10 +127,12 @@ class BellboyLeadActor(GenericActor):
         # Form a message based on the SensorEventMsg
         sensor_message_str = f"Requested Floor #{str(message.eventData)[6]}"
 
+        # push the servo
+        self.send(servo[message.buttonHovered], ServoReq.PUSHBUTTON)
         # Display, log realtime and post to backend
-        self.display(sensor_message_str)
-        self.log_realtime(sensor_message_str)
-        self.post_to_backend(message)
+        # self.display(sensor_message_str)
+        # self.log_realtime(sensor_message_str)
+        # self.post_to_backend(message)
 
     def receiveMsg_ServoReq(self, message, sender):
 

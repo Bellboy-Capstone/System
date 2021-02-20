@@ -12,8 +12,8 @@ from utils.messages import SensorEvent, SensorEventMsg
 
 log = logging.getLogger("elevator")
 # simple "buttons", only have a position (depth) value and a radius.. all in cm
-BTN1_POS = 8.5
-BTN2_POS = 16
+BTN1_POS = 13
+BTN2_POS = 25
 BTN_RAD = 3
 
 DATA_TO_COUNT = 10  # 10 * 100 ms = 1 sec of data
@@ -25,8 +25,6 @@ def buttonHovered(depth_deque: deque):
 
     processes data deque. tells us which button was hovered.
     """
-
-    log.debug(str.format("data: {}", format_deque(depth_deque)))
 
     # for now only test in quantums
     if len(depth_deque) % DATA_TO_COUNT != 0:
