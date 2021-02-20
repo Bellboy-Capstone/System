@@ -24,7 +24,7 @@ class GenericActor(ActorTypeDispatcher, ABC):
     def nameOf(self, address: ActorAddress):
         """
         Returns name of actor if it's entry exists in address book.
-
+        
         Else returns the toString of the actorAddress.
         """
 
