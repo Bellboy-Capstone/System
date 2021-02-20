@@ -42,8 +42,15 @@ class WebCommsActor(GenericActor):
         file_content = None
         with open(credential_path, "rb") as auth_file:
             self.log.info("Found credential file, unpickling...")
-            file_content = str(pickle.load(auth_file))
-            self._identifier = file_content
+            if(not auth_file):
+                return False
+
+            try:
+                pickle_data = pickle.load(auth_file)
+                file_content = str(pickle_data)
+                self._identifier = file_content
+            except EOFError:
+                self.log.error("An error occured while loading the pickled credentials.")
 
         if not file_content:
             # If no creds present, we need to fetch credentials from Services.
@@ -54,8 +61,10 @@ class WebCommsActor(GenericActor):
 
             # grab and save our new identifier
             data = auth_req.json()
-            self._identifier = str(data.get("identifier"))
-            with open(credential_path, "w+") as auth_file:
+            self.log.info("Got data from authentication endpoint.")
+            self.log.info(str(data))
+            self._identifier: str = str(data.get("identifier"))
+            with open(credential_path, "wb") as auth_file:
                 self.log.debug("Saving new ID %s", self._identifier)
                 pickle.dump(self._identifier, auth_file)
 
