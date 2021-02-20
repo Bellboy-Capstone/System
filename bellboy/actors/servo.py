@@ -91,7 +91,7 @@ class ServoActor(GenericActor):
         
     
     def receiveMsg_ServoMsg(self, message, sender):
-        if message.msgType == ServoReq.SETUP:
+        if message.type == ServoReq.SETUP:
             self._setup_servo(message.servoPin)
 
 

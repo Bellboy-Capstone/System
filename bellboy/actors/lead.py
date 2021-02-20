@@ -66,9 +66,14 @@ class BellboyLeadActor(GenericActor):
         # lcd_setup_msg = LcdMsg(LcdReq.SETUP, defaultText="Welcome to Bellboy")
         # self.send(self.lcd, lcd_setup_msg)
 
-        #servo
-        self.servo = self.createActor(ServoActor, globalName="servo")
-        self.send(self.servo, ServoReq.SETUP)
+        #servos
+        self.servo = []
+        self.servo[0] = self.createActor(ServoActor, globalName="servo1")
+        self.servo[1] = self.createActor(ServoActor, globalName="servo2")
+        
+        self.send(self.servo[0], ServoMsg(type=ServoReq.SETUP, servoPin=17))
+        self.send(self.servo[1], ServoMsg(type=ServoReq.SETUP, servoPin=18))
+
 
     # utility methods
     def display(self, text, duration=3):
@@ -91,9 +96,6 @@ class BellboyLeadActor(GenericActor):
             self.ultrasonic,
             SensorMsg(SensorReq.POLL, pollPeriod_ms=100, triggerFunc=buttonHovered),
         )
-
-    def push_servo(self):
-        self.send(self.servo, ServoReq.PUSHBUTTON)
 
     # --------------------------#
     # MESSAGE HANDLING METHODS  #
