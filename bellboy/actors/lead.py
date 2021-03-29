@@ -2,9 +2,9 @@
 from actors.comms import WebCommsActor
 from actors.elevator import buttonHovered
 from actors.generic import GenericActor
-from actors.lcd import LcdActor
 from actors.ultrasonic import UltrasonicActor
 from actors.microphone import MicActor
+from actors.oled import OledActor
 from thespian.actors import ActorAddress, ActorExitRequest
 from utils.messages import (
     BellboyMsg,
@@ -43,8 +43,8 @@ class BellboyLeadActor(GenericActor):
         self.post_to_backend(BellboyMsg(event="power", state="on"))
         self.log_realtime("Ready to serve clients.")
         self.display("Hello this is a message, which floor would you like to go to?")
-        self.poll_sensor()
-        self.listen_to_mic()
+        # self.poll_sensor()
+        # self.listen_to_mic()
 
     def spawnActors(self):
         """Create and set-up all child actors."""
@@ -56,21 +56,24 @@ class BellboyLeadActor(GenericActor):
         self.send(self.comms_actor, CommsReq.SETUP)
 
         # sensor
-        self.ultrasonic = self.createActor(UltrasonicActor, globalName="ultrasonic")
-        sensor_setup_msg = SensorMsg(
-            SensorReq.SETUP, trigPin=23, echoPin=24, maxDepth_cm=200
-        )
-        self.send(self.ultrasonic, sensor_setup_msg)
+        # self.ultrasonic = self.createActor(UltrasonicActor, globalName="ultrasonic")
+        # sensor_setup_msg = SensorMsg(
+        #     SensorReq.SETUP, trigPin=23, echoPin=24, maxDepth_cm=200
+        # )
+        # self.send(self.ultrasonic, sensor_setup_msg)
 
         # display
-        self.lcd = self.createActor(LcdActor, globalName="lcd")
-        lcd_setup_msg = LcdMsg(LcdReq.SETUP, defaultText="Welcome to Bellboy")
-        self.send(self.lcd, lcd_setup_msg)
+        # self.lcd = self.createActor(LcdActor, globalName="lcd")
+        # lcd_setup_msg = LcdMsg(LcdReq.SETUP, defaultText="Welcome to Bellboy")
+        # self.send(self.lcd, lcd_setup_msg)
+        self.oled = self.createActor(OledActor, globalName="oled")
+        oled_setup_msg = LcdMsg(LcdReq.SETUP, defaultText="Welcome to Bellboy")
+        self.send(self.oled, oled_setup_msg)
 
         # microphone
-        self.mic = self.createActor(MicActor, globalName="mic")
-        # self.send(self.mic, MicReq.GET_MIC_LIST)
-        self.send(self.mic, MicMsg(msgType=MicReq.SETUP, micNumber=1))
+        # self.mic = self.createActor(MicActor, globalName="mic")
+        # # self.send(self.mic, MicReq.GET_MIC_LIST)
+        # self.send(self.mic, MicMsg(msgType=MicReq.SETUP, micNumber=1))
 
     # utility methods
     def display(self, text, duration=3):
@@ -80,7 +83,7 @@ class BellboyLeadActor(GenericActor):
             displayText=text,
             displayDuration=duration,
         )
-        self.send(self.lcd, message)
+        self.send(self.oled, message)
 
     def post_to_backend(self, data: PostableMsg):
         self.send(self.comms_actor, data)

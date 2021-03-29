@@ -3,6 +3,7 @@ import pickle
 import ssl
 from datetime import timedelta
 from time import sleep
+import os.path
 
 import requests
 import websocket
@@ -40,10 +41,16 @@ class WebCommsActor(GenericActor):
 
         # Get credentials
         file_content = None
-        with open(credential_path, "rb") as auth_file:
-            self.log.info("Found credential file, unpickling...")
-            file_content = str(pickle.load(auth_file))
-            self._identifier = file_content
+        # make file if doesnt exist
+        if not os.path.exists(credential_path):
+            with open(credential_path, 'w'): pass
+        else:
+            # grab creds
+            with open(credential_path, "rb") as auth_file:
+                self.log.info("Found credential file, unpickling...")
+                file_content = str(pickle.load(auth_file))
+                self._identifier = file_content
+            
 
         if not file_content:
             # If no creds present, we need to fetch credentials from Services.
@@ -55,7 +62,7 @@ class WebCommsActor(GenericActor):
             # grab and save our new identifier
             data = auth_req.json()
             self._identifier = str(data.get("identifier"))
-            with open(credential_path, "w+") as auth_file:
+            with open(credential_path, "wb") as auth_file:
                 self.log.debug("Saving new ID %s", self._identifier)
                 pickle.dump(self._identifier, auth_file)
 
