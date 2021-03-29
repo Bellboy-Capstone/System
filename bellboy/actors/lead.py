@@ -42,7 +42,7 @@ class BellboyLeadActor(GenericActor):
         # bellboy is ready, start running things n whatnot
         self.post_to_backend(BellboyMsg(event="power", state="on"))
         self.log_realtime("Ready to serve clients.")
-        self.display("Hello this is a message, which floor would you like to go to?")
+        # self.display("Hello this is a message, which floor would you like to go to?")
         # self.poll_sensor()
         # self.listen_to_mic()
 
@@ -142,6 +142,9 @@ class BellboyLeadActor(GenericActor):
     def receiveMsg_MicMsg(self, msg, sender):
         if msg.msgType == MicResp.MIC_LIST:
             self.log.info(msg.micList)
+    
+    def receiveMsg_LcdMsg(self, msg, sender):
+        self.display(msg.displayText, msg.displayDuration)
 
     def summary(self):
         """Returns a summary of the actor."""

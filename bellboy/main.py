@@ -3,7 +3,7 @@ import logging
 from actors.lead import BellboyLeadActor
 from thespian.actors import ActorSystem
 from utils.cli import get_bellboy_configs
-from utils.messages import Init, Request, StatusReq
+from utils.messages import Init, Request, StatusReq, LcdMsg, LcdReq
 
 
 def main():
@@ -32,6 +32,11 @@ def main():
         ):
             log.debug("Sending status request to lead actor.")
             system.ask(bellboy, StatusReq())
+            system.tell(bellboy, LcdMsg(
+            LcdReq.DISPLAY,
+            displayText="listen to my heart beat (its beating for you)",
+            displayDuration=3,
+        ))
 
     except KeyboardInterrupt:
         log.error("The bellboy system was interrupted by the keyboard, exiting...")

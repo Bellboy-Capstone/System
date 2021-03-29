@@ -1,19 +1,26 @@
 
 from time import sleep
+from os import path
 
 from actors.generic import GenericActor
 from utils.lcd.Adafruit_LCD1602 import Adafruit_CharLCD
 from utils.messages import LcdMsg, LcdReq, LcdResp, Response
 
+from threading import Thread
 from board import SCL, SDA
 import busio
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont, ImageSequence
 import adafruit_ssd1306
 
 CHARS_PER_LINE = 21
 PIX_WIDTH = 128
 PIX_HEIGHT = 32
 GIF_FPS = 60 
+
+
+basepath = path.dirname(__file__)
+gif_path = path.abspath(path.join(basepath, "..", "utils", "oled", "audio_animation_128x32.gif"))
+
 
 sec_per_frame = 1.0/GIF_FPS
 font = ImageFont.load_default()
@@ -52,6 +59,15 @@ class OledActor(GenericActor):
         self.canvas = Image.new("1", (self.width, self.height))
         self.painter = ImageDraw.Draw(self.canvas)
 
+        # gather gif from file
+        gif = Image.open(gif_path)
+        self.gif_frames = []
+
+        for frame in ImageSequence.Iterator(gif):
+            # add frames as '1' bit maps.
+            self.gif_frames.append(frame.convert('1'))
+
+
         self.displayText("System Starting...", 2)
         self.status = LcdResp.SET
 
@@ -59,6 +75,7 @@ class OledActor(GenericActor):
         """Displays text on screen for duration of time, then returns to
         default message."""
 
+        self.interrupted = True # end gif thread
         if self.TEST_MODE:
             self.log.info("Mock OLED DISPLAY: " + text)
             sleep(self.duration)
@@ -75,12 +92,14 @@ class OledActor(GenericActor):
         
         self.duration = 0
         self.interrupted = False
-        self.printText(self.default_text)
+
+        self.display_gif()
+        #self.printText(self.default_text)
 
 
     def clearScreen(self):
-        self.painter.rectangle((0, 0, self.width, self.height), outline=0, fill=0)
-        self.oled.image(self.canvas)
+        # Clear display.
+        self.oled.fill(0)
         self.oled.show()
 
     def printText(self, text):
@@ -128,9 +147,24 @@ class OledActor(GenericActor):
             lineCount += 1
 
         return lines
+
+    def display_gif(self):
+        self.gif_thread = Thread(target=self.gif_thread_loop)
+        self.gif_thread.start()
+
+    def gif_thread_loop(self):
+        #self.clearScreen()
+                # clean the canvas
+        self.painter.rectangle((0, 0, self.width, self.height), outline=0, fill=0)
+
+        fIx = 0
+        while not self.interrupted:
+            self.oled.image(self.gif_frames[fIx])
+            self.oled.show()
+            sleep(sec_per_frame)
+            fIx = (fIx + 1)%len(self.gif_frames)
+
         
-
-
     # --------------------------#
     # MESSAGE HANDLING METHODS  #
     # --------------------------#
@@ -154,12 +188,14 @@ class OledActor(GenericActor):
         if message.msgType == LcdReq.DISPLAY:
             self.displayText(message.displayText, message.displayDuration)
 
+
     def teardown(self):
         """
         Actor's teardown sequence, called before shutdown.
 
         (i.e. close threads, disconnect from services, etc)
         """
+        self.interrupted = True
         self.clearScreen()
 
     def summary(self):
