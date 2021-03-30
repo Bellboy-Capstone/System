@@ -5,7 +5,7 @@
 from PIL import Image, ImageSequence
 
 
-gif_path = "audio_animation.gif"
+gif_path = "audio_animation_128x32.gif"
 gif_name = gif_path.split('.')[0]
 
 gif = Image.open(gif_path)
