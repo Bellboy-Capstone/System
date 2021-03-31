@@ -19,8 +19,9 @@ GIF_FPS = 60
 
 
 basepath = path.dirname(__file__)
-gif_path = path.abspath(path.join(basepath, "..", "utils", "oled", "audio_animation_128x32.gif"))
-
+gif_name = "audio_animation_128x32.gif"
+gif_path = path.abspath(path.join(basepath, "..", "utils", "oled", gif_name))
+i2c_addr = 0x3c # 0x3c for 128x32, 0x3d for 128x64
 
 sec_per_frame = 1.0/GIF_FPS
 font = ImageFont.load_default()
@@ -42,7 +43,7 @@ class OledActor(GenericActor):
         i2c = busio.I2C(SCL, SDA)
 
         # Create the SSD1306 OLED class
-        self.oled = adafruit_ssd1306.SSD1306_I2C(PIX_WIDTH, PIX_HEIGHT, i2c)
+        self.oled = adafruit_ssd1306.SSD1306_I2C(PIX_WIDTH, PIX_HEIGHT, i2c, addr=i2c_addr)
 
         # Clear display.
         self.oled.fill(0)
