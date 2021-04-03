@@ -93,32 +93,30 @@ class UltrasonicActor(GenericActor):
             if not self.TEST_MODE:
                 self._buffer.appendleft(self._sensor.distance * 100.0)
 
-                # check for event, if occurred send msg to subscriber
+                # check for event
                 event = self._eventFunc(self._buffer)
+
+                # send event if last one not too recent
                 now = datetime.now()
                 timegap = now.timestamp() - self._last_detection_time.timestamp()
-
                 if event:
                     # Make sure at least <timeout seconds> have passed between activations.
-                    if timegap > self._detection_timeout_seconds:
+                    if timegap < self._detection_timeout_seconds:
                         self.log.debug(
-                            "Enough time has elapsed between activations, sending."
+                            "Sensor cooldown period in effect, last event occured %s sec ago",
+                            timegap,
                         )
-                        self._last_detection_time = now
-                        self.send(self.parent, event)
                     else:
-                        self.log.debug(
-                            "Sensor cooldown period in effect, timegap: %s", timegap
-                        )
+                        self.send(self.parent, event)
 
-            # sleep till next period, o next mltiple of period
+                    self._last_detection_time = now
+
+            # sleep till next period, or next mltiple of period
             dt_msec = (time.time() - t0) * MS_PER_SEC
             if dt_msec > self._poll_period:
                 self.log.warning(
-                    str.format(
-                        "operation took {} ms, consider having a longer poll period.",
-                        dt_msec,
-                    )
+                    "operation took %s ms, consider having a longer poll period.",
+                    dt_msec,
                 )
 
             time.sleep(((self._poll_period - dt_msec) % self._poll_period) / MS_PER_SEC)
@@ -138,7 +136,7 @@ class UltrasonicActor(GenericActor):
             self.log.debug("no thread to stop")
             return
 
-        self.log.debug("Stopping the UltraSonic detection loop...")
+        self.log.debug("Stopping the Ultrasonic detection loop...")
         self._terminate_thread = True
 
     def _clear(self):
@@ -162,15 +160,12 @@ class UltrasonicActor(GenericActor):
     def receiveMsg_SensorReq(self, message, sender):
         """responding to simple sensor requests."""
 
-        self.log.info(
-            str.format("Received message {} from {}", message, self.nameOf(sender))
-        )
+        self.log.info("Received message %s from %s", message, self.nameOf(sender))
 
         # ignore unauthorized requests
         if sender != self.parent:
-            self.log.warning(
-                str.format("Received {} req from unauthorized sender!", message)
-            )
+            self.log.warning("Received %s req from unauthorized sender!", message)
+
             self.send(sender, Response.UNAUTHORIZED)
             return
 
@@ -187,14 +182,10 @@ class UltrasonicActor(GenericActor):
             self._clear()
 
     def receiveMsg_SensorMsg(self, message: SensorMsg, sender):
-        self.log.info(
-            str.format("Received message {} from {}", message, self.nameOf(sender))
-        )
+        self.log.info("Received message %s from %s", message, self.nameOf(sender))
 
         if sender != self.parent:
-            self.log.warning(
-                str.format("Received {} req from unauthorized sender!", message.type)
-            )
+            self.log.warning("Received %s req from unauthorized sender!", message.type)
             self.send(sender, Response.UNAUTHORIZED)
             return
 
@@ -224,6 +215,7 @@ class UltrasonicActor(GenericActor):
     def teardown(self):
         """Sensor teardown, ensures polling thread is dead."""
         self._stop_polling()
+        self._clear()
 
     def summary(self):
         """sends a summary of the actor."""

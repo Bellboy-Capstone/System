@@ -26,10 +26,26 @@ class TestMode:
 
 
 # generic parent class for detailed messages
-
-
 class DetailedMsg:
     pass
+
+
+# class for msgs which can be posted to back end
+class PostableMsg(DetailedMsg):
+    def toDict(self):
+        # converts message to postable dictionary...
+        raise Exception("toDict not implemented!")
+
+
+# Bellboy messages
+class BellboyMsg(PostableMsg):
+    def __init__(self, event=None, state=None):
+        self.event = event
+        self.state = state
+
+    def toDict(self):
+        ret_dict = {"event": self.event, "state": self.state}
+        return ret_dict
 
 
 # general requests
@@ -95,7 +111,7 @@ class SensorEvent(Enum):
 
 
 # for event with more info
-class SensorEventMsg(DetailedMsg):
+class SensorEventMsg(PostableMsg):
     def __init__(self, eventType, eventData):
         self.eventType = eventType
         self.eventData = eventData
@@ -103,18 +119,27 @@ class SensorEventMsg(DetailedMsg):
     def __str__(self):
         return self.eventType.name
 
+    def toDict(self):
+        return {"eventType": self.eventType.name, "eventData": self.eventData}
+
 
 """ Communication related messages. """
 
 
 # comms requests
 class CommsReq(Enum):
-    AUTHENTICATE, HEARTBEAT, RESET = range(3)
+    AUTHENTICATE, HEARTBEAT, RESET, SETUP = range(4)
 
 
 # comms responses
 class CommsResp(Enum):
     SUCCESS, FAILURE = range(2)
+
+
+# comms requests
+class RealtimeLog:
+    def __init__(self, text):
+        self.text = text
 
 
 """Lcd messages"""
@@ -172,8 +197,8 @@ class CameraType(Enum):
     RPI_CAM, USB_CAM = range(2)
 
 
-class CamEventMsg:
-    def __init__(self, eventType: CamEvent, face = None, faceId = 0):
+class CamEventMsg(PostableMsg):
+    def __init__(self, eventType: CamEvent, face=None, faceId=0):
         self.eventType = eventType
         self.face = face
         self.faceId = faceId
