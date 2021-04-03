@@ -44,7 +44,7 @@ class FacecamActor(GenericActor):
 
 
     # STATE METHODS
-    def setup_camera(self, camera_type, model="hog", tolerance=0.8):
+    def setup_camera(self, camera_type, model="hog", tolerance=0.5):
         """ Sets up camera.
         """
         self.cameraType = camera_type 
@@ -194,7 +194,10 @@ class FacecamActor(GenericActor):
 
             # finally, display the resulting frame
             cv2.imshow("Video", frame)
-            
+            key = cv2.waitKey(1) & 0xFF
+            # quit when 'q' key is pressed
+            if key == ord("q"):
+                break
         self.log.info("Streaming terminated.")
         self.status = CamResp.SET
 

@@ -38,34 +38,35 @@ class BellboyLeadActor(GenericActor):
         self.status = Response.STARTED
 
         # bellboy is ready, start running things n whatnot
-        self.post_to_backend(BellboyMsg(event="power", state="on"))
-        self.log_realtime("Ready to serve clients.")
-        self.display("Hello this is a message, which floor would you like to go to?")
-        self.poll_sensor()
+        # self.post_to_backend(BellboyMsg(event="power", state="on"))
+        # self.log_realtime("Ready to serve clients.")
+        # self.display("Hello this is a message, which floor would you like to go to?")
+        # self.poll_sensor()
         self.stream_camera()
-        
+
     def spawnActors(self):
         """Create and set-up all child actors."""
         # creates and sets up actors actors
         self.log.info("Spawning all dependent actors...")
 
-        # comms
-        self.comms_actor = self.createActor(WebCommsActor, globalName="comms")
-        self.send(self.comms_actor, CommsReq.SETUP)
+        # # comms
+        # self.comms_actor = self.createActor(WebCommsActor, globalName="comms")
+        # self.send(self.comms_actor, CommsReq.SETUP)
 
-        # sensor
-        self.ultrasonic = self.createActor(UltrasonicActor, globalName="ultrasonic")
-        sensor_setup_msg = SensorMsg(
-            SensorReq.SETUP, trigPin=23, echoPin=24, maxDepth_cm=200
-        )
-        self.send(self.ultrasonic, sensor_setup_msg)
+        # # sensor
+        # self.ultrasonic = self.createActor(UltrasonicActor, globalName="ultrasonic")
+        # sensor_setup_msg = SensorMsg(
+        #     SensorReq.SETUP, trigPin=23, echoPin=24, maxDepth_cm=200
+        # )
+        # self.send(self.ultrasonic, sensor_setup_msg)
 
-        # display
-        self.lcd = self.createActor(LcdActor, globalName="lcd")
-        lcd_setup_msg = LcdMsg(LcdReq.SETUP, defaultText="Welcome to Bellboy")
-        self.send(self.lcd, lcd_setup_msg)
+        # # display
+        # self.lcd = self.createActor(LcdActor, globalName="lcd")
+        # lcd_setup_msg = LcdMsg(LcdReq.SETUP, defaultText="Welcome to Bellboy")
+        # self.send(self.lcd, lcd_setup_msg)
 
         # camera
+        self.facecam = self.createActor(FacecamActor, globalName="facecam")
         self.send(self.facecam, CamReq.SETUP)
 
     # utility methods
