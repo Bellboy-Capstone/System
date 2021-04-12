@@ -1,6 +1,6 @@
 from enum import Enum
 
-
+import time
 """ Global messages, non-actor specifc """
 
 
@@ -111,16 +111,33 @@ class SensorEvent(Enum):
 
 
 # for event with more info
-class SensorEventMsg(PostableMsg):
-    def __init__(self, eventType, eventData):
-        self.eventType = eventType
-        self.eventData = eventData
+class FloorChosenEventMsg(PostableMsg):
+    def __init__(self, floorNum, activation):
+        self.floorNum = floorNum
+        self.activation = activation
+
+    def __str__(self):
+        return "%s activation! Taking elevator to floor %i"%(self.activation.name, self.floorNum)
+
+    def toDict(self):
+        return {"floorNum": str(self.floorNum), "activation_type": self.activation.name, "timestamp": time.time()}
+
+
+# for event with more info
+class FaceRegonizedEventMsg(PostableMsg):
+    def __init__(self, faceId):
+        self.faceId = faceId
+        self.activation = ActivationType.FACE_RECOGNIZED
 
     def __str__(self):
         return self.eventType.name
 
     def toDict(self):
-        return {"eventType": self.eventType.name, "eventData": self.eventData}
+        return {"floorNum": str(4), "activation_type": self.activation.name, "timestamp": time.time()}
+
+# comms requests
+class ActivationType(Enum):
+    FACE_RECOGNIZED, BUTTON_HOVERED, VOICE_ACTIVATION = range(3)
 
 
 """ Communication related messages. """
@@ -172,9 +189,12 @@ class LcdMsg(DetailedMsg):
 
 
 """ Servo related messages"""
+"""Servo related messages"""
+
+
 # servo requests
 class ServoReq(Enum):
-    SETUP, PUSHBUTTON = range(2)
+    SETUP, PUSHBUTTON, STOP = range(3)
 
 
 # servo responses
@@ -193,10 +213,10 @@ class ServoMsg(DetailedMsg):
         servoMax = 0
     ):
         self.type = type
-        self._servoPin = servoPin
-        self._servoOffset = servoOffset
-        self._servoMin = servoMin
-        self._servoMax = servoMax
+        self.servoPin = servoPin
+        self.servoOffset = servoOffset
+        self.servoMin = servoMin
+        self.servoMax = servoMax
 
     def __str__(self):
         return self.type.name

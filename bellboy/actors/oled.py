@@ -14,14 +14,14 @@ import adafruit_ssd1306
 
 CHARS_PER_LINE = 21
 PIX_WIDTH = 128
-PIX_HEIGHT = 32
+PIX_HEIGHT = 64
 GIF_FPS = 60 
 
 
 basepath = path.dirname(__file__)
-gif_name = "audio_animation_128x32.gif"
+gif_name = "audio_animation_128x64.gif"
 gif_path = path.abspath(path.join(basepath, "..", "utils", "oled", gif_name))
-i2c_addr = 0x3c # 0x3c for 128x32, 0x3d for 128x64
+i2c_addr = 0x3d # 0x3c for 128x32, 0x3d for 128x64
 
 sec_per_frame = 1.0/GIF_FPS
 font = ImageFont.load_default()
@@ -94,8 +94,8 @@ class OledActor(GenericActor):
         self.duration = 0
         self.interrupted = False
 
-        self.display_gif()
-        #self.printText(self.default_text)
+        #self.display_gif()
+        self.printText(self.default_text)
 
 
     def clearScreen(self):
