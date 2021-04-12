@@ -143,3 +143,17 @@ bellboy/functest.py
 */.vscode/*
 *launch.json
 .vscode/settings.json
+bellboy/utils/facial/dataset/faces_0
+bellboy/utils/facial/dataset/faces_1
+bellboy/utils/facial/dataset/faces_2
+bellboy/utils/facial/dataset/faces_3
+bellboy/utils/facial/dataset/faces_4
+bellboy/utils/facial/dataset/faces_5
+bellboy/utils/facial/dataset/faces_6
+bellboy/utils/facial/dataset/faces_7
+bellboy/utils/facial/dataset/faces_8
+bellboy/utils/facial/dataset/faces_9
+bellboy/utils/facial/dataset/faces_10
+bellboy/utils/facial/dataset/faces_11
+experiments/speech/audio_animation*
+bellboy/utils/facial/*
