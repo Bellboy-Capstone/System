@@ -4,6 +4,7 @@ import ssl
 from datetime import timedelta
 from time import sleep
 import os.path
+import os
 
 import requests
 import websocket

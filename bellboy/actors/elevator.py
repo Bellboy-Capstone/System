@@ -7,12 +7,12 @@ in actors for now.. could move
 import logging
 
 from collections import deque
-from utils.messages import SensorEvent, SensorEventMsg
+from utils.messages import ActivationType, FloorChosenEventMsg
 
 log = logging.getLogger("elevator")
 # simple "buttons", only have a position (depth) value and a radius.. all in cm
-BTN1_POS = 8.5
-BTN2_POS = 16
+BTN1_POS = 25
+BTN2_POS = 25
 BTN_RAD = 3
 
 DATA_TO_COUNT = 10  # 10 * 100 ms = 1 sec of data
@@ -24,8 +24,6 @@ def buttonHovered(depth_deque: deque):
 
     processes data deque. tells us which button was hovered.
     """
-
-    log.debug(str.format("data: {}", format_deque(depth_deque)))
 
     # for now only test in quantums
     if len(depth_deque) % DATA_TO_COUNT != 0:
@@ -43,9 +41,7 @@ def buttonHovered(depth_deque: deque):
 
     if btn_chosen == "button1":
         log.debug(str.format("data: {}", format_deque(depth_deque)))
-        return SensorEventMsg(
-            eventType=SensorEvent.BUTTON_HOVERED, eventData="button1 was hovered"
-        )
+        return  FloorChosenEventMsg(activation=ActivationType.BUTTON_HOVERED, floorNum=1)
 
     count = 0
     while count < DATA_TO_COUNT:
@@ -58,9 +54,8 @@ def buttonHovered(depth_deque: deque):
 
     if btn_chosen == "button2":
         log.debug(str.format("data: {}", format_deque(depth_deque)))
-        return SensorEventMsg(
-            eventType=SensorEvent.BUTTON_HOVERED, eventData="button2 was hovered"
-        )
+        return  FloorChosenEventMsg(activation=ActivationType.BUTTON_HOVERED, floorNum=2)
+
 
     return None
 

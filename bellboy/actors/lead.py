@@ -5,6 +5,7 @@ from actors.generic import GenericActor
 from actors.ultrasonic import UltrasonicActor
 from actors.microphone import MicActor
 # from actors.oled import OledActor
+from actors.servo import ServoActor
 from thespian.actors import ActorAddress, ActorExitRequest
 from utils.messages import (
     BellboyMsg,
@@ -19,7 +20,10 @@ from utils.messages import (
     SensorReq,
     MicReq, 
     MicResp,
-    MicMsg
+    MicMsg,
+    ServoReq,
+    ServoResp,
+    ServoMsg
 )
 
 
@@ -56,11 +60,11 @@ class BellboyLeadActor(GenericActor):
         self.send(self.comms_actor, CommsReq.SETUP)
 
         # sensor
-        # self.ultrasonic = self.createActor(UltrasonicActor, globalName="ultrasonic")
-        # sensor_setup_msg = SensorMsg(
-        #     SensorReq.SETUP, trigPin=23, echoPin=24, maxDepth_cm=200
-        # )
-        # self.send(self.ultrasonic, sensor_setup_msg)
+        self.ultrasonic = self.createActor(UltrasonicActor, globalName="ultrasonic")
+        sensor_setup_msg = SensorMsg(
+            SensorReq.SETUP, trigPin=23, echoPin=24, maxDepth_cm=200
+        )
+        self.send(self.ultrasonic, sensor_setup_msg)
 
         # display
         # self.lcd = self.createActor(LcdActor, globalName="lcd")
@@ -120,24 +124,22 @@ class BellboyLeadActor(GenericActor):
 
         self.send(sender, self.status)
 
-    def receiveMsg_SensorEventMsg(self, message, sender):
-        self.log.info(
-            str.format(
-                "#{}: {} event from {} - {}",
-                self.event_count,
-                message.eventType,
-                sender,
-                message.eventData,
-            )
-        )
+    def receiveMsg_FloorChosenEventMsg(self, message, sender):
+        self.log.info(message)
 
-        # Form a message based on the SensorEventMsg
-        sensor_message_str = f"Requested Floor #{str(message.eventData)[6]}"
-
+        # push the servo
+        self.log.info(str(message))
+        self.send(self.servo[0], ServoReq.PUSHBUTTON)
+        
         # Display, log realtime and post to backend
-        self.display(sensor_message_str)
-        self.log_realtime(sensor_message_str)
+        self.display("Going to Floor %i..." % message.floorNum)
+        self.log_realtime(str(message))
         self.post_to_backend(message)
+
+    def receiveMsg_ServoReq(self, message, sender):
+
+        if message == ServoReq.PUSHBUTTON:
+            self.push_servo()
 
     def receiveMsg_MicMsg(self, msg, sender):
         if msg.msgType == MicResp.MIC_LIST:
